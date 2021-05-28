@@ -135,7 +135,7 @@ export default function Login(props) {
                         <Grid container justify="center">
                             <Grid item>
                                 <Link
-                                    to="/register"
+                                    to="/sign-up"
                                     style={{
                                         textDecoration: "none",
                                         color: "#2176ff",

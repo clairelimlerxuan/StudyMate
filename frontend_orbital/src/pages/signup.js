@@ -35,6 +35,8 @@ export default function SignUp(props) {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [faculty, setFaculty] = useState("");
+    const [major, setMajor] = useState("");
 
     const handleUsername = (e) => {
         setUsername(e.target.value);
@@ -46,6 +48,13 @@ export default function SignUp(props) {
         setEmail(e.target.value);
     };
 
+    const handleFaculty = (e) => {
+        setFaculty(e.target.value);
+    }
+
+    const handleMajor = (e) => {
+        setMajor(e.target.value);
+    }
 
    /* const handleRegister = (e, data) => {
         e.preventDefault();
@@ -93,6 +102,8 @@ export default function SignUp(props) {
                         props.handleRegister(e, {
                             username: username,
                             password: password,
+                            faculty : faculty,
+                            major : major,
                         })
                     }
                 >
@@ -135,6 +146,34 @@ export default function SignUp(props) {
                                 autoComplete="current-password"
                                 value={password}
                                 onChange={handlePassword}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                required
+                                fullWidth
+                                name="faculty"
+                                label="Faculty"
+                                type="faculty"
+                                id="faculty"
+                                autoComplete="current-faculty"
+                                value={password}
+                                onChange={handleFaculty}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                required
+                                fullWidth
+                                name="major"
+                                label="Major"
+                                type="major"
+                                id="major"
+                                autoComplete="current-major"
+                                value={password}
+                                onChange={handleMajor}
                             />
                         </Grid>
                     </Grid>
