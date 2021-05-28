@@ -1,178 +1,146 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { makeStyles } from "@material-ui/core/styles";
-import Box from "@material-ui/core/Box";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import useScrollTrigger from "@material-ui/core/useScrollTrigger";
-import Typography from "@material-ui/core/Typography";
-import Button from "@material-ui/core/Button";
-import { NavMenu, NavItem } from "@mui-treasury/components/menu/navigation";
-import { useLineNavigationMenuStyles } from "@mui-treasury/styles/navigationMenu/line";
-import { useFirebaseBtnStyles } from "@mui-treasury/styles/button/firebase";
-import { usePushingGutterStyles } from "@mui-treasury/styles/gutter/pushing";
 
-const useStyles = makeStyles((theme) => ({
-    navbar: {
-        backgroundColor: "white",
-        color: theme.palette.primary.main,
-        position: "fixed",
-    },
-    container: {
-        display: "grid",
-        gridTemplateColumns: "25% 50% 25%",
-        justifyItems: "center",
-    },
-    pages: {
-        display: "flex",
-    },
-    title: {
-        margin: "1rem",
-    },
-}));
+import React, { useState, useEffect } from 'react';
+import { Button } from './button';
+import { Link } from 'react-router-dom';
+import './navbar.css';
 
-function ElevationScroll(props) {
-    const { children, window } = props;
-    // Note that you normally won't need to set the window ref as useScrollTrigger
-    // will default to window.
-    // This is only being set here because the demo is in an iframe.
-    const trigger = useScrollTrigger({
-        disableHysteresis: true,
-        threshold: 0,
-        target: window ? window() : undefined,
-    });
+function Navbar(props) {
+  const [click, setClick] = useState(false);
+  const [button, setButton] = useState(true);
 
-    return React.cloneElement(children, {
-        elevation: trigger ? 4 : 0,
-    });
-}
+  const handleClick = () => setClick(!click);
+  const closeMobileMenu = () => setClick(false);
 
-export default function Navbar(props) {
-    const classes = useStyles();
-    const styles = useFirebaseBtnStyles();
-    const gutterStyles = usePushingGutterStyles();
+  const showButton = () => {
+    if (window.innerWidth <= 960) {
+      setButton(false);
+    } else {
+      setButton(true);
+    }
+  };
 
-    return (
-        <div className={classes.root}>
-            <ElevationScroll {...props}>
-                <AppBar position="static" className={classes.navbar}>
-                    <Toolbar className={classes.container}>
-                        <Link
-                            to="/"
-                            style={{
-                                textDecoration: "none",
-                                color: "#2176ff",
-                            }}
-                            onClick={() => props.setActive("")}
-                        >
-                            <Typography variant="h3">BT2102</Typography>
-                        </Link>
-                        <Box height={48} display={"flex"}>
-                            <NavMenu useStyles={useLineNavigationMenuStyles}>
-                                <Link
-                                    to="/library"
-                                    style={{
-                                        textDecoration: "none",
-                                    }}
-                                >
-                                    <NavItem
-                                        active={
-                                            props.active == "library"
-                                                ? true
-                                                : false
-                                        }
-                                    >
-                                        <Typography variant="h6">
-                                            Library
-                                        </Typography>
-                                    </NavItem>
-                                </Link>
-                                <NavItem
-                                    active={
-                                        props.active == "about" ? true : false
-                                    }
-                                >
-                                    <Typography variant="h6">
-                                        About Us
-                                    </Typography>
-                                </NavItem>
-                                <Link
-                                    to="/payment"
-                                    style={{
-                                        textDecoration: "none",
-                                    }}
-                                >
-                                    <NavItem
-                                        active={
-                                            props.active == "payments"
-                                                ? true
-                                                : false
-                                        }
-                                    >
-                                        <Typography variant="h6">
-                                            Payments
-                                        </Typography>
-                                    </NavItem>
-                                </Link>
-                            </NavMenu>
-                        </Box>
-                        {!props.isLoggedIn ? (
-                            <div className={gutterStyles.parent}>
-                                <Link
-                                    to="/login"
-                                    style={{
-                                        textDecoration: "none",
-                                    }}
-                                >
-                                    <Button classes={styles}>Login</Button>
-                                </Link>
-                                <Link
-                                    to="/sign-up"
-                                    style={{
-                                        textDecoration: "none",
-                                    }}
-                                >
-                                    <Button
-                                        classes={styles}
-                                        variant={"contained"}
-                                        color={"primary"}
-                                    >
-                                        Sign Up
-                                    </Button>
-                                </Link>
-                            </div>
-                        ) : (
-                            <div className={gutterStyles.parent}>
-                                <Link
+  useEffect(() => {
+    showButton();
+  }, []);
+
+  window.addEventListener('resize', showButton);
+
+  return (
+    !props.isLoggedIn ? (
+    <>
+      <nav className='navbar'>
+        <div className='navbar-container'>
+          <Link to='/' className='navbar-logo' onClick={closeMobileMenu}>
+            TRVL
+            <i class='fab fa-typo3' />
+          </Link>
+          <div className='menu-icon' onClick={handleClick}>
+            <i className={click ? 'fas fa-times' : 'fas fa-bars'} />
+          </div>
+          <ul className={click ? 'nav-menu active' : 'nav-menu'}>
+            <li className='nav-item'>
+              <Link to='/' className='nav-links' onClick={closeMobileMenu}>
+                Home
+              </Link>
+            </li>
+            <li className='nav-item'>
+            <Link
+              to='/schedules'
+              className='nav-links'
+              onClick={closeMobileMenu}
+            >
+              Schedules
+            </Link>
+          </li>
+          <li className='nav-item'>
+            <Link
+              to='/assignment-exam'
+              className='nav-links'
+              onClick={closeMobileMenu}
+            >
+             Assignments & Exams
+            </Link>
+          </li>
+            <li>
+            {button ? (
+                  <Link to='/login' className='nav-links-mobile'>
+                    <Button buttonStyle='btn--outline'>Login</Button>
+                  </Link>
+                ) : (
+                  <Link to='/login' className='nav-links-mobile'>
+                    <Button
+                      buttonStyle='btn--outline'
+                      buttonSize='btn--mobile'
+                      onClick={closeMobileMenu}
+                    >Login
+                        </Button>
+                        </Link>)}
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </>
+  ) : (
+    <>
+    <nav className='navbar'>
+      <div className='navbar-container'>
+        <Link to='/' className='navbar-logo' onClick={closeMobileMenu}>
+          TRVL
+          <i class='fab fa-typo3' />
+        </Link>
+        <div className='menu-icon' onClick={handleClick}>
+          <i className={click ? 'fas fa-times' : 'fas fa-bars'} />
+        </div>
+        <ul className={click ? 'nav-menu active' : 'nav-menu'}>
+          <li className='nav-item'>
+            <Link to='/' className='nav-links' onClick={closeMobileMenu}>
+              Home
+            </Link>
+          </li>
+          <li className='nav-item'>
+            <Link
+              to='/schedules'
+              className='nav-links'
+              onClick={closeMobileMenu}
+            >
+              Schedules
+            </Link>
+          </li>
+          <li className='nav-item'>
+            <Link
+              to='/assignment-exam'
+              className='nav-links'
+              onClick={closeMobileMenu}
+            >
+             Assignments & Exams
+            </Link>
+          </li>
+          <li>
+            <Link  className='nav-links-mobile' 
                                     to="/profile"
                                     style={{
                                         textDecoration: "none",
                                     }}
                                 >
-                                    <Button classes={styles}>
+                                    <Button buttonStyle='primary'>
                                         {props.username}
                                     </Button>
                                 </Link>
-                                <Link
-                                    to="/"
-                                    style={{
-                                        textDecoration: "none",
-                                    }}
-                                >
-                                    <Button
-                                        classes={styles}
-                                        variant={"contained"}
-                                        color={"primary"}
-                                        onClick={() => props.handleLogout()}
-                                    >
-                                        Sign Out
-                                    </Button>
-                                </Link>
-                            </div>
-                        )}
-                    </Toolbar>
-                </AppBar>
-            </ElevationScroll>
-        </div>
-    );
+          </li>
+          <li>
+            <Link
+              to='/'
+              className='nav-links-mobile'
+              onClick={() => props.handleLogout(), closeMobileMenu}
+            >
+              <Button buttonStyle='btn--outline'>Log Out</Button>
+            </Link>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </>
+  ));
 }
+
+export default Navbar;

@@ -10,6 +10,14 @@ function card() {
                 <div className='cards-warpper'>
                     <ul className='cards-items'>
                         <CardItem
+                        label='YZour own personalized timetable'
+                        src='/images/homepage.jpg'
+                        text='Create your own timetable'
+                        path='/schedule'>
+                        </CardItem>
+                    </ul>
+                    <ul className='cards-items'>
+                        <CardItem
                         src='/images/homepage.jpg'
                         text='Create your own timetable'
                         path='/schedule'>

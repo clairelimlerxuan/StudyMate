@@ -1,6 +1,6 @@
 .cards {
     padding: 4rem;
-    background: #fff;
+    background: #B79C8B;;
   }
   
   h1 {
@@ -42,6 +42,7 @@
     border-radius: 10px;
     overflow: hidden;
     text-decoration: none;
+    background: #fff;
   }
   
   .cards-item-pic-wrap {
@@ -49,6 +50,7 @@
     width: 100%;
     padding-top: 67%;
     overflow: hidden;
+    background: #252e48;
   }
   
   .fade-img {
@@ -66,7 +68,7 @@
     font-size: 12px;
     font-weight: 700;
     color: #fff;
-    background-color: #1f98f4;
+    background-color:sienna;
     box-sizing: border-box;
   }
   
@@ -91,6 +93,7 @@
   
   .cards-item-info {
     padding: 20px 30px 30px;
+    background: #fff;
   }
   
   .cards-item-text {
