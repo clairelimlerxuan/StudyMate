@@ -5,6 +5,12 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
+# note to self: 
+'''
+1. create model
+2. register it with admin site
+'''
+
 '''
 Note:
 - faculty as choices or class?
