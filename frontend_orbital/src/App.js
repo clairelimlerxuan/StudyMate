@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import "./App.css";
-import { Switch, Route, withRouter } from "react-router-dom";
+import { Switch, Route, withRouter,  useLocation  } from "react-router-dom";
 import Home from "./pages/home";
 
 import SignUp from "./pages/signup";
@@ -17,14 +17,14 @@ function App(props) {
     );
     const [username, setUsername] = useState("");
     const [id, setID] = useState("");
+    const [isStaff, setIsStaff] = useState(false);
     const [active, setActive] = useState("");
     const alert = useAlert();
-    // console.log("isloggedin " + isLoggedIn);
-    // console.log("username " + username);
+
 
     useEffect(() => {
         if (isLoggedIn) {
-            fetch("http://localhost:3000/current_user/", {
+            fetch("http://localhost:8000/current_user/", {
                 headers: {
                     Authorization: `JWT ${localStorage.getItem("token")}`,
                 },
@@ -33,13 +33,13 @@ function App(props) {
                 .then((json) => {
                     setUsername(json.username);
                     setID(json.id);
+                    setIsStaff(json.is_staff);
                 });
         }
     }, [isLoggedIn]);
-/*
     const handleRegister = (e, data) => {
         e.preventDefault();
-        fetch("http://localhost:3000/api/users/sign-up", {
+        fetch("http://localhost:8000/server/users/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -66,7 +66,7 @@ function App(props) {
     const handleLogin = (e, data) => {
         console.log(data);
         e.preventDefault();
-        fetch("http://localhost:3000/token-auth/", {
+        fetch("http://localhost:8000/token-auth/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -85,6 +85,7 @@ function App(props) {
                 setIsLoggedIn(true);
                 setUsername(json.user.username);
                 setID(json.user.id);
+                setIsStaff(json.is_staff);
                 props.history.push("/");
             })
             .catch((error) => alert.show("Wrong Username or Password"));
@@ -96,21 +97,30 @@ function App(props) {
         setUsername("");
         alert.show("Logged Out");
     };
-*/
+
     return (
         <div className="App">
+           {(props.location.pathname !== '/sign-up' && props.location.pathname !== '/login') && <Navbar
+                active={active}
+                setActive={setActive}
+                isLoggedIn={isLoggedIn}
+                username={username}
+                handleLogout={handleLogout}
+            />}
 
             <Switch>
                 <Route
                     path="/sign-up"
-                   component={SignUp}
+                    render={(props) => (
+                    <SignUp {...props} handleRegister={handleRegister} />
+                    )}
                 />
                 <Route
                     path="/login"
-                    component={Login}
+                    render={(props) => (
+                        <Login {...props} handleLogin={handleLogin} />
+                    )}
                 />
-
-              
                 <Route path="/" component={Home} />
             </Switch>
         </div>

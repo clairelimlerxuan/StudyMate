@@ -4,12 +4,27 @@ import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
 import { Link } from "react-router-dom";
+import Box from '@material-ui/core/Box';
 import Grid from "@material-ui/core/Grid";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 
+function Copyright() {
+    return (
+      <Typography variant="body2" color="textSecondary" align="center">
+        {'Copyright © '}
+        <Link color="inherit" href="https://material-ui.com/">
+          Your Website
+        </Link>{' '}
+        {new Date().getFullYear()}
+        {'.'}
+      </Typography>
+    );
+  }
+
+  
 const useStyles = makeStyles((theme) => ({
     paper: {
         paddingTop: theme.spacing(17),
@@ -35,8 +50,6 @@ export default function SignUp(props) {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [faculty, setFaculty] = useState("");
-    const [major, setMajor] = useState("");
 
     const handleUsername = (e) => {
         setUsername(e.target.value);
@@ -48,42 +61,6 @@ export default function SignUp(props) {
         setEmail(e.target.value);
     };
 
-    const handleFaculty = (e) => {
-        setFaculty(e.target.value);
-    }
-
-    const handleMajor = (e) => {
-        setMajor(e.target.value);
-    }
-
-   /* const handleRegister = (e, data) => {
-        e.preventDefault();
-        fetch("http://localhost:3000/sign-up/", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
-        })
-            .then((res) => {
-                console.log(res);
-                if (res.ok) {
-                    return res.json();
-                } else {
-                    throw new Error("Error");
-                }
-            })
-            .then((json) => {
-                localStorage.setItem("token", json.token);
-                props.history.push("/login");
-            })
-            .catch((error) => {
-                alert.show("That Username Already Exists");
-            });
-            e.preventDefault();
-    };
- 
-*/
 
     return (
         <Container component="main" maxWidth="xs">
@@ -101,9 +78,8 @@ export default function SignUp(props) {
                     onSubmit={(e) =>
                         props.handleRegister(e, {
                             username: username,
+                            email : email,
                             password: password,
-                            faculty : faculty,
-                            major : major,
                         })
                     }
                 >
@@ -148,34 +124,6 @@ export default function SignUp(props) {
                                 onChange={handlePassword}
                             />
                         </Grid>
-                        <Grid item xs={12}>
-                            <TextField
-                                variant="outlined"
-                                required
-                                fullWidth
-                                name="faculty"
-                                label="Faculty"
-                                type="faculty"
-                                id="faculty"
-                                autoComplete="current-faculty"
-                                value={password}
-                                onChange={handleFaculty}
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField
-                                variant="outlined"
-                                required
-                                fullWidth
-                                name="major"
-                                label="Major"
-                                type="major"
-                                id="major"
-                                autoComplete="current-major"
-                                value={password}
-                                onChange={handleMajor}
-                            />
-                        </Grid>
                     </Grid>
                     <Button
                         type="submit"
@@ -201,6 +149,9 @@ export default function SignUp(props) {
                     </Grid>
                 </form>
             </div>
+            <Box mt={5}>
+                <Copyright />
+            </Box>
         </Container>
     );
 }

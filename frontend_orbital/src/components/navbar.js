@@ -31,7 +31,7 @@ function Navbar(props) {
       <nav className='navbar'>
         <div className='navbar-container'>
           <Link to='/' className='navbar-logo' onClick={closeMobileMenu}>
-            TRVL
+            StudyMate
             <i class='fab fa-typo3' />
           </Link>
           <div className='menu-icon' onClick={handleClick}>
@@ -43,6 +43,15 @@ function Navbar(props) {
                 Home
               </Link>
             </li>
+            <li className='nav-item'>
+            <Link
+              to='/forum'
+              className='nav-links'
+              onClick={closeMobileMenu}
+            >
+             Q&A Forum
+            </Link>
+          </li>
             <li className='nav-item'>
             <Link
               to='/schedules'
@@ -85,7 +94,7 @@ function Navbar(props) {
     <nav className='navbar'>
       <div className='navbar-container'>
         <Link to='/' className='navbar-logo' onClick={closeMobileMenu}>
-          TRVL
+          StudyMate
           <i class='fab fa-typo3' />
         </Link>
         <div className='menu-icon' onClick={handleClick}>
@@ -131,7 +140,7 @@ function Navbar(props) {
             <Link
               to='/'
               className='nav-links-mobile'
-              onClick={() => props.handleLogout(), closeMobileMenu}
+              onClick={(() => props.handleLogout())}
             >
               <Button buttonStyle='btn--outline'>Log Out</Button>
             </Link>

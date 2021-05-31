@@ -10,17 +10,32 @@ function card() {
                 <div className='cards-warpper'>
                     <ul className='cards-items'>
                         <CardItem
-                        label='YZour own personalized timetable'
-                        src='/images/homepage.jpg'
-                        text='Create your own timetable'
+                        label='Your own personalized timetable'
+                        src='images/calendar.svg'
+                        text='Organise your classes, tasks, exams and your personal schedules with StudyMate'
                         path='/schedule'>
+                        </CardItem>
+                        <CardItem
+                        label='Q&A Forum'
+                        src='/images/discussion.svg'
+                        text='Get to ask questions regarding academic and non-academic matters 
+                        and connect students to help one another'
+                        path='/forum'>
                         </CardItem>
                     </ul>
                     <ul className='cards-items'>
                         <CardItem
-                        src='/images/homepage.jpg'
-                        text='Create your own timetable'
-                        path='/schedule'>
+                        label ='Assignments & Exams List'
+                        src='/images/task_list.svg'
+                        text='StudyMate helps you to keep track of more than just homework'
+                        path='/assignment-exam'>
+                        </CardItem>
+                        <CardItem
+                        label ='Notification'
+                        src='/images/notification.svg'
+                        text='Get notified about incomplete tasks 
+                        and upcoming exams with our website'
+                        path='/notification'>
                         </CardItem>
                     </ul>
                 </div>

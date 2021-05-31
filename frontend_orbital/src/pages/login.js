@@ -18,11 +18,11 @@ const useStyles = makeStyles((theme) => ({
       height: '100vh',
     },
     image: {
-      backgroundImage: 'url(https://source.unsplash.com/random)',
+      backgroundImage: 'url(/images/login.svg)',
       backgroundRepeat: 'no-repeat',
       backgroundColor:
         theme.palette.type === 'light' ? theme.palette.grey[50] : theme.palette.grey[900],
-      backgroundSize: 'cover',
+      backgroundSize: 'contain',
       backgroundPosition: 'center',
     },
     paper: {
@@ -121,7 +121,7 @@ export default function Login(props) {
                             control={<Checkbox value="remember" color="primary" />}
                             label="Remember me"
                         />
-                        <Link to='/'>
+
                         <Button
                             type="submit"
                             fullWidth
@@ -131,14 +131,13 @@ export default function Login(props) {
                         >
                             Sign In
                         </Button>
-                        </Link>
                         <Grid container justify="center">
                             <Grid item>
                                 <Link
                                     to="/sign-up"
                                     style={{
                                         textDecoration: "none",
-                                        color: "#2176ff",
+                                        color: "#564B48",
                                     }}
                                 >
                                     {"Don't have an account? Sign Up"}

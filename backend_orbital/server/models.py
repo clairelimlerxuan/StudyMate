@@ -87,20 +87,19 @@ class MemberUser(models.Model):
         on_delete=models.CASCADE,
         primary_key=True
     )
-    userID = models.CharField(max_length=20)
-    userPassword = models.CharField(max_length=30)
+    userPassword = models.CharField(max_length=100)
     userNUSEmail = models.EmailField()
-    displayName = models.CharField(max_length=30)
-    faculty = models.CharField(max_length=50, choices=FACULTY_CHOICES)
+    username = models.CharField(max_length=100)
+    faculty = models.CharField(max_length=100, choices=FACULTY_CHOICES, blank = True)
     major = models.ForeignKey(    # CEG belongs to SOC and ENGI! -> *:* relationship
         Major,
-        on_delete=models.RESTRICT
+        on_delete=models.RESTRICT, blank = True, null = True
     )
-    yearOfStudy = models.CharField(max_length=6, choices=YEAR_OF_STUDY_CHOICES)     # add constraint
+    yearOfStudy = models.CharField(max_length=6, choices=YEAR_OF_STUDY_CHOICES, blank = True)     # add constraint
     creationDate = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return self.displayName 
+        return self.username
 
     class Meta:
          db_table = 'memberUser'

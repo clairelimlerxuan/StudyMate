@@ -8,8 +8,7 @@ function IntroSection() {
     <div className='hero-container'>
         <video src='/images/books.mp4' autoPlay loop muted ></video>
         <h1>Welcome to Study Mate</h1>
-        <p>What are you waiting for?</p>
-        <p>Nothing</p>
+        <p>Make your study life easier to manage with us</p>
         <div className='hero-btns'>
           <Link className='hero-start' to='/login'>
             <Button
