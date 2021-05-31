@@ -45,6 +45,18 @@
     border: 1px solid #fff;
   }
   
+  .footer-input-feedback {
+    padding: 8px 20px;
+    border-radius: 10px;
+    margin-right: 10px;
+    outline: none;
+    border: none;
+    font-size: 18px;
+    margin-bottom: 16px;
+    border: 1px solid #fff;
+    margin: 0px 10px 15.9943px 0px; 
+    width: 366px; height: 99px;
+  }
   .footer-links {
     width: 100%;
     max-width: 1000px;

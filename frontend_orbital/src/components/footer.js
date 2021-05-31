@@ -1,20 +1,11 @@
 import React from 'react'
 import './footer.css'
 import { Link } from 'react-router-dom';
+import { Button } from './button';
 
 function footer() {
     return (
         <div className='footer-container'>
-            <section className='footer-subscription'>
-                <div className='input-areas'>
-                    <form>
-                        <input type='email' name='email' placeholder=
-                        "Your Email" className="footer-input">
-
-                        </input>                 
-                    </form>
-                </div>
-            </section>
             <div className='footer-links'>
                 <div className="footer-link-wrapper">
                     <div className="footer-link-items">
