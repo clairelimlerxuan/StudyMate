@@ -3,27 +3,40 @@ import React, { useState, useEffect } from 'react';
 import { Button } from './button';
 import { Link } from 'react-router-dom';
 import './navbar.css';
-
+import Dropdown from './dropdown';
 function Navbar(props) {
+
   const [click, setClick] = useState(false);
-  const [button, setButton] = useState(true);
+  const [dropdown, setDropdown] = useState(false);
 
   const handleClick = () => setClick(!click);
   const closeMobileMenu = () => setClick(false);
 
-  const showButton = () => {
-    if (window.innerWidth <= 960) {
-      setButton(false);
+  const onMouseEnter = () => {
+    if (window.innerWidth < 960) {
+      setDropdown(false);
     } else {
-      setButton(true);
+      setDropdown(true);
     }
   };
 
+  const onMouseLeave = () => {
+    if (window.innerWidth < 960) {
+      setDropdown(false);
+    } else {
+      setDropdown(false);
+    }
+  };
+
+  const extendElement = () => {
+    dropdown ? setDropdown(false) : setDropdown(true);
+  }
+
   useEffect(() => {
-    showButton();
+    onMouseEnter();
   }, []);
 
-  window.addEventListener('resize', showButton);
+  window.addEventListener('resize', onMouseEnter);
 
   return (
     !props.isLoggedIn ? (
@@ -51,7 +64,7 @@ function Navbar(props) {
             >
              Q&A Forum
             </Link>
-          </li>
+            </li>
             <li className='nav-item'>
             <Link
               to='/schedules'
@@ -60,18 +73,9 @@ function Navbar(props) {
             >
               Schedules
             </Link>
-          </li>
-          <li className='nav-item'>
-            <Link
-              to='/assignment-exam'
-              className='nav-links'
-              onClick={closeMobileMenu}
-            >
-             Assignments & Exams
-            </Link>
-          </li>
+            </li>
             <li>
-            {button ? (
+            {dropdown ? (
                   <Link to='/login' className='nav-links-mobile'>
                     <Button buttonStyle='btn--outline'>Login</Button>
                   </Link>
@@ -108,6 +112,15 @@ function Navbar(props) {
           </li>
           <li className='nav-item'>
             <Link
+              to='/forum'
+              className='nav-links'
+              onClick={closeMobileMenu}
+            >
+             Q&A Forum
+            </Link>
+          </li>
+          <li className='nav-item'>
+            <Link
               to='/schedules'
               className='nav-links'
               onClick={closeMobileMenu}
@@ -115,26 +128,14 @@ function Navbar(props) {
               Schedules
             </Link>
           </li>
-          <li className='nav-item'>
-            <Link
-              to='/assignment-exam'
-              className='nav-links'
-              onClick={closeMobileMenu}
-            >
-             Assignments & Exams
-            </Link>
-          </li>
-          <li>
-            <Link  className='nav-links-mobile' 
-                                    to="/profile"
-                                    style={{
-                                        textDecoration: "none",
-                                    }}
-                                >
-                                    <Button buttonStyle='primary'>
-                                        {props.username}
-                                    </Button>
-                                </Link>
+          <li className='nav-links-mobile'  onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave} onClick={extendElement}>
+              <Button buttonStyle='primary' class="dropbtn">
+                Hi, {props.username}!
+                <i class="fa fa-caret-down"></i>
+              </Button>
+              {dropdown && <Dropdown  
+onCloseMobileMenu={closeMobileMenu}/>}
           </li>
           <li>
             <Link
