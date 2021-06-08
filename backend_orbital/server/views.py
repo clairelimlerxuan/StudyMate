@@ -17,8 +17,7 @@ from .serializers import UserSerializer, UserSerializerWithToken
 # note to self: 
 '''
 1. query the database for all models - using primary key (tbc?)
-2. pass that database queryset into the serializer to be converted into JSON and rendered
-ModelViewSet handles GET and POST for the models
+2. pass that database queryset into the serializer to be converted into JSON and rendered ModelViewSet handles GET and POST for the models
 '''
 
 @api_view(['GET'])
@@ -46,9 +45,12 @@ class UserList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class FacultyViewSet(viewsets.ModelViewSet):
+    queryset = Faculty.objects.all().order_by('facultyID')
+    serializer_class = FacultySerializer
 
 class MajorViewSet(viewsets.ModelViewSet):
-    queryset = Major.objects.all().order_by('majorName')
+    queryset = Major.objects.all().order_by('majorID')
     serializer_class = MajorSerializer
 
 class AdminUserViewSet(viewsets.ModelViewSet):
@@ -58,6 +60,10 @@ class AdminUserViewSet(viewsets.ModelViewSet):
 class MemberUserViewSet(viewsets.ModelViewSet):
     queryset = MemberUser.objects.all().order_by('user')
     serializer_class = MemberUserSerializer
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all().order_by('categoryID')
+    serializer_class = CategorySerializer
 
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all().order_by('tagID')
