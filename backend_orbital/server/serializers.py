@@ -102,6 +102,11 @@ class CategorySerializer(serializers.HyperlinkedModelSerializer):
 class TagSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Tag
+        fields = "__all__"
+
+class ModuleSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Module
         fields = "__all__"  
 
 class PostSerializer(serializers.HyperlinkedModelSerializer):

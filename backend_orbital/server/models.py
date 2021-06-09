@@ -49,8 +49,13 @@ class AdminUser(models.Model):
     )
     adminUserPassword = models.CharField(max_length=30)
 
+    def __str__(self):
+        return self.user
+
     class Meta:
         db_table = 'adminUser'
+        verbose_name = 'Admin User'  
+        verbose_name_plural = 'Admin Users'  
 
 
 class MemberUser(models.Model):
@@ -95,6 +100,9 @@ class Category(models.Model):
     categoryID = models.CharField(max_length=20, primary_key=True)
     categoryName = models.CharField(max_length=50)
 
+    def __str__(self):
+        return self.categoryName
+
     class Meta:
         db_table = 'category'
         verbose_name = 'Category'
@@ -110,13 +118,31 @@ class Tag(models.Model):
         db_column = 'categoryID'
     )
 
-    class Meta:
-         db_table = 'tag'
-         verbose_name = 'Tag'  
-    
     def __str__(self):
         return self.tagName
 
+    class Meta:
+         db_table = 'tag'
+         verbose_name = 'Tag'  
+
+
+class Module(models.Model):
+    moduleCode = models.CharField(max_length=7, primary_key=True)
+    title = models.CharField(max_length=50)
+    tagID = models.ForeignKey(
+        Tag,
+        on_delete=models.RESTRICT,
+        null=True,
+        db_column = 'tagID'
+    )
+
+    def __str__(self):
+        return self.moduleCode
+    
+    class Meta:
+        db_table = 'module'
+        verbose_name = 'Module'
+    
 
 class Post(models.Model):
     postID = models.AutoField(primary_key=True)  # auto increment id
@@ -136,6 +162,12 @@ class Post(models.Model):
         Tag,
         on_delete=models.RESTRICT,
         db_column = 'tagID'
+    )
+    moduleID = models.OneToOneField(
+        Module,
+        on_delete=models.RESTRICT,
+        null=True,
+        db_column='moduleID'
     )
     title = models.CharField(max_length=50)
     textContent = models.TextField()

@@ -69,6 +69,10 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all().order_by('tagID')
     serializer_class = TagSerializer
 
+class ModuleViewSet(viewsets.ModelViewSet):
+    queryset = Module.objects.all().order_by('moduleCode')
+    serializer_class = ModuleSerializer
+
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('postID')
     serializer_class = PostSerializer
@@ -80,4 +84,3 @@ class CommentViewSet(viewsets.ModelViewSet):
 class VoteViewSet(viewsets.ModelViewSet):
     queryset = Vote.objects.all().order_by('voteID')
     serializer_class = VoteSerializer
-
