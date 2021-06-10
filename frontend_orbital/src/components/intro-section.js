@@ -3,8 +3,9 @@ import '../App.css';
 import { Button } from './button';
 import './intro-section.css';
 import {Link} from 'react-router-dom';
-function IntroSection() {
+function IntroSection(props) {
   return (
+    (!props.isLoggedIn ? (
     <div className='hero-container'>
         <video src='/images/books.mp4' autoPlay loop muted ></video>
         <h1>Welcome to Study Mate</h1>
@@ -20,8 +21,14 @@ function IntroSection() {
             </Button>
             </Link>
         </div>
-      </div>
-    );
+      </div> ) : (
+            <div className='hero-container'>
+            <video src='/images/books.mp4' autoPlay loop muted ></video>
+            <h1>Welcome, {props.username}!</h1>
+            <p>Make your study life easier to manage with us</p>
+          </div> 
+      )
+    ));
   }
 
 export default IntroSection;
