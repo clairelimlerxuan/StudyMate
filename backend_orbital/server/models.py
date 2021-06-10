@@ -11,33 +11,27 @@ from django.contrib.auth.models import User
 2. register it with admin site
 '''
 
-'''
-Note:
-- faculty as choices or class?
-    if as choice, leave it in Major or MemberUser?
-- memberUser <-> major is *:* relationship (e.g. CEG).
-    django uses ManyToManyField, while mySQL will create a new relation
-- restrict options based on previous fields (e.g. restrict list of major based on faculty)
-- constraints: https://docs.djangoproject.com/en/3.2/ref/models/constraints/ 
-'''
+class Faculty(models.Model):
+    facultyID = models.CharField(max_length=10, primary_key=True)
+    facultyName = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.facultyName
+
+    class Meta:
+        db_table = 'faculty'
+        verbose_name = 'Faculty'
+        verbose_name_plural = 'Faculties'
+
 
 class Major(models.Model):
-
-    FACULTY_CHOICES = (
-        ('CHS', 'College of Humanities and Sciences'),
-        ('BIZ', 'Business & Accountancy'),
-        ('COM', 'Computing'),
-        ('DEN', 'Dentistry'),
-        ('DE', 'Design & Environment'),
-        ('ENGR', 'Engineering'),
-        ('LAW', 'Law'),
-        ('MED', 'Medicine'),
-        ('NSG', 'Nursing'),
-        ('PHAR', 'Pharmacy'),
-        ('MUS', 'Music')
+    majorID = models.CharField(max_length=10, primary_key=True)
+    majorName = models.CharField(max_length=100)
+    facultyID = models.ForeignKey(
+        Faculty,
+        on_delete=models.RESTRICT,
+        db_column = 'facultyID'
     )
-    majorName = models.CharField(max_length=100, primary_key=True)
-    faculty = models.CharField(max_length=50, choices=FACULTY_CHOICES)
 
     def __str__(self):
         return self.majorName
@@ -55,26 +49,16 @@ class AdminUser(models.Model):
     )
     adminUserPassword = models.CharField(max_length=30)
 
+    def __str__(self):
+        return self.user
+
     class Meta:
         db_table = 'adminUser'
+        verbose_name = 'Admin User'  
+        verbose_name_plural = 'Admin Users'  
 
 
 class MemberUser(models.Model):
-
-    FACULTY_CHOICES = (
-        ('CHS', 'College of Humanities and Sciences'),
-        ('BIZ', 'Business & Accountancy'),
-        ('COM', 'Computing'),
-        ('DEN', 'Dentistry'),
-        ('DE', 'Design & Environment'),
-        ('ENGR', 'Engineering'),
-        ('LAW', 'Law'),
-        ('MED', 'Medicine'),
-        ('NSG', 'Nursing'),
-        ('PHAR', 'Pharmacy'),
-        ('MUS', 'Music')
-    )
-
     YEAR_OF_STUDY_CHOICES = (
         ('1', 'Year 1'),
         ('2', 'Year 2'),
@@ -90,10 +74,15 @@ class MemberUser(models.Model):
     userPassword = models.CharField(max_length=100)
     userNUSEmail = models.EmailField()
     username = models.CharField(max_length=100)
-    faculty = models.CharField(max_length=100, choices=FACULTY_CHOICES, blank = True)
-    major = models.ForeignKey(    # CEG belongs to SOC and ENGI! -> *:* relationship
+    facultyID = models.ForeignKey(
+        Faculty,
+        on_delete=models.RESTRICT,
+        db_column='facultyID'
+    )
+    majorID = models.ForeignKey(    # CEG belongs to SOC and ENGI! -> *:* relationship
         Major,
-        on_delete=models.RESTRICT, blank = True, null = True
+        on_delete=models.RESTRICT, 
+        db_column='majorID'
     )
     yearOfStudy = models.CharField(max_length=6, choices=YEAR_OF_STUDY_CHOICES, blank = True)     # add constraint
     creationDate = models.DateTimeField(auto_now_add=True)
@@ -107,25 +96,55 @@ class MemberUser(models.Model):
          verbose_name_plural = 'Member Users'  
 
 
+class Category(models.Model):
+    categoryID = models.CharField(max_length=20, primary_key=True)
+    categoryName = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.categoryName
+
+    class Meta:
+        db_table = 'category'
+        verbose_name = 'Category'
+        verbose_name_plural = 'Categories'
+
+
 class Tag(models.Model):
-    tagID = models.AutoField(primary_key=True)  # auto increment id
+    tagID = models.CharField(max_length=20, primary_key=True) 
     tagName = models.CharField(max_length=50)
+    categoryID = models.ForeignKey(
+        Category,
+        on_delete=models.RESTRICT,
+        db_column = 'categoryID'
+    )
+
+    def __str__(self):
+        return self.tagName
 
     class Meta:
          db_table = 'tag'
          verbose_name = 'Tag'  
-    
-    def __str__(self):
-        return self.tagName
 
+
+class Module(models.Model):
+    moduleCode = models.CharField(max_length=7, primary_key=True)
+    title = models.CharField(max_length=50)
+    tagID = models.ForeignKey(
+        Tag,
+        on_delete=models.RESTRICT,
+        null=True,
+        db_column = 'tagID'
+    )
+
+    def __str__(self):
+        return self.moduleCode
+    
+    class Meta:
+        db_table = 'module'
+        verbose_name = 'Module'
+    
 
 class Post(models.Model):
-    
-    TYPE_CHOICES = (
-        ('Acad', 'Academic'),
-        ('Non-Acad', 'Non-Academic')
-    )
-    
     postID = models.AutoField(primary_key=True)  # auto increment id
     userID = models.ForeignKey(
         MemberUser, 
@@ -134,11 +153,21 @@ class Post(models.Model):
         null=True,
         db_column = 'userID'
     )
-    type = models.CharField(max_length=50, choices=TYPE_CHOICES)  # add constraint
+    categoryID = models.ForeignKey(
+        Category,
+        on_delete=models.RESTRICT,
+        db_column = 'categoryID'
+    )
     tagID = models.ForeignKey(
         Tag,
         on_delete=models.RESTRICT,
-        db_column = 'tag'
+        db_column = 'tagID'
+    )
+    moduleID = models.OneToOneField(
+        Module,
+        on_delete=models.RESTRICT,
+        null=True,
+        db_column='moduleID'
     )
     title = models.CharField(max_length=50)
     textContent = models.TextField()
@@ -168,7 +197,7 @@ class Comment(models.Model):
         db_column = 'postID'
     )
     textContent = models.TextField()
-    # imageContent = 
+    # imageContent = models.ImageField()
     creationDate = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -206,4 +235,3 @@ class Vote(models.Model):
     class Meta:
          db_table = 'vote' 
          verbose_name = 'Vote' 
-         # unique_together=('type', 'userID', 'postID')   # tbc

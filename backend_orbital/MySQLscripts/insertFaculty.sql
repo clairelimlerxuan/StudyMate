@@ -9,5 +9,3 @@ INSERT INTO Faculty VALUES ("MED", "Medicine");
 INSERT INTO Faculty VALUES ("NSG", "Nursing");
 INSERT INTO Faculty VALUES ("PHAR", "Pharmacy");
 INSERT INTO Faculty VALUES ("MUS", "Music");
-
-SELECT * FROM Faculty

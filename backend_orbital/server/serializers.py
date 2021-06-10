@@ -74,6 +74,11 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
             for exclude_name in not_allowed:
                 self.fields.pop(exclude_name)
 
+class FacultySerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Faculty
+        fields = "__all__"
+
 class MajorSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Major
@@ -89,9 +94,19 @@ class MemberUserSerializer(serializers.HyperlinkedModelSerializer):
         model = MemberUser
         fields = "__all__"
 
+class CategorySerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Category
+        fields = "__all__"
+
 class TagSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Tag
+        fields = "__all__"
+
+class ModuleSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Module
         fields = "__all__"  
 
 class PostSerializer(serializers.HyperlinkedModelSerializer):
