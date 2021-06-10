@@ -3,13 +3,15 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 import { Switch, Route, withRouter,  useLocation  } from "react-router-dom";
 import Home from "./pages/home";
-
+import IntroSection from './components/intro-section';
 import SignUp from "./pages/signup";
 import Login from "./pages/login";
-
+import Profile from "./pages/profile";
 import { useAlert } from "react-alert";
 import Navbar from "./components/navbar";
-
+import Forum from './pages/forum';
+import PrivateRoute from './components/privateroute';
+import PublicRoute from './components/publicroute';
 
 function App(props) {
     const [isLoggedIn, setIsLoggedIn] = useState(
@@ -108,6 +110,14 @@ function App(props) {
                 handleLogout={handleLogout}
             />}
 
+            {(props.location.pathname == '/') && <IntroSection
+                active={active}
+                setActive={setActive}
+                isLoggedIn={isLoggedIn}
+                username={username}
+                handleLogout={handleLogout}
+            />}     
+
             <Switch>
                 <Route
                     path="/sign-up"
@@ -121,7 +131,29 @@ function App(props) {
                         <Login {...props} handleLogin={handleLogin} />
                     )}
                 />
-                <Route path="/" component={Home} />
+                                <Route
+                    path="/profile"
+                    render={(props) => (
+                        <Profile
+                            {...props}
+                            username={username}
+                            id={id}
+                            isStaff={isStaff}
+                        />
+                    )}
+                />
+                <PrivateRoute
+                    path="/forum"
+                    render={(props) => (
+                        <Forum
+                            {...props}
+                            username={username}
+                            id={id}
+                            isStaff={isStaff}
+                        />
+                    )}
+                />
+                <Route path='/'  component={Home}/>
             </Switch>
         </div>
     );
