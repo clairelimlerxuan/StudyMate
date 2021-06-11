@@ -74,52 +74,52 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
             for exclude_name in not_allowed:
                 self.fields.pop(exclude_name)
 
-class FacultySerializer(serializers.HyperlinkedModelSerializer):
+class FacultySerializer(serializers.ModelSerializer):
     class Meta:
         model = Faculty
         fields = "__all__"
 
-class MajorSerializer(serializers.HyperlinkedModelSerializer):
+class MajorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Major
         fields = "__all__"
 
-class AdminUserSerializer(serializers.HyperlinkedModelSerializer):
+class AdminUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdminUser
         fields = "__all__"  
 
-class MemberUserSerializer(serializers.HyperlinkedModelSerializer):
+class MemberUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = MemberUser
         fields = "__all__"
 
-class CategorySerializer(serializers.HyperlinkedModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = "__all__"
 
-class TagSerializer(serializers.HyperlinkedModelSerializer):
+class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = "__all__"
 
-class ModuleSerializer(serializers.HyperlinkedModelSerializer):
+class ModuleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Module
         fields = "__all__"  
 
-class PostSerializer(serializers.HyperlinkedModelSerializer):
+class PostSerializer(serializers.ModelSerializer):
      class Meta:
         model = Post
         fields = "__all__"
 
-class CommentSerializer(serializers.HyperlinkedModelSerializer):
+class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = "__all__"
 
-class VoteSerializer(serializers.HyperlinkedModelSerializer):
+class VoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vote
         fields = "__all__"
