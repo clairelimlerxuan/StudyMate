@@ -1,0 +1,13 @@
+{% extends 'server/base.html' %}
+
+{% block content %}
+  <h2>Register for an account</h2>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <table>
+      {{ form.as_p }}
+    </table>
+    <button type="submit">Save</button>
+  </form>
+
+{% endblock %}

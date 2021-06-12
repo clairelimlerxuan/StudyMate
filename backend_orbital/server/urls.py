@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework import routers
 from . import views
-from .views import current_user, UserList
+from .views import MemberUserCreateView, current_user, UserList
 
 
 router = routers.DefaultRouter()
@@ -22,4 +22,6 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('current_user/', current_user),
     path('users/', UserList.as_view()),
+
+    path('addMemberUser/', views.MemberUserCreateView.as_view(), name='addMemberUser'),
 ]

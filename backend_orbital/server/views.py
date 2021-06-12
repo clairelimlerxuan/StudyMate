@@ -4,7 +4,9 @@ from rest_framework import viewsets
 
 from .serializers import *
 from .models import *
+from .forms import *
 
+from django.views.generic import CreateView
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
 from rest_framework import permissions, status
@@ -84,3 +86,9 @@ class CommentViewSet(viewsets.ModelViewSet):
 class VoteViewSet(viewsets.ModelViewSet):
     queryset = Vote.objects.all().order_by('voteID')
     serializer_class = VoteSerializer
+
+
+class MemberUserCreateView(CreateView):
+    model = MemberUser
+    fields = "__all__"
+    #success_url = 

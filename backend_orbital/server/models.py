@@ -69,7 +69,8 @@ class MemberUser(models.Model):
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
-        primary_key=True
+        null=True,
+        #primary_key=True
     )
     userPassword = models.CharField(max_length=100)
     userNUSEmail = models.EmailField()
@@ -77,11 +78,13 @@ class MemberUser(models.Model):
     facultyID = models.ForeignKey(
         Faculty,
         on_delete=models.RESTRICT,
+        null=True,
         db_column='facultyID'
     )
     majorID = models.ForeignKey(    # CEG belongs to SOC and ENGI! -> *:* relationship
         Major,
         on_delete=models.RESTRICT, 
+        null=True,
         db_column='majorID'
     )
     yearOfStudy = models.CharField(max_length=6, choices=YEAR_OF_STUDY_CHOICES, blank = True)     # add constraint
