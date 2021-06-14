@@ -14,6 +14,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import UserSerializer, UserSerializerWithToken
+
 # Create your views here.
 
 # note to self: 
@@ -91,6 +92,31 @@ class VoteViewSet(viewsets.ModelViewSet):
     queryset = Vote.objects.all().order_by('voteID')
     serializer_class = VoteSerializer
 
+
+# READ FUNCTIONALITY
+@api_view(['GET'])
+def viewPost(request, pk):
+    post = Post.objects.get(postID = pk)
+    serializer = PostSerializer(post, many = False)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def viewComment(request, pk):
+    comment = Comment.objects.get(commentID = pk)
+    serializer = CommentSerializer(comment, many = False)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def viewReply(request, pk):
+    reply = Reply.objects.get(replyID = pk)
+    serializer = ReplySerializer(reply, many = False)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def viewUser(request, pk):
+    user = MemberUser.objects.get(user_id = pk)
+    serializer = MemberUserSerializer(user, many = False)
+    return Response(serializer.data)
 
 class MemberUserCreateView(CreateView):
     model = MemberUser
