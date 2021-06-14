@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework import routers
 from . import views
-from .views import MemberUserCreateView, current_user, UserList, viewComment, viewPost, viewReply, viewUser
+from .views import MemberUserCreateView, current_user, UserList, deleteComment, deletePost, deleteReply, viewComment, viewPost, viewReply, viewUser
 
 router = routers.DefaultRouter()
 router.register(r'Faculty', views.FacultyViewSet) 
@@ -23,10 +23,14 @@ urlpatterns = [
     path('current_user/', current_user),
     path('users/', UserList.as_view()),
 
-    path('viewpost/<int:pk>/', viewPost),
-    path('viewcomment/<int:pk>/', viewComment),
-    path('viewreply/<int:pk>/', viewReply),
-    path('viewuser/<int:pk>/', viewUser),
+    path('viewpost/<int:postPK>/', viewPost),
+    path('viewcomment/<int:commentPK>/', viewComment),
+    path('viewreply/<int:replyPK>/', viewReply),
+    path('viewuser/<int:userPK>/', viewUser),
+
+    path('deletepost/<int:postPK>/<int:userPK>/', deletePost),
+    path('deletecomment/<int:commentPK>/<int:userPK>/', deleteComment),
+    path('deletereply/<int:replyPK>/<int:userPK>/', deleteReply),
 
     path('addMemberUser/', views.MemberUserCreateView.as_view(), name='addMemberUser'),
 ]

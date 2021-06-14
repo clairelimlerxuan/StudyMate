@@ -95,29 +95,62 @@ class VoteViewSet(viewsets.ModelViewSet):
 
 # READ FUNCTIONALITY
 @api_view(['GET'])
-def viewPost(request, pk):
-    post = Post.objects.get(postID = pk)
+def viewPost(request, postPK):
+    post = Post.objects.get(postID = postPK)
     serializer = PostSerializer(post, many = False)
     return Response(serializer.data)
 
 @api_view(['GET'])
-def viewComment(request, pk):
-    comment = Comment.objects.get(commentID = pk)
+def viewComment(request, commentPK):
+    comment = Comment.objects.get(commentID = commentPK)
     serializer = CommentSerializer(comment, many = False)
     return Response(serializer.data)
 
 @api_view(['GET'])
-def viewReply(request, pk):
-    reply = Reply.objects.get(replyID = pk)
+def viewReply(request, replyPK):
+    reply = Reply.objects.get(replyID = replyPK)
     serializer = ReplySerializer(reply, many = False)
     return Response(serializer.data)
 
 @api_view(['GET'])
-def viewUser(request, pk):
-    user = MemberUser.objects.get(user_id = pk)
+def viewUser(request, userPK):
+    user = MemberUser.objects.get(user_id = userPK)
     serializer = MemberUserSerializer(user, many = False)
     return Response(serializer.data)
 
+
+# DELETE FUNCTIONALITY
+@api_view(['DELETE'])
+def deletePost(request, postPK, userPK):
+    try:
+        user = MemberUser.objects.get(user_id = userPK)     
+        post = Post.objects.filter(postID = postPK, userID = user)
+        post.delete()
+        return Response('Post deleted successfully.', status = status.HTTP_200_OK)
+    except: 
+        return Response('User did not make this post.', status = status.HTTP_404_NOT_FOUND)
+
+@api_view(['DELETE'])
+def deleteComment(request, commentPK, userPK,):
+    try:
+        user = MemberUser.objects.get(user_id = userPK)       
+        comment = Comment.objects.filter(commentID = commentPK, userID = user)
+        comment.delete()
+        return Response('Comment deleted successfully.', status = status.HTTP_200_OK)
+    except:
+        return Response('User did not make this comment in the post.', status = status.HTTP_404_NOT_FOUND)
+
+@api_view(['DELETE'])
+def deleteReply(request, replyPK, userPK):
+    try:
+        user = MemberUser.objects.get(user_id = userPK)    
+        reply = Reply.objects.filter(replyID = replyPK, userID = user)
+        reply.delete()
+        return Response('Reply deleted successfully.', status = status.HTTP_200_OK)
+    except:
+        return Response('User did not reply to this comment in the post.', status = status.HTTP_404_NOT_FOUND)
+
+    
 class MemberUserCreateView(CreateView):
     model = MemberUser
     fields = "__all__"
