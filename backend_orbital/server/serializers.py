@@ -119,6 +119,11 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = "__all__"
 
+class ReplySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reply
+        fields = '__all__'
+
 class VoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vote

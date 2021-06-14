@@ -83,6 +83,10 @@ class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all().order_by('commentID')
     serializer_class = CommentSerializer
 
+class ReplyViewSet(viewsets.ModelViewSet):
+    queryset = Reply.objects.all().order_by('replyID')
+    serializer_class = ReplySerializer
+
 class VoteViewSet(viewsets.ModelViewSet):
     queryset = Vote.objects.all().order_by('voteID')
     serializer_class = VoteSerializer

@@ -14,6 +14,7 @@ router.register(r'Tag', views.TagViewSet)
 router.register(r'Module', views.ModuleViewSet)
 router.register(r'Post', views.PostViewSet)
 router.register(r'Comment', views.CommentViewSet)
+router.register(r'Reply', views.ReplyViewSet)
 router.register(r'Vote', views.VoteViewSet)
 # raw string treats backslash (\) as a literal character
 

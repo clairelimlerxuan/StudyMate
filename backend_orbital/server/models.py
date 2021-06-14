@@ -1,3 +1,4 @@
+from inspect import CO_ITERABLE_COROUTINE
 from django.db import models
 from django.db.models.deletion import CASCADE, DO_NOTHING, RESTRICT, SET_NULL
 from django.db.models.fields.related import ForeignKey, ManyToManyField
@@ -69,8 +70,7 @@ class MemberUser(models.Model):
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
-        null=True,
-        #primary_key=True
+        primary_key=True
     )
     userPassword = models.CharField(max_length=100)
     userNUSEmail = models.EmailField()
@@ -178,7 +178,7 @@ class Post(models.Model):
     creationDate = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.title 
+        return 'Post Title (' + self.title + ')'
 
     class Meta:
          db_table = 'post' 
@@ -204,12 +204,44 @@ class Comment(models.Model):
     creationDate = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.userID) + '_' + str(self.postID)  
+        return 'Comment ID (' + str(self.commentID) + ')'
 
     class Meta:
          db_table = 'comment' 
          verbose_name = 'Comment'  
 
+
+class Reply(models.Model):
+    replyID = models.AutoField(primary_key=True)
+    userID = models.ForeignKey(
+        MemberUser, 
+        on_delete=models.SET_NULL,  # if user is removed, reply is still there
+        blank=True, 
+        null=True,
+        db_column = 'userID'
+    )
+    postID = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,   # if post is removed, reply is removed too 
+        db_column = 'postID'
+    )
+    commentID = models.ForeignKey(
+        Comment,
+        on_delete=models.CASCADE,   # if comment is removed, reply is removed
+        db_column = 'commentID'
+    )
+    textContent = models.TextField()
+    # imageContent = models.ImageField()
+    creationDate = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'Reply ID (' + str(self.replyID) + ')'
+    
+    class Meta:
+        db_table = 'reply'
+        verbose_name = 'Reply'
+        verbose_name_plural = 'Replies'
+    
 
 class Vote(models.Model):
 
