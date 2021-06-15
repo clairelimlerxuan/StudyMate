@@ -32,6 +32,10 @@ urlpatterns = [
     path('deletecomment/<int:commentPK>/<int:userPK>/', deleteComment),
     path('deletereply/<int:replyPK>/<int:userPK>/', deleteReply),
 
+    path('editpost/', editPost),
+    path('editcomment/', editComment),
+    path('editreply/', editReply),
+
     path('upvotepost/', upvotePost),
     path('downvotepost/', downvotePost),
     path('unvotepost/', unvotePost),

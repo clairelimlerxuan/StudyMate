@@ -122,7 +122,7 @@ def deletePost(request, postPK, userPK):
         post.delete()
         return Response({'res' : 'Post deleted successfully.'}, status = status.HTTP_200_OK)
     except: 
-        return Response({'res' : 'User did not make this post.'}, status = status.HTTP_404_NOT_FOUND)
+        return Response({'res' : 'User does not have permission to delete this post.'}, status = status.HTTP_404_NOT_FOUND)
 
 @api_view(['DELETE'])
 def deleteComment(request, commentPK, userPK,):
@@ -132,7 +132,7 @@ def deleteComment(request, commentPK, userPK,):
         comment.delete()
         return Response({'res' : 'Comment deleted successfully.'}, status = status.HTTP_200_OK)
     except:
-        return Response({'res' : 'User did not make this comment in the post.'}, status = status.HTTP_404_NOT_FOUND)
+        return Response({'res' : 'User does not have permission to delete this comment.'}, status = status.HTTP_404_NOT_FOUND)
 
 @api_view(['DELETE'])
 def deleteReply(request, replyPK, userPK):
@@ -142,7 +142,68 @@ def deleteReply(request, replyPK, userPK):
         reply.delete()
         return Response({'res' : 'Reply deleted successfully.'}, status = status.HTTP_200_OK)
     except:
-        return Response({'res' : 'User did not reply to this comment in the post.'}, status = status.HTTP_404_NOT_FOUND)
+        return Response({'res' : 'User does not have permission to delte this reply.'}, status = status.HTTP_404_NOT_FOUND)
+
+
+# UPDATE FUNCTIONALITIES
+@api_view(['POST'])
+def editPost(request):
+    data = request.data
+    userPK = data['userID']
+    postPK = data['postID']
+    title = data['title']
+    textContent = data['textContent']
+
+    if request.user.is_authenticated:
+        post = Post.objects.get(postID = postPK)
+        if request.user.id == userPK:
+            post.title = title
+            post.textContent = textContent
+            post.save()
+            serializer = PostSerializer(post)
+            return Response(serializer.data)
+        else:
+            return Response({'res': 'User does not have permission to edit this post.'}, status = status.HTTP_403_FORBIDDEN)
+    else:
+        return Response({'res' : 'User is not authenticated.'}, status = status.HTTP_403_FORBIDDEN)
+
+@api_view(['POST'])
+def editComment(request):
+    data = request.data
+    userPK = data['userID']
+    commentPK  = data['commentID']
+    textContent = data['textContent']
+
+    if request.user.is_authenticated:
+        comment = Comment.objects.get(commentID = commentPK)
+        if request.user.id == userPK:
+            comment.textContent = textContent
+            comment.save()
+            serializer = CommentSerializer(comment)
+            return Response(serializer.data)
+        else:
+            return Response({'res': 'User does not have permission to edit this comment.'}, status = status.HTTP_403_FORBIDDEN)
+    else:
+        return Response({'res' : 'User is not authenticated.'}, status = status.HTTP_403_FORBIDDEN)
+
+@api_view(['POST'])
+def editReply(request):
+    data = request.data
+    userPK = data['userID']
+    replyPK  = data['replyID']
+    textContent = data['textContent']
+
+    if request.user.is_authenticated:
+        reply = Reply.objects.get(replyID = replyPK)
+        if request.user.id == userPK:
+            reply.textContent = textContent
+            reply.save()
+            serializer = ReplySerializer(reply)
+            return Response(serializer.data)
+        else:
+            return Response({'res': 'User does not have permission to edit this reply.'}, status = status.HTTP_403_FORBIDDEN)
+    else:
+        return Response({'res' : 'User is not authenticated.'}, status = status.HTTP_403_FORBIDDEN)
 
 
 # VOTE FUNCTIONALITIES
