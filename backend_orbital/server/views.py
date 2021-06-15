@@ -17,12 +17,6 @@ from .serializers import UserSerializer, UserSerializerWithToken
 
 # Create your views here.
 
-# note to self: 
-'''
-1. query the database for all models - using primary key (tbc?)
-2. pass that database queryset into the serializer to be converted into JSON and rendered ModelViewSet handles GET and POST for the models
-'''
-
 @api_view(['GET'])
 def current_user(request):
     """
@@ -93,7 +87,7 @@ class VoteViewSet(viewsets.ModelViewSet):
     serializer_class = VoteSerializer
 
 
-# READ FUNCTIONALITY
+# READ FUNCTIONALITIES
 @api_view(['GET'])
 def viewPost(request, postPK):
     post = Post.objects.get(postID = postPK)
@@ -119,16 +113,16 @@ def viewUser(request, userPK):
     return Response(serializer.data)
 
 
-# DELETE FUNCTIONALITY
+# DELETE FUNCTIONALITIES
 @api_view(['DELETE'])
 def deletePost(request, postPK, userPK):
     try:
         user = MemberUser.objects.get(user_id = userPK)     
         post = Post.objects.filter(postID = postPK, userID = user)
         post.delete()
-        return Response('Post deleted successfully.', status = status.HTTP_200_OK)
+        return Response({'res' : 'Post deleted successfully.'}, status = status.HTTP_200_OK)
     except: 
-        return Response('User did not make this post.', status = status.HTTP_404_NOT_FOUND)
+        return Response({'res' : 'User did not make this post.'}, status = status.HTTP_404_NOT_FOUND)
 
 @api_view(['DELETE'])
 def deleteComment(request, commentPK, userPK,):
@@ -136,9 +130,9 @@ def deleteComment(request, commentPK, userPK,):
         user = MemberUser.objects.get(user_id = userPK)       
         comment = Comment.objects.filter(commentID = commentPK, userID = user)
         comment.delete()
-        return Response('Comment deleted successfully.', status = status.HTTP_200_OK)
+        return Response({'res' : 'Comment deleted successfully.'}, status = status.HTTP_200_OK)
     except:
-        return Response('User did not make this comment in the post.', status = status.HTTP_404_NOT_FOUND)
+        return Response({'res' : 'User did not make this comment in the post.'}, status = status.HTTP_404_NOT_FOUND)
 
 @api_view(['DELETE'])
 def deleteReply(request, replyPK, userPK):
@@ -146,11 +140,73 @@ def deleteReply(request, replyPK, userPK):
         user = MemberUser.objects.get(user_id = userPK)    
         reply = Reply.objects.filter(replyID = replyPK, userID = user)
         reply.delete()
-        return Response('Reply deleted successfully.', status = status.HTTP_200_OK)
+        return Response({'res' : 'Reply deleted successfully.'}, status = status.HTTP_200_OK)
     except:
-        return Response('User did not reply to this comment in the post.', status = status.HTTP_404_NOT_FOUND)
+        return Response({'res' : 'User did not reply to this comment in the post.'}, status = status.HTTP_404_NOT_FOUND)
 
-    
+
+# VOTE FUNCTIONALITIES
+def getVoteInstance(request):
+    data = request.data
+    votePK = data['voteID']
+    voteInstance = Vote.objects.get(voteID = votePK)
+    return voteInstance
+
+def getVoteType(request):
+    data = request.data
+    voteType = data['type']
+    return voteType
+
+@api_view(['POST'])
+def upvotePost(request):
+    voteType = getVoteType(request)
+    vote = getVoteInstance(request)
+    if voteType == 'Upvote': 
+        if vote.type == 'Upvote':
+            return Response({'res' : 'User cannot upvote this post. User has already upvoted this post.'}, status = status.HTTP_403_FORBIDDEN)
+        elif vote.type == 'Downvote':
+            return Response({'res' : 'User cannot upvote this post. Please unvote this post.'}, status = status.HTTP_403_FORBIDDEN)
+        else:
+            vote.type = 'Upvote'
+            vote.save()
+            serializer = VoteSerializer(vote)
+            return Response(serializer.data)
+    else:
+        return Response({'res' : 'Invalid data.'}, status = status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
+def downvotePost(request):
+    voteType = getVoteType(request)
+    vote = getVoteInstance(request)
+    if voteType == 'Downvote':
+        if vote.type == 'Downvote':
+            return Response({'res' : 'User cannot downvote this post. User has already downvoted this post.'}, status = status.HTTP_403_FORBIDDEN)
+        elif vote.type == 'Upvote':
+            return Response({'res' : 'User cannot downvote this post. Please unvote this post.'}, status = status.HTTP_403_FORBIDDEN)
+        else:
+            vote.type = 'Downvote'
+            vote.save()
+            serializer = VoteSerializer(vote)
+            return Response(serializer.data)
+    else:
+        return Response({'res' : 'Invalid data.'}, status = status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
+def unvotePost(request):
+    voteType = getVoteType(request)
+    vote = getVoteInstance(request)
+    if voteType == 'None':
+        if vote.type == 'None':
+            return Response({'res' : 'User cannot unvote this post. User did not vote for this post.'}, status = status.HTTP_403_FORBIDDEN)
+        else:
+            vote.type = 'None'
+            vote.save()
+            serializer = VoteSerializer(vote)
+            return Response(serializer.data)
+    else:
+        return Response({'res' : 'Invalid data.'}, status = status.HTTP_404_NOT_FOUND)
+
+
 class MemberUserCreateView(CreateView):
     model = MemberUser
     fields = "__all__"

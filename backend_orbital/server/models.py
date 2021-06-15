@@ -6,12 +6,6 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
-# note to self: 
-'''
-1. create model
-2. register it with admin site
-'''
-
 class Faculty(models.Model):
     facultyID = models.CharField(max_length=10, primary_key=True)
     facultyName = models.CharField(max_length=50)
@@ -265,8 +259,9 @@ class Vote(models.Model):
     )
 
     def __str__(self):
-        return str(self.userID) + '_' + str(self.postID) + '_' + str(self.type) 
+        return str(self.voteID)
 
     class Meta:
          db_table = 'vote' 
          verbose_name = 'Vote' 
+         unique_together=('userID', 'postID')
