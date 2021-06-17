@@ -43,6 +43,8 @@ urlpatterns = [
     path('filterbycategory/', FilterByCategory.as_view()),
     path('filterbytag/', FilterByTag.as_view()),
     path('filterbymodule/', FilterByModule.as_view()),
+    path('fitlerbyfaculty/', FilterByFaculty.as_view()),
+    path('filterbymajor/', FilterByMajor.as_view()),
 
     path('addMemberUser/', views.MemberUserCreateView.as_view(), name='addMemberUser'),
 ]

@@ -306,29 +306,36 @@ def unvotePost(request):
     
 
 # FILTER FUNCTIONS
-class FilterByCategory(generics.ListAPIView):
+class FilterPost(generics.ListAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ['=categoryID__categoryID']    # filter via foreign key
 
-class FilterByTag(generics.ListAPIView):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
+class FilterUser(generics.ListAPIView):
+    queryset = MemberUser.objects.all()
+    serializer_class = MemberUserSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ['=tagID__tagID']    # not working if search contains whitespace
 
-class FilterByModule(generics.ListAPIView):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['=moduleID__moduleCode']    # filter via foreign key
+class FilterByCategory(FilterPost):
+    search_fields = ['=categoryID__categoryID'] # filter via foreign key
+
+class FilterByTag(FilterPost):
+    search_fields = ['$tagID__tagID']   # = not working if search contains whitespace
+
+class FilterByModule(FilterPost):
+    search_fields = ['=moduleID__moduleCode']   # filter via foreign key
+
+class FilterByFaculty(FilterUser):
+    search_fields = ['=facultyID__facultyID']  # filter via foreign key
+
+class FilterByMajor(FilterUser):
+    search_fields = ['=majorID__majorID']  # filter via foreign key
 
 # '^' Starts-with search.
 # '=' Exact matches.
 # '@' Full-text search. (Currently only supported Django's PostgreSQL backend.)
 # '$' Regex search.    
-        
+
 
 class MemberUserCreateView(CreateView):
     model = MemberUser
