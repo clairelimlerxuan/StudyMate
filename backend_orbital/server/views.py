@@ -331,6 +331,10 @@ class FilterByFaculty(FilterUser):
 class FilterByMajor(FilterUser):
     search_fields = ['=majorID__majorID']  # filter via foreign key
 
+# SEARCH FUNCTION
+class SearchPost(FilterPost):
+    search_fields = ['$title']
+
 # '^' Starts-with search.
 # '=' Exact matches.
 # '@' Full-text search. (Currently only supported Django's PostgreSQL backend.)

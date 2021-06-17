@@ -46,5 +46,7 @@ urlpatterns = [
     path('fitlerbyfaculty/', FilterByFaculty.as_view()),
     path('filterbymajor/', FilterByMajor.as_view()),
 
+    path('search/', SearchPost.as_view()),
+
     path('addMemberUser/', views.MemberUserCreateView.as_view(), name='addMemberUser'),
 ]
