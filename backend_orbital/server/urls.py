@@ -23,6 +23,20 @@ urlpatterns = [
     path('current_user/', current_user),
     path('users/', UserList.as_view()),
 
+
+
+    path('postdata/<int:postpk>/', getPostData),
+
+    path('postlist/', postList),
+    path('commentlist/', commentList),
+    path('replylist/', replyList),
+
+    path('userpostlist/<int:userid>/',  getUsersPost),
+    path('usercommentlist/<int:userid>/', getUsersComment),
+    path('userreplylist/<int:userid>/', getUsersReply),
+
+    path('commentparent/<int:commentpk>/', getCommentParent),
+
     path('viewpost/<int:postPK>/', viewPost),
     path('viewcomment/<int:commentPK>/', viewComment),
     path('viewreply/<int:replyPK>/', viewReply),

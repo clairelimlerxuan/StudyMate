@@ -11,6 +11,7 @@
     "@material/top-app-bar": "^10.0.0",
     "@mui-treasury/components": "^1.10.1",
     "@mui-treasury/styles": "^1.13.1",
+    "axios": "^0.21.1",
     "prop-types": "^15.7.2",
     "react": "^17.0.1",
     "react-alert": "^7.0.2",

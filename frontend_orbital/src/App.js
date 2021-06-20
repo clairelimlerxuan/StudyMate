@@ -12,7 +12,7 @@ import Navbar from "./components/navbar";
 import Forum from './pages/forum';
 import PrivateRoute from './components/privateroute';
 import PublicRoute from './components/publicroute';
-
+import PostHistory from './pages/posthistory'
 function App(props) {
     const [isLoggedIn, setIsLoggedIn] = useState(
         localStorage.getItem("token") ? true : false
@@ -26,7 +26,7 @@ function App(props) {
 
     useEffect(() => {
         if (isLoggedIn) {
-            fetch("http://localhost:8000/current_user/", {
+            fetch("http://localhost:8000/server/current_user/", {
                 headers: {
                     Authorization: `JWT ${localStorage.getItem("token")}`,
                 },
@@ -142,10 +142,21 @@ function App(props) {
                         />
                     )}
                 />
-                <PrivateRoute
+                <Route
                     path="/forum"
                     render={(props) => (
                         <Forum
+                            {...props}
+                            username={username}
+                            id={id}
+                            isStaff={isStaff}
+                        />
+                    )}
+                />
+                <Route
+                    path="/post"
+                    render={(props) => (
+                        <PostHistory
                             {...props}
                             username={username}
                             id={id}

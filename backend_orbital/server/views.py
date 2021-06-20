@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 from rest_framework import viewsets
 from rest_framework import response
+from rest_framework.serializers import Serializer
 
 from .serializers import *
 from .models import *
@@ -14,7 +15,11 @@ from rest_framework import permissions, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer, UserSerializerWithToken
+
 
 # Create your views here.
 
@@ -87,21 +92,70 @@ class VoteViewSet(viewsets.ModelViewSet):
     queryset = Vote.objects.all().order_by('voteID')
     serializer_class = VoteSerializer
 
+@api_view(['GET'])
+@permission_classes((AllowAny, ))
+def postList(request):
+    posts = Post.objects.all()[:100]
+    serializer = PostSerializer(posts, many = True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes((AllowAny, ))
+def commentList(request):
+    comments = Comment.objects.all()[:100]
+    serializer = PostSerializer(comments, many = True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes((AllowAny, ))
+def replyList(request):
+    replies = Reply.objects.all()[:100]
+    serializer = ReplySerializer(replies, many = True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes((AllowAny, ))
+def getPostData(request, pk):
+    post = Post.objects.get(postID = pk)
+    serializer = PostSerializer(post, many = False)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes((AllowAny, ))
+def getCommentData(request, pk):
+    comment = Comment.objects.get(commentid = pk)
+    serializer = CommentSerializer(comment, many = False)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes((AllowAny, ))
+def getCommentData(request, pk):
+    reply = Reply.objects.get(replyid = pk)
+    serializer = ReplySerializer(reply, many = False)
+    return Response(serializer.data)
+
+
 
 # READ FUNCTIONALITIES
 @api_view(['GET'])
+@permission_classes((AllowAny, ))
 def viewPost(request, postPK):
     post = Post.objects.get(postID = postPK)
     serializer = PostSerializer(post, many = False)
     return Response(serializer.data)
 
 @api_view(['GET'])
+@permission_classes((AllowAny, ))
 def viewComment(request, commentPK):
     comment = Comment.objects.get(commentID = commentPK)
     serializer = CommentSerializer(comment, many = False)
     return Response(serializer.data)
 
+
+
 @api_view(['GET'])
+@permission_classes((AllowAny, ))
 def viewReply(request, replyPK):
     reply = Reply.objects.get(replyID = replyPK)
     serializer = ReplySerializer(reply, many = False)
@@ -111,6 +165,30 @@ def viewReply(request, replyPK):
 def viewUser(request, userPK):
     user = MemberUser.objects.get(user_id = userPK)
     serializer = MemberUserSerializer(user, many = False)
+    return Response(serializer.data)
+
+#get user's post
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getUsersPost(request, userid):
+    posts = Post.objects.filter(userID = userid)
+    serializer = PostSerializer(posts, many = True)
+    return Response(serializer.data)
+
+#get user's comment
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getUsersComment(request, userid):
+    comments = Comment.objects.filter(userID = userid)
+    serializer = CommentSerializer(comments, many = True)
+    return Response(serializer.data)
+
+#get user's reply
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getUsersReply(request, userid):
+    replies = Reply.objects.filter(userID = userid)
+    serializer =ReplySerializer(replies, many = True)
     return Response(serializer.data)
 
 
@@ -123,7 +201,15 @@ def userHasPermission(request):
 def userHasPermission(request, userPK):
     return request.user.id == userPK or request.user.is_staff
 
-
+#get comment's post
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getCommentParent(request, commentpk):
+    comment = Comment.objects.get(commentID = commentpk)
+    post = Post.objects.get(postID =  comment.postID.postID)
+    serializer = PostSerializer(post, many = False)
+    return Response(serializer.data)
+    
 # DELETE FUNCTIONALITIES
 @api_view(['DELETE'])
 def deletePost(request, postPK, userPK):

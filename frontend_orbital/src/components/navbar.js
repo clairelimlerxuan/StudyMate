@@ -6,8 +6,8 @@ import './navbar.css';
 import Dropdown from './dropdown';
 function Navbar(props) {
 
-  const [click, setClick] = useState(false);
-  const [dropdown, setDropdown] = useState(false);
+  const [click, setClick] = React.useState(false);
+  const [dropdown, setDropdown] = React.useState(false);
 
   const handleClick = () => setClick(!click);
   const closeMobileMenu = () => setClick(false);

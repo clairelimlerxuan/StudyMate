@@ -8,11 +8,14 @@ const PrivateRoute = ({component: Component, ...rest}) => {
 
         // Show the component only when the user is logged in
         // Otherwise, show error message
-        <Route {...rest} render={props => (
-            isLogin() ?
-                <Component {...props} />
-            :           <Warning/>
-            )} />                           
+        <Route {...rest}   render={(props) => {
+            !isLogin && alert('This is a private Route');
+            return
+            isLogin() ? (
+                <Component {...props} /> )
+            :      (     <Warning/> )
+
+            }} />                           
     );
 };
 

@@ -5,10 +5,11 @@ import {
     CategoryItem,
 } from "@mui-treasury/components/menu/category";
 import { makeStyles } from "@material-ui/core/styles";
+import { YearPicker } from "react-dropdown-date";
 import Button from "@material-ui/core/Button";
 import { useFirebaseBtnStyles } from "@mui-treasury/styles/button/firebase";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles({
     container: {
         backgroundColor: "#E7ECEF",
         borderRadius: "10px",
@@ -27,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
         padding: 0,
         fontWeight: "bold",
     },
-}));
+});
 
 const categories = [
     "Open Source",
@@ -67,5 +68,42 @@ const categories = [
     "Software Development",
 ];
 
-export default function category(props) {
+export default function Category(props) {
+    const classes = useStyles();
+    const styles = useFirebaseBtnStyles();
+    return (
+        <div className={classes.container}>
+            <CategoryProvider>
+                <CategoryTitle>Categories</CategoryTitle>
+                {categories.map((category) => {
+                    return (
+                        <CategoryItem
+                            className={
+                                props.category == category
+                                    ? classes.active
+                                    : null
+                            }
+                            onClick={() => props.setCategory(category)}
+                            style={{ cursor: "pointer" }}
+                        >
+                            {category}
+                        </CategoryItem>
+                    );
+                })}
+                <Button
+                    style={{ marginTop: "1.5rem", width: "95%" }}
+                    classes={styles}
+                    variant={"contained"}
+                    color={"primary"}
+                    onClick={() =>
+                        props.handleFilter(props.category)
+                    }
+                >
+                    Filter
+                </Button>
+            </CategoryProvider>
+        </div>
+    );
 }
+
+
