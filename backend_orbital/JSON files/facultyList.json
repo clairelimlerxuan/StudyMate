@@ -1,0 +1,11 @@
+[{"facultyID":"BIZ", "facultyName":"Business & Accountancy"},
+ {"facultyID":"CHS", "facultyName":"College of Humanities and Sciences"},
+ {"facultyID":"COM", "facultyName":"Computing"},
+ {"facultyID":"DE", "facultyName":"Design & Environment"},
+ {"facultyID":"DEN", "facultyName":"Dentistry"},
+ {"facultyID":"ENGR", "facultyName":"Engineering"},
+ {"facultyID":"LAW", "facultyName":"Law"},
+ {"facultyID":"MED", "facultyName":"Medicine"},
+ {"facultyID":"MUS", "facultyName":"Music"},
+ {"facultyID":"NSG", "facultyName":"Nursing"},
+ {"facultyID":"PHAR", "facultyName":"Pharmacy"}]
