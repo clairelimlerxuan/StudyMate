@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models.deletion import CASCADE, DO_NOTHING, RESTRICT, SET_NULL
 from django.db.models.fields.related import ForeignKey, ManyToManyField
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 
@@ -85,7 +86,16 @@ class MemberUser(models.Model):
     creationDate = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return self.username
+        return str(self.user)
+
+    def clean(self):
+        errorDict = {}
+        facultyName = self.facultyID
+        facultyFK = self.majorID.facultyID
+        if facultyName != facultyFK:    # check FK of major against faculty
+            errorDict['majorID'] = ValidationError('Invalid major selected. MajorID does not match with FacultyID.')
+        if errorDict:
+            raise ValidationError(errorDict)
 
     class Meta:
          db_table = 'memberUser'
@@ -160,10 +170,11 @@ class Post(models.Model):
         on_delete=models.RESTRICT,
         db_column = 'tagID'
     )
-    moduleID = models.OneToOneField(
+    moduleID = models.ForeignKey(
         Module,
         on_delete=models.RESTRICT,
         null=True,
+        blank = True,
         db_column='moduleID'
     )
     title = models.CharField(max_length=50)
@@ -172,7 +183,25 @@ class Post(models.Model):
     creationDate = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return 'Post Title (' + self.title + ')'
+        return 'Post #' + str(self.postID) + ': ' + str(self.title)
+        
+    def clean(self):
+        errorDict = {}
+        categoryName = self.categoryID
+        categoryFK = self.tagID.categoryID
+        tagName = self.tagID
+        moduleName = self.moduleID
+
+        if categoryName != categoryFK:    # check FK of tag against category
+            errorDict['tagID'] = ValidationError('Invalid tag selected. TagID does not match with CategoryID.')
+        if moduleName is not None:
+            tagFK = moduleName.tagID
+            if tagName != tagFK:     # check FK of module against tag 
+                errorDict['moduleID'] = ValidationError('Invalid module selected. ModuleID does not match with TagID.')
+        elif tagName.tagID == 'Module': 
+            errorDict['moduleID'] = ValidationError('No module selected.')
+        if errorDict:
+            raise ValidationError(errorDict)
 
     class Meta:
          db_table = 'post' 
@@ -198,7 +227,7 @@ class Comment(models.Model):
     creationDate = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return 'Comment ID (' + str(self.commentID) + ')'
+        return 'Comment #' + str(self.commentID) + ' to ' + str(self.postID)
 
     class Meta:
          db_table = 'comment' 
@@ -229,7 +258,16 @@ class Reply(models.Model):
     creationDate = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return 'Reply ID (' + str(self.replyID) + ')'
+        return 'Reply #' + str(self.replyID) + ' to ' + str(self.commentID)
+    
+    def clean(self):
+        errorDict = {}
+        postName = self.postID
+        postFK = self.commentID.postID
+        if postName != postFK:    # check FK of comment against post
+            errorDict['commentID'] = ValidationError('Invalid comment selected. CommentID does not match with PostID.')
+        if errorDict:
+            raise ValidationError(errorDict)
     
     class Meta:
         db_table = 'reply'
@@ -252,7 +290,7 @@ class Vote(models.Model):
         on_delete=models.CASCADE,  # if user is removed, vote is removed too
         db_column = 'userID'
     )
-    postID = models.ForeignKey(     # changed from 1:1 to 1:*
+    postID = models.ForeignKey(  
         Post,
         on_delete=models.CASCADE,   # if post is removed, vote is removed too
         db_column = 'postID'
@@ -264,4 +302,4 @@ class Vote(models.Model):
     class Meta:
          db_table = 'vote' 
          verbose_name = 'Vote' 
-         unique_together=('userID', 'postID')
+         unique_together = ('userID', 'postID')
