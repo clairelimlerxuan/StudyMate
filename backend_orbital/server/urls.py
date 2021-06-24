@@ -15,7 +15,8 @@ router.register(r'Post', views.PostViewSet)
 router.register(r'Comment', views.CommentViewSet)
 router.register(r'Reply', views.ReplyViewSet)
 router.register(r'Vote', views.VoteViewSet)
-# raw string treats backslash (\) as a literal character
+router.register(r'Event', views.EventViewSet)
+router.register(r'Task', views.TaskViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -94,6 +94,14 @@ class VoteViewSet(viewsets.ModelViewSet):
     queryset = Vote.objects.all().order_by('voteID')
     serializer_class = VoteSerializer
 
+class EventViewSet(viewsets.ModelViewSet):
+    queryset = Event.objects.all().order_by('eventID')
+    serializer_class = EventSerializer
+
+class TaskViewSet(viewsets.ModelViewSet):
+    queryset = Task.objects.all().order_by('taskID')
+    serializer_class = TaskSerializer
+
 @api_view(['GET'])
 @permission_classes((AllowAny, ))
 def postList(request):
@@ -205,7 +213,7 @@ def getCommentParent(request, commentpk):
 def userHasPermission(request, userPK):
     return request.user.id == userPK or request.user.is_staff
     
-    
+
 # DELETE FUNCTIONALITIES
 @api_view(['DELETE'])
 def deletePost(request, postPK, userPK):

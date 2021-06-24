@@ -182,3 +182,15 @@ class VoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vote
         fields = "__all__"
+
+
+class EventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Event
+        fields = "__all__"
+
+
+class TaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = "__all__"

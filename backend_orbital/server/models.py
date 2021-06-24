@@ -179,7 +179,7 @@ class Post(models.Model):
     )
     title = models.CharField(max_length=50)
     textContent = models.TextField()
-    # imageContent = 
+    #imageContent = models.ImageField()
     creationDate = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -223,7 +223,7 @@ class Comment(models.Model):
         db_column = 'postID'
     )
     textContent = models.TextField()
-    # imageContent = models.ImageField()
+    #imageContent = models.ImageField()
     creationDate = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -254,7 +254,7 @@ class Reply(models.Model):
         db_column = 'commentID'
     )
     textContent = models.TextField()
-    # imageContent = models.ImageField()
+    #imageContent = models.ImageField()
     creationDate = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -303,3 +303,44 @@ class Vote(models.Model):
          db_table = 'vote' 
          verbose_name = 'Vote' 
          unique_together = ('userID', 'postID')
+
+    
+class Event(models.Model):
+    eventID = models.AutoField(primary_key=True)
+    userID = models.ForeignKey(
+        MemberUser,
+        on_delete=models.CASCADE,   # if user is removed, event is removed too
+        db_column = 'userID'
+    )
+    title = models.CharField(max_length = 50)
+    description = models.CharField(max_length = 100)
+    day = models.DateField()
+    startTime = models.TimeField()
+    endTime = models.TimeField()
+    creationDate = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'Event #' + str(self.eventID) + ': ' + str(self.title) 
+    
+    class Meta:
+        db_table = 'event'
+        verbose_name = 'Event'
+
+
+class Task(models.Model):
+    taskID = models.AutoField(primary_key=True)
+    userID = models.ForeignKey(
+        MemberUser,
+        on_delete=models.CASCADE,   # if user is removed, task is removed too
+        db_column = 'userID'
+    )
+    title = models.CharField(max_length = 50)
+    isCompleted = models.BooleanField()
+    creationDate = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'Item #' + str(self.taskID) + ': ' + str(self.title)
+
+    class Meta:
+        db_table = 'task'
+        verbose_name = 'Task'
