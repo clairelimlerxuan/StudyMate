@@ -1,15 +1,9 @@
 from django.shortcuts import render
 
 from rest_framework import viewsets
-<<<<<<< HEAD
-from rest_framework import response
-from rest_framework.serializers import Serializer
-=======
->>>>>>> 26b224f345281bc8c866e27e6bd7d956a2274ae2
 
 from .serializers import *
 from .models import *
-from .forms import *
 
 from django.views.generic import CreateView
 from django.contrib.auth.models import User
@@ -22,7 +16,6 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer, UserSerializerWithToken
-
 
 # Create your views here.
 
@@ -161,8 +154,6 @@ def viewComment(request, commentPK):
     serializer = CommentSerializer(comment, many = False)
     return Response(serializer.data)
 
-
-
 @api_view(['GET'])
 @permission_classes((AllowAny, ))
 def viewReply(request, replyPK):
@@ -200,11 +191,6 @@ def getUsersReply(request, userid):
     serializer =ReplySerializer(replies, many = True)
     return Response(serializer.data)
 
-
-# check if user can modify one's post/commment/reply
-def userHasPermission(request, userPK):
-    return request.user.id == userPK or request.user.is_staff
-
 #get comment's post
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -213,6 +199,12 @@ def getCommentParent(request, commentpk):
     post = Post.objects.get(postID =  comment.postID.postID)
     serializer = PostSerializer(post, many = False)
     return Response(serializer.data)
+
+
+# check if user can modify one's post/commment/reply
+def userHasPermission(request, userPK):
+    return request.user.id == userPK or request.user.is_staff
+    
     
 # DELETE FUNCTIONALITIES
 @api_view(['DELETE'])
@@ -430,11 +422,13 @@ class SearchPost(FilterPost):
 # '@' Full-text search. (Currently only supported Django's PostgreSQL backend.)
 # '$' Regex search.    
 
-
+'''
 class MemberUserCreateView(CreateView):
     model = MemberUser
-    fields = "__all__"
+    #fields = "__all__"
+    form_class = MemberUserForm
     #success_url = 
+'''
 
 # CreateAPIView - for create-only endpoints.
 # ListAPIView - for read-only endpoints to represent a collection of model instances.

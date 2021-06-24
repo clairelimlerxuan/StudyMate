@@ -23,8 +23,6 @@ urlpatterns = [
     path('current_user/', current_user),
     path('users/', UserList.as_view()),
 
-
-
     path('postdata/<int:postpk>/', getPostData),
 
     path('postlist/', postList),
@@ -62,5 +60,5 @@ urlpatterns = [
 
     path('search/', SearchPost.as_view()),
 
-    path('addMemberUser/', views.MemberUserCreateView.as_view(), name='addMemberUser'),
+    # path('addMemberUser/', views.MemberUserCreateView.as_view(), name='addMemberUser'),
 ]
