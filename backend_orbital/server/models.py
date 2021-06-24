@@ -314,13 +314,40 @@ class Event(models.Model):
     )
     title = models.CharField(max_length = 50)
     description = models.CharField(max_length = 100)
-    day = models.DateField()
+    date = models.DateField()
     startTime = models.TimeField()
     endTime = models.TimeField()
     creationDate = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return 'Event #' + str(self.eventID) + ': ' + str(self.title) 
+
+    def overlap(self, fixedStart, fixedEnd, newStart, newEnd):
+        overlap = False
+        if newStart == fixedEnd or newEnd == fixedStart:    # edge cases
+            overlap = False
+        elif newStart >= fixedStart and newStart <= fixedEnd:   # inner limits
+            overlap = True
+        elif newEnd >= fixedStart and newEnd <= fixedEnd:   # inner limits
+            overlap = True
+        elif newStart <= fixedStart and newEnd >= fixedEnd:     # outer limits
+            overlap = True
+        return overlap
+
+    def clean(self):
+        errorDict = {}
+        events = Event.objects.filter(userID = self.userID, date = self.date).exclude(eventID = self.eventID)
+        if events.exists():
+            for event in events:
+                if self.overlap(event.startTime, event.endTime, self.startTime, self.endTime):
+                    errorDict['endTime'] = ValidationError('Invalid event. There is an overlap with another event: ' + str(event.date) 
+                                            + ', ' + str(event.startTime) + ' - ' + str(event.endTime))
+        if self.endTime < self.startTime:
+            errorDict['date'] = ValidationError('Invalid timings. Ending time must end before starting time.')
+        elif self.endTime <= self.startTime:
+             errorDict['date'] = ValidationError('Invalid timings. Ending time must be different from starting time.')
+        if errorDict:
+            raise ValidationError(errorDict)
     
     class Meta:
         db_table = 'event'

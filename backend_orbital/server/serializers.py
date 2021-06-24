@@ -20,10 +20,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserSerializerWithToken(serializers.ModelSerializer):
-
     token = serializers.SerializerMethodField()
     email = serializers.CharField(write_only = True)
     password = serializers.CharField(write_only=True)
+    
     def get_token(self, obj):
         jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
         jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
@@ -49,11 +49,11 @@ class UserSerializerWithToken(serializers.ModelSerializer):
 
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
+    
     """
     A ModelSerializer that takes an additional `fields` and 'exclude' argument that
     controls which fields should be displayed.
     """
-
     def __init__(self, *args, **kwargs):
         # Don't pass the 'fields' arg up to the superclass
         fields = kwargs.pop('fields', None)
@@ -75,25 +75,29 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
                 self.fields.pop(exclude_name)
 
 
-class FacultySerializer(serializers.ModelSerializer):
+class FacultySerializer(serializers.ModelSerializer): 
+    
     class Meta:
         model = Faculty
         fields = "__all__"
 
 
 class MajorSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Major
         fields = "__all__"
 
 
 class AdminUserSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = AdminUser
         fields = "__all__"  
 
 
 class MemberUserSerializer(serializers.ModelSerializer):    
+    
     def validate(self, attrs):
         errorDict = {}
         facultyName = attrs['facultyID']
@@ -105,31 +109,34 @@ class MemberUserSerializer(serializers.ModelSerializer):
         else:
             return attrs
 
-
     class Meta:
         model = MemberUser
         fields = "__all__"
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Category
         fields = "__all__"
 
 
 class TagSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Tag
         fields = "__all__"
 
 
 class ModuleSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Module
         fields = "__all__"  
 
 
 class PostSerializer(serializers.ModelSerializer):
+    
     def validate(self, attrs):
         errorDict = {}
         categoryName = attrs['categoryID']
@@ -156,12 +163,14 @@ class PostSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Comment
         fields = "__all__"
 
 
 class ReplySerializer(serializers.ModelSerializer):
+    
     def validate(self, attrs):    # check FK of comment against post
         errorDict = {}
         postName = attrs['postID']
@@ -179,18 +188,55 @@ class ReplySerializer(serializers.ModelSerializer):
 
 
 class VoteSerializer(serializers.ModelSerializer):
+   
     class Meta:
         model = Vote
         fields = "__all__"
 
 
 class EventSerializer(serializers.ModelSerializer):
+    
+    def overlap(self, fixedStart, fixedEnd, newStart, newEnd):
+        overlap = False
+        if newStart == fixedEnd or newEnd == fixedStart:    # edge cases
+            overlap = False
+        elif newStart >= fixedStart and newStart <= fixedEnd:   # inner limits
+            overlap = True
+        elif newEnd >= fixedStart and newEnd <= fixedEnd:   # inner limits
+            overlap = True
+        elif newStart <= fixedStart and newEnd >= fixedEnd:     # outer limits
+            overlap = True
+        return overlap
+
+    def validate(self, attrs):
+        errorDict = {}
+        userInst = attrs['userID']
+        dateInst = attrs['date']
+        startTimeInst = attrs['startTime']
+        endTimeInst = attrs['endTime']
+
+        events = Event.objects.filter(userID = userInst, date = dateInst)
+        if events.exists():
+            for event in events:
+                if self.overlap(event.startTime, event.endTime, startTimeInst, endTimeInst):
+                    errorDict['endTime'] = ValidationError('Invalid event. There is an overlap with another event: ' + str(event.date) 
+                                            + ', ' + str(event.startTime) + ' - ' + str(event.endTime))
+        if endTimeInst < startTimeInst:
+            errorDict['date'] = ValidationError('Invalid timings. Ending time must end before starting time.')
+        elif endTimeInst <= startTimeInst:
+             errorDict['date'] = ValidationError('Invalid timings. Ending time must be different from starting time.')
+        if errorDict:
+            raise ValidationError(errorDict)
+        else:
+            return attrs
+
     class Meta:
         model = Event
         fields = "__all__"
 
 
 class TaskSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Task
         fields = "__all__"
