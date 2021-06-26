@@ -33,6 +33,8 @@ urlpatterns = [
     path('userpostlist/<int:userid>/',  getUsersPost),
     path('usercommentlist/<int:userid>/', getUsersComment),
     path('userreplylist/<int:userid>/', getUsersReply),
+    path('usereventlist/<int:userid>/', getUsersEvent),
+    path('usertasklist/<int:userid>/', getUsersTask),
 
     path('commentparent/<int:commentpk>/', getCommentParent),
 
@@ -40,14 +42,20 @@ urlpatterns = [
     path('viewcomment/<int:commentPK>/', viewComment),
     path('viewreply/<int:replyPK>/', viewReply),
     path('viewuser/<int:userPK>/', viewUser),
+    path('viewevent/<int:eventPK>/', viewEvent),
+    path('viewtask/<int:taskPK>/', viewTask),
 
     path('deletepost/<int:postPK>/<int:userPK>/', deletePost),
     path('deletecomment/<int:commentPK>/<int:userPK>/', deleteComment),
     path('deletereply/<int:replyPK>/<int:userPK>/', deleteReply),
+    path('deleteevent/<int:eventPK>/<int:userPK>/', deleteEvent),
+    path('deletetask/<int:taskPK>/<int:userPK>/', deleteTask),
 
     path('editpost/', editPost),
     path('editcomment/', editComment),
     path('editreply/', editReply),
+    path('editevent/', editEvent),
+    path('edittask/', editTask),
 
     path('upvotepost/', upvotePost),
     path('downvotepost/', downvotePost),

@@ -1,3 +1,5 @@
+from datetime import datetime
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 
 from rest_framework import viewsets
@@ -12,9 +14,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.permissions import AllowAny
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from .serializers import UserSerializer, UserSerializerWithToken
 
 # Create your views here.
@@ -102,6 +103,8 @@ class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all().order_by('taskID')
     serializer_class = TaskSerializer
 
+
+# GET LIST OF POSTS/ COMMENTS/ REPLIES
 @api_view(['GET'])
 @permission_classes((AllowAny, ))
 def postList(request):
@@ -113,7 +116,7 @@ def postList(request):
 @permission_classes((AllowAny, ))
 def commentList(request):
     comments = Comment.objects.all()[:100]
-    serializer = PostSerializer(comments, many = True)
+    serializer = CommentSerializer(comments, many = True)
     return Response(serializer.data)
 
 @api_view(['GET'])
@@ -146,36 +149,70 @@ def getCommentData(request, pk):
     return Response(serializer.data)
 
 
-
-# READ FUNCTIONALITIES
+# GET INDIVIDUAL POST/ COMMENT/ REPLY
 @api_view(['GET'])
 @permission_classes((AllowAny, ))
 def viewPost(request, postPK):
-    post = Post.objects.get(postID = postPK)
+    try:
+        post = Post.objects.get(postID = postPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such post.'}, status = status.HTTP_404_NOT_FOUND)
     serializer = PostSerializer(post, many = False)
     return Response(serializer.data)
 
 @api_view(['GET'])
 @permission_classes((AllowAny, ))
 def viewComment(request, commentPK):
-    comment = Comment.objects.get(commentID = commentPK)
+    try:
+        comment = Comment.objects.get(commentID = commentPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such comment.'}, status = status.HTTP_404_NOT_FOUND)
     serializer = CommentSerializer(comment, many = False)
     return Response(serializer.data)
 
 @api_view(['GET'])
 @permission_classes((AllowAny, ))
 def viewReply(request, replyPK):
+    try:
+        reply = Reply.objects.get(replyID = replyPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such reply.'}, status = status.HTTP_404_NOT_FOUND)
     reply = Reply.objects.get(replyID = replyPK)
     serializer = ReplySerializer(reply, many = False)
     return Response(serializer.data)
 
 @api_view(['GET'])
+@permission_classes((AllowAny, ))
 def viewUser(request, userPK):
     user = MemberUser.objects.get(user_id = userPK)
     serializer = MemberUserSerializer(user, many = False)
     return Response(serializer.data)
 
-#get user's post
+@api_view(['GET'])
+def viewEvent(request, eventPK):
+    try:
+        event = Event.objects.get(eventID = eventPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such event.'}, status = status.HTTP_404_NOT_FOUND)
+    if request.user.id != event.userID.user_id: 
+        return Response({'res' : 'User does not have permission to view this event.'}, status = status.HTTP_403_FORBIDDEN)
+    serializer = EventSerializer(event, many = False)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def viewTask(request, taskPK):
+    try:
+        task = Task.objects.get(taskID = taskPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such task.'}, status = status.HTTP_404_NOT_FOUND)
+    if request.user.id != task.userID.user_id: 
+        return Response({'res' : 'User does not have permission to view this task.'}, status = status.HTTP_403_FORBIDDEN)
+    serializer = EventSerializer(task, many = False)
+    return Response(serializer.data)
+
+
+# GET USER'S LIST OF POSTS/ COMMENTS/ REPLIES
+# get user's posts
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUsersPost(request, userid):
@@ -183,7 +220,7 @@ def getUsersPost(request, userid):
     serializer = PostSerializer(posts, many = True)
     return Response(serializer.data)
 
-#get user's comment
+# get user's comments
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUsersComment(request, userid):
@@ -191,15 +228,35 @@ def getUsersComment(request, userid):
     serializer = CommentSerializer(comments, many = True)
     return Response(serializer.data)
 
-#get user's reply
+# get user's replies
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUsersReply(request, userid):
     replies = Reply.objects.filter(userID = userid)
-    serializer =ReplySerializer(replies, many = True)
+    serializer = ReplySerializer(replies, many = True)
     return Response(serializer.data)
 
-#get comment's post
+# get user's events
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getUsersEvent(request, userid):
+    events = Event.objects.filter(userID = userid)
+    if request.user.id != userid:
+        return Response({'res' : 'User does not have permission to view this event.'}, status = status.HTTP_403_FORBIDDEN)
+    serializer = EventSerializer(events, many = True)
+    return Response(serializer.data)
+
+# get user's tasks
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getUsersTask(request, userid):
+    tasks = Task.objects.filter(userID = userid)
+    if request.user.id != userid:
+        return Response({'res' : 'User does not have permission to view this task.'}, status = status.HTTP_403_FORBIDDEN)
+    serializer = TaskSerializer(tasks, many = True)
+    return Response(serializer.data)
+
+# get comment's posts
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getCommentParent(request, commentpk):
@@ -209,44 +266,102 @@ def getCommentParent(request, commentpk):
     return Response(serializer.data)
 
 
-# check if user can modify one's post/commment/reply
-def userHasPermission(request, userPK):
-    return request.user.id == userPK or request.user.is_staff
-    
+# check for permission - that user/ admin user
+def userHasPermission(request, userPK): 
+    return request.user.id == userPK or request.user.is_staff  
 
-# DELETE FUNCTIONALITIES
+
+# DELETE USER'S INDIVIDUAL POST/ COMMENT/ REPLY
 @api_view(['DELETE'])
 def deletePost(request, postPK, userPK):
-    user = MemberUser.objects.get(user_id = userPK)     
-    post = Post.objects.filter(postID = postPK, userID = user)
-    if userHasPermission(request, userPK): 
+    try:
+        user = MemberUser.objects.get(user_id = userPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        post = Post.objects.get(postID = postPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such post.'}, status = status.HTTP_404_NOT_FOUND)
+    userPost = Post.objects.filter(postID = postPK, userID = user)
+    if userPost.exists() and userHasPermission(request, userPK): 
         post.delete()
         return Response({'res' : 'Post deleted successfully.'}, status = status.HTTP_200_OK)
     else: 
-        return Response({'res' : 'User does not have permission to delete this post.'}, status = status.HTTP_404_NOT_FOUND)
+        return Response({'res' : 'User does not have permission to delete this post.'}, status = status.HTTP_403_FORBIDDEN)
+
 
 @api_view(['DELETE'])
 def deleteComment(request, commentPK, userPK,):
-    user = MemberUser.objects.get(user_id = userPK)       
-    comment = Comment.objects.filter(commentID = commentPK, userID = user)
-    if userHasPermission(request, userPK):
+    try:
+        user = MemberUser.objects.get(user_id = userPK)       
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        comment = Comment.objects.get(commentID = commentPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such comment.'}, status = status.HTTP_404_NOT_FOUND)
+    userComment = Comment.objects.filter(commentID = commentPK, userID = user)
+    if userComment.exists() and userHasPermission(request, userPK):
         comment.delete()
         return Response({'res' : 'Comment deleted successfully.'}, status = status.HTTP_200_OK)
     else:
-        return Response({'res' : 'User does not have permission to delete this comment.'}, status = status.HTTP_404_NOT_FOUND)
+        return Response({'res' : 'User does not have permission to delete this comment.'}, status = status.HTTP_403_FORBIDDEN)
+
 
 @api_view(['DELETE'])
 def deleteReply(request, replyPK, userPK):
-    user = MemberUser.objects.get(user_id = userPK)    
-    reply = Reply.objects.filter(replyID = replyPK, userID = user)
-    if userHasPermission(request, userPK):    
+    try:
+        user = MemberUser.objects.get(user_id = userPK)    
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        reply = Reply.objects.get(replyID = replyPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such reply.'}, status = status.HTTP_404_NOT_FOUND)       
+    userReply = Reply.objects.filter(replyID = replyPK, userID = user)
+    if userReply.exists() and userHasPermission(request, userPK):    
         reply.delete()
         return Response({'res' : 'Reply deleted successfully.'}, status = status.HTTP_200_OK)
     else:
-        return Response({'res' : 'User does not have permission to delete this reply.'}, status = status.HTTP_404_NOT_FOUND)
+        return Response({'res' : 'User does not have permission to delete this reply.'}, status = status.HTTP_403_FORBIDDEN)
+
+    
+@api_view(['DELETE'])
+def deleteEvent(request, eventPK, userPK):
+    try:
+        user = MemberUser.objects.get(user_id = userPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        event = Event.objects.get(eventID = eventPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such event.'}, status = status.HTTP_404_NOT_FOUND)
+    userEvent = Event.objects.filter(eventID = eventPK, userID = user)
+    if userEvent.exists() and request.user.id == userPK:
+        event.delete()
+        return Response({'res' : 'Event deleted successfully.'}, status = status.HTTP_200_OK)
+    else:
+        return Response({'res' : 'User does not have permission to delete this event.'}, status = status.HTTP_403_FORBIDDEN)
+
+@api_view(['DELETE'])
+def deleteTask(request, taskPK, userPK):
+    try:
+        user = MemberUser.objects.get(user_id = userPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        task = Task.objects.get(taskID = taskPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such task.'}, status = status.HTTP_404_NOT_FOUND)
+    userTask = Task.objects.filter(taskID = taskPK, userID = user)
+    if userTask.exists() and request.user.id == userPK:
+        task.delete()
+        return Response({'res' : 'Task deleted successfully.'}, status = status.HTTP_200_OK)
+    else:
+        return Response({'res' : 'User does not have permission to delete this task.'}, status = status.HTTP_403_FORBIDDEN)
 
 
-# UPDATE FUNCTIONALITIES
+# UPDATE USER'S INDIVIDUAL POST/ COMMENT/ REPLY
 @api_view(['POST'])
 def editPost(request):
     data = request.data
@@ -254,30 +369,50 @@ def editPost(request):
     postPK = data['postID']
     title = data['title']
     textContent = data['textContent']
-
-    if request.user.is_authenticated:
+    try:
+        user = MemberUser.objects.get(user_id = userPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
         post = Post.objects.get(postID = postPK)
-        if userHasPermission(request, userPK):
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such post.'}, status = status.HTTP_404_NOT_FOUND)
+    if request.user.is_authenticated:
+        userPost = Post.objects.filter(postID = postPK, userID = user)
+        if userPost.exists() and userHasPermission(request, userPK):
             post.title = title
             post.textContent = textContent
             post.save()
             serializer = PostSerializer(post)
             return Response(serializer.data)
         else:
-            return Response({'res': 'User does not have permission to edit this post.'}, status = status.HTTP_403_FORBIDDEN)
+            return Response({'res' : 'User does not have permission to edit this post.'}, status = status.HTTP_403_FORBIDDEN)
     else:
         return Response({'res' : 'User is not authenticated.'}, status = status.HTTP_403_FORBIDDEN)
+
 
 @api_view(['POST'])
 def editComment(request):
     data = request.data
     userPK = data['userID']
+    postPK = data['postID']
     commentPK  = data['commentID']
     textContent = data['textContent']
-
-    if request.user.is_authenticated:
+    try: 
+        user = MemberUser.objects.get(user_id = userPK)   
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        post = Post.objects.get(postID = postPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such post.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
         comment = Comment.objects.get(commentID = commentPK)
-        if userHasPermission(request, userPK):
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such comment.'}, status = status.HTTP_404_NOT_FOUND)
+    if request.user.is_authenticated:
+        userComment = Comment.objects.filter(commentID = commentPK, userID = user, postID = post)
+        if userComment.exists() and userHasPermission(request, userPK):
             comment.textContent = textContent
             comment.save()
             serializer = CommentSerializer(comment)
@@ -290,13 +425,30 @@ def editComment(request):
 @api_view(['POST'])
 def editReply(request):
     data = request.data
-    userPK = request['userID']
+    userPK = data['userID']
+    postPK = data['postID']
+    commentPK  = data['commentID']
     replyPK  = data['replyID']
     textContent = data['textContent']
-
-    if request.user.is_authenticated:
+    try:
+        user = MemberUser.objects.get(user_id = userPK)  
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        post = Post.objects.get(postID = postPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such post.'}, status = status.HTTP_404_NOT_FOUND)    
+    try:
+        comment = Comment.objects.get(commentID = commentPK) 
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such comment.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
         reply = Reply.objects.get(replyID = replyPK)
-        if userHasPermission(request, userPK):
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such reply.'}, status = status.HTTP_404_NOT_FOUND)
+    if request.user.is_authenticated:
+        userReply = Reply.objects.filter(replyID = replyPK, userID = user, postID = post, commentID = comment)
+        if userReply.exists() and userHasPermission(request, userPK):
             reply.textContent = textContent
             reply.save()
             serializer = ReplySerializer(reply)
@@ -307,30 +459,95 @@ def editReply(request):
         return Response({'res' : 'User is not authenticated.'}, status = status.HTTP_403_FORBIDDEN)
 
 
-# VOTE FUNCTIONALITIES
-def getVoteInstance(request):
-    data = request.data
-    votePK = data['voteID']
-    voteInstance = Vote.objects.get(voteID = votePK)
-    return voteInstance
-
-def getVoteType(request):
-    data = request.data
-    voteType = data['type']
-    return voteType
-
-def getUserPK(request):
+@api_view(['POST'])
+def editEvent(request):
     data = request.data
     userPK = data['userID']
-    return userPK
+    eventPK = data['eventID']
+    title = data['title']
+    date = data['date']
+    startTime = data['startTime']
+    endTime = data['endTime']    
+    try:
+        user = MemberUser.objects.get(user_id = userPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        event = Event.objects.get(eventID = eventPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such event.'}, status = status.HTTP_404_NOT_FOUND)
+    if request.user.is_authenticated:
+        userEvent = Event.objects.filter(eventID = eventPK, userID = user)
+        if userEvent.exists() and request.user.id == userPK:
+            event.title = title
+            event.date = date
+            event.startTime = datetime.strptime(startTime, '%H:%M:%S').time()
+            event.endTime = datetime.strptime(endTime, '%H:%M:%S').time()
+            try:
+                event.full_clean()  
+                event.save()
+                serializer = EventSerializer(event)
+                return Response(serializer.data)
+            except ValidationError as err:
+                return Response(err, status = status.HTTP_403_FORBIDDEN)
+        else:
+            return Response({'res': 'User does not have permission to edit this event.'}, status = status.HTTP_403_FORBIDDEN)
+    else:
+        return Response({'res' : 'User is not authenticated.'}, status = status.HTTP_403_FORBIDDEN)
 
 @api_view(['POST'])
-def upvotePost(request):
+def editTask(request):
+    data = request.data
+    userPK = data['userID']
+    taskPK = data['taskID']
+    title = data['title']
+    isCompleted = data['isCompleted']
+    try:
+        user = MemberUser.objects.get(user_id = userPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        task = Task.objects.get(taskID = taskPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such task.'}, status = status.HTTP_404_NOT_FOUND)
     if request.user.is_authenticated:
-        voteType = getVoteType(request)
-        vote = getVoteInstance(request)
-        userPK = getUserPK(request)
-        if userHasPermission(request, userPK):
+        userTask = Task.objects.filter(taskID = taskPK, userID = user)
+        if userTask.exists() and request.user.id == userPK:
+            task.title = title
+            task.isCompleted = isCompleted
+            task.save()
+            serializer = TaskSerializer(task)
+            return Response(serializer.data)
+        else:
+            return Response({'res': 'User does not have permission to edit this task.'}, status = status.HTTP_403_FORBIDDEN)
+
+    else:
+        return Response({'res' : 'User is not authenticated.'}, status = status.HTTP_403_FORBIDDEN)
+
+
+# VOTE FOR INDIVIDUAL POST
+@api_view(['POST'])
+def upvotePost(request):
+    data = request.data
+    userPK = data['userID']
+    postPK = data['postID']
+    votePK = data['voteID']
+    voteType = data['type']
+    try:
+        user = MemberUser.objects.get(user_id = userPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        post = Post.objects.get(postID = postPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such post.'}, status = status.HTTP_404_NOT_FOUND)
+    try: 
+        vote = Vote.objects.get(voteID = votePK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such vote.'}, status = status.HTTP_404_NOT_FOUND)
+    if request.user.is_authenticated:
+        userVote = Vote.objects.filter(voteID = votePK, userID = user, postID = post)
+        if userVote.exists() and request.user.id == userPK:
             if voteType == 'Upvote': 
                 if vote.type == 'Upvote':
                     return Response({'res' : 'User cannot upvote this post. User has already upvoted this post.'}, status = status.HTTP_403_FORBIDDEN)
@@ -344,17 +561,33 @@ def upvotePost(request):
             else:
                 return Response({'res' : 'Invalid data.'}, status = status.HTTP_404_NOT_FOUND)
         else:
-            return Response({'res': 'User does not have permission to edit this reply.'}, status = status.HTTP_403_FORBIDDEN)
+            return Response({'res': 'User does not have permission to upvote this post.'}, status = status.HTTP_403_FORBIDDEN)
     else:
         return Response({'res' : 'User is not authenticated.'}, status = status.HTTP_403_FORBIDDEN)
 
+
 @api_view(['POST'])
 def downvotePost(request):
+    data = request.data
+    userPK = data['userID']
+    postPK = data['postID']
+    votePK = data['voteID']
+    voteType = data['type']
+    try:
+        user = MemberUser.objects.get(user_id = userPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        post = Post.objects.get(postID = postPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such post.'}, status = status.HTTP_404_NOT_FOUND)
+    try: 
+        vote = Vote.objects.get(voteID = votePK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such vote.'}, status = status.HTTP_404_NOT_FOUND)
     if request.user.is_authenticated:
-        voteType = getVoteType(request)
-        vote = getVoteInstance(request)
-        userPK = getUserPK(request)
-        if userHasPermission(request, userPK):
+        userVote = Vote.objects.filter(voteID = votePK, userID = user, postID = post)
+        if userVote.exists() and request.user.id == userPK:
             if voteType == 'Downvote':
                 if vote.type == 'Downvote':
                     return Response({'res' : 'User cannot downvote this post. User has already downvoted this post.'}, status = status.HTTP_403_FORBIDDEN)
@@ -368,17 +601,33 @@ def downvotePost(request):
             else:
                 return Response({'res' : 'Invalid data.'}, status = status.HTTP_404_NOT_FOUND)
         else:
-            return Response({'res': 'User does not have permission to edit this reply.'}, status = status.HTTP_403_FORBIDDEN)
+            return Response({'res': 'User does not have permission to downvote this post.'}, status = status.HTTP_403_FORBIDDEN)
     else:
         return Response({'res' : 'User is not authenticated.'}, status = status.HTTP_403_FORBIDDEN)
 
+
 @api_view(['POST'])
 def unvotePost(request):
+    data = request.data
+    userPK = data['userID']
+    postPK = data['postID']
+    votePK = data['voteID']
+    voteType = data['type']
+    try:
+        user = MemberUser.objects.get(user_id = userPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        post = Post.objects.get(postID = postPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such post.'}, status = status.HTTP_404_NOT_FOUND)
+    try: 
+        vote = Vote.objects.get(voteID = votePK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such vote.'}, status = status.HTTP_404_NOT_FOUND)
     if request.user.is_authenticated:
-        voteType = getVoteType(request)
-        vote = getVoteInstance(request)
-        userPK = getUserPK(request)
-        if userHasPermission(request, userPK):
+        userVote = Vote.objects.filter(voteID = votePK, userID = user, postID = post)
+        if userVote.exists() and request.user.id == userPK:
             if voteType == 'None':
                 if vote.type == 'None':
                     return Response({'res' : 'User cannot unvote this post. User did not vote for this post.'}, status = status.HTTP_403_FORBIDDEN)
@@ -390,9 +639,10 @@ def unvotePost(request):
             else:
                 return Response({'res' : 'Invalid data.'}, status = status.HTTP_404_NOT_FOUND)
         else:
-                return Response({'res': 'User does not have permission to edit this reply.'}, status = status.HTTP_403_FORBIDDEN)
+                return Response({'res': 'User does not have permission to unvote this post.'}, status = status.HTTP_403_FORBIDDEN)
     else:
         return Response({'res' : 'User is not authenticated.'}, status = status.HTTP_403_FORBIDDEN)
+
     
 
 # FILTER FUNCTIONS

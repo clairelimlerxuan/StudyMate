@@ -90,6 +90,7 @@ class MemberUser(models.Model):
 
     def clean(self):
         errorDict = {}
+        userNUSEmail = self.userNUSEmail
         facultyName = self.facultyID
         facultyFK = self.majorID.facultyID
         if facultyName != facultyFK:    # check FK of major against faculty
@@ -334,7 +335,9 @@ class Event(models.Model):
             overlap = True
         return overlap
 
-    def clean(self):
+    # "Note, however, that like Model.full_clean(), a model’s clean() method is not invoked when you call your model’s save() method."
+    # fixed bug at view.py - editEvent method
+    def full_clean(self):
         errorDict = {}
         events = Event.objects.filter(userID = self.userID, date = self.date).exclude(eventID = self.eventID)
         if events.exists():
