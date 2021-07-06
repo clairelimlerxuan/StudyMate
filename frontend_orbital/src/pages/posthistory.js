@@ -20,6 +20,13 @@ import {
     Typography,
 } from "@material-ui/core";
 
+const override = css`
+  display: block;
+  margin: 0 auto;
+  border-color: red;
+  align-text: center;
+`;
+
 const useStyles = makeStyles({
     container: {
         display: "grid",
@@ -45,14 +52,14 @@ const useStyles = makeStyles({
 export default function Profile(props) {
     const classes = useStyles();
     const [data, setData] = useState({});
-    const [posts, setPosts] = useState([]);
     const [comments, setComments] = useState([]);
-    const [replies, setReply] = useState([]);
+    const [posts, setPosts] = useState([]);
+    const [replies, setReplies] = useState([]);
     const [loading, setLoading] = useState(true);
     const alert = useAlert();
     const [active, setActive] = useState("Posted");
     console.log("IS STAFF " + props.isStaff);
-    console.log(posts);
+    
 
     if (data != null) {
         console.log(data.length == 0);
@@ -73,6 +80,7 @@ export default function Profile(props) {
                 .then((res) => {
                     console.log(res.data);
                     setData(res.data);
+                    setPosts(res.data);
                     setLoading(false);
                 })
                 .catch((err) => {
@@ -81,6 +89,8 @@ export default function Profile(props) {
                 });
         }
     }, []);
+
+
 
     const handleChangeData = (newType) => {
         setActive(newType);
@@ -122,6 +132,7 @@ export default function Profile(props) {
                 .then((res) => {
                     console.log(res.data);
                     setData(res.data);
+                    setComments(res.data);
                     setLoading(false);
                 })
                 .catch((err) => {
@@ -141,6 +152,7 @@ export default function Profile(props) {
             .then((res) => {
                 console.log(res.data);
                 setData(res.data);
+                setReplies(res.data);
                 setLoading(false);
             })
             .catch((err) => {
@@ -217,9 +229,8 @@ export default function Profile(props) {
                                     <FadeLoader
                                         loading={loading}
                                         color="#2176ff"
-                                        css={css}
+                                        css={override}
                                         size={150}
-                                        
                                     />
                                 </div>
                             ) : data.length != 0 ? (
@@ -238,11 +249,11 @@ export default function Profile(props) {
                                 ) : (
                                     active == "Comment" ? (
                                         <CardContent className={classes.comments}>
-                                        {data.map((comment) => {
+                                        {comments.map((comment) => {
                                                 return (
                                                     <CommentList
                                                         comment={comment}
-                                                        key={comment.commentid}
+                                                        key={comment.commentID}
                                                     />
                                                 );
                                         }
@@ -250,7 +261,7 @@ export default function Profile(props) {
                                     </CardContent> 
                                     ) : (
                                         <CardContent className={classes.replies}>
-                                        {data.map((reply) => {
+                                        {replies.map((reply) => {
                                                 return (
                                                     <ReplyList
                                                         reply={reply}

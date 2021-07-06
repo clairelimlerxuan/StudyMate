@@ -10,9 +10,10 @@ import Profile from "./pages/profile";
 import { useAlert } from "react-alert";
 import Navbar from "./components/navbar";
 import Forum from './pages/forum';
-import PrivateRoute from './components/privateroute';
-import PublicRoute from './components/publicroute';
-import PostHistory from './pages/posthistory'
+import PostHistory from './pages/posthistory';
+import PostPage from './pages/postpage';
+import Account from './pages/account';
+import Timetable from './pages/timetable';
 function App(props) {
     const [isLoggedIn, setIsLoggedIn] = useState(
         localStorage.getItem("token") ? true : false
@@ -134,7 +135,7 @@ function App(props) {
                                 <Route
                     path="/profile"
                     render={(props) => (
-                        <Profile
+                        <Account
                             {...props}
                             username={username}
                             id={id}
@@ -157,6 +158,32 @@ function App(props) {
                     path="/post"
                     render={(props) => (
                         <PostHistory
+                            {...props}
+                            username={username}
+                            id={id}
+                            isStaff={isStaff}
+                        />
+                    )}
+                />
+
+                <Route
+                    path="/forum"
+                    render={(props) => (
+                        <Forum
+                        {...props} setActive={setActive}
+                        />
+                    )}
+                />
+                <Route
+                    exact
+                    path="/post-page/:postID"
+                    render={(props) => <PostPage {...props} id={id} />}
+                />
+
+                <Route
+                    path='/schedules'
+                    render={(props) => (
+                        <Timetable
                             {...props}
                             username={username}
                             id={id}

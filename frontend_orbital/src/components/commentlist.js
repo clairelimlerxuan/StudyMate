@@ -67,7 +67,13 @@ export default function BorrowedBookList({ comment }) {
 
     useEffect(() => {
         axios
-            .get(`http://localhost:8000/server/viewcomment/${data.commentID}/`)
+            .get(`http://localhost:8000/server/viewcomment/${data.commentID}/`,
+            {
+                headers: {
+                    Authorization: "JWT " + localStorage.getItem("token"),
+                },
+            }
+            )
             .then((res) => {
                 setCommentdata(res.data);
             })
@@ -78,7 +84,12 @@ export default function BorrowedBookList({ comment }) {
 
     useEffect(() => {
         axios
-            .get(`http://localhost:8000/server/commentparent/${data.commentID}/`)
+            .get(`http://localhost:8000/server/commentparent/${data.commentID}/`,
+            {
+                headers: {
+                    Authorization: "JWT " + localStorage.getItem("token"),
+                },
+            })
             .then((res) => {
                 setPostdata(res.data);
             })
@@ -95,9 +106,6 @@ export default function BorrowedBookList({ comment }) {
         setOpen(false);
     };
 
-    const handleView = () => {
-
-    }
 
    
     return (

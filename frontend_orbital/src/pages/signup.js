@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useMemo } from "react";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -48,9 +49,12 @@ const useStyles = makeStyles((theme) => ({
 export default function SignUp(props) {
     const classes = useStyles();
     const [username, setUsername] = useState("");
-    const [email, setEmail] = useState("");
+    const [email, setEmail] = useState("e1234567@u.nus.edu");
     const [password, setPassword] = useState("");
-
+    const isValidPassword = React.useMemo(() =>
+    /e\S+@u.nus.edu/.test(email),
+    [email]
+    )
     const handleUsername = (e) => {
         setUsername(e.target.value);
     };
@@ -99,14 +103,18 @@ export default function SignUp(props) {
                         </Grid>
                         <Grid item xs={12}>
                             <TextField
+                                error = {isValidPassword ? false : true}
                                 variant="outlined"
+                                validationState={isValidPassword ? 'valid' : 'invalid'}
                                 required
                                 fullWidth
                                 id="email"
                                 label="Email Address"
                                 name="email"
+                                placeholder="e1234567@u.nus.edu"
                                 autoComplete="email"
                                 value={email}
+                                helperText={isValidPassword ? "" : "Please sign up with your NUS student email"}
                                 onChange={handleEmail}
                             />
                         </Grid>

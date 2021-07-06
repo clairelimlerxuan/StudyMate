@@ -16,7 +16,7 @@ const useStyles = makeStyles({
         marginTop: "5vh",
         padding: "1rem",
         paddingTop: 0,
-        height: "130vh",
+        height: "30vh",
         width: "20vw",
         display: "grid",
         rowGap: 0,
@@ -30,43 +30,9 @@ const useStyles = makeStyles({
     },
 });
 
-const categories = [
-    "Open Source",
-    "Mobile",
-    "Java",
-    "Software Engineering",
-    "Internet",
-    "Web Development",
-    "Miscellaneous",
-    "Microsoft .NET",
-    "Microsoft",
-    "Next Generation Databases",
-    "PowerBuilder",
-    "Client-Server",
-    "Computer Graphics",
-    "Object-Oriented Programming",
-    "Networking",
-    "Theory",
-    "Programming",
-    "Python",
-    "Mobile Technology",
-    "Business",
-    "XML",
-    "Perl",
-    "java",
-    "Microsoft/.NET",
-    "Miscellaneous",
-    "Object-Technology Programming",
-    "internet",
-    ".NET",
-    "Algorithmic Art",
-    "PHP",
-    "SOA",
-    "Computer Graph",
-    "Client Server",
-    "In Action",
-    "Software Development",
-];
+const categories =    
+    {1 : "Academic",
+    2 : "Non-Academic"};
 
 export default function Category(props) {
     const classes = useStyles();
@@ -75,18 +41,18 @@ export default function Category(props) {
         <div className={classes.container}>
             <CategoryProvider>
                 <CategoryTitle>Categories</CategoryTitle>
-                {categories.map((category) => {
+                {Object.entries(categories).map(([key, value]) => {
                     return (
                         <CategoryItem
                             className={
-                                props.category == category
+                                props.key == key
                                     ? classes.active
                                     : null
                             }
-                            onClick={() => props.setCategory(category)}
+                            onClick={() => props.setCategory(key)}
                             style={{ cursor: "pointer" }}
                         >
-                            {category}
+                            {value}
                         </CategoryItem>
                     );
                 })}

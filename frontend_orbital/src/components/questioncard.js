@@ -6,16 +6,22 @@ import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
+import ChatBubbleIcon from '@material-ui/icons/ChatBubble';
+import ThumbUpIcon from '@material-ui/icons/ThumbUp';
+import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import { CardMedia } from "@material-ui/core";
+import { Link } from "react-router-dom";
+import { Autocomplete } from "@material-ui/lab";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
     root: {
-        width: 275,
-        minHeight: 400,
+        width: 600,
         color: "black",
         margin: "20px",
+        marginBottom: 10,
         backgroundColor: "#fafafa",
         display: "grid",
+        paddingTop: "10px",
     },
     cover: {
         width: "100%",
@@ -25,70 +31,68 @@ const useStyles = makeStyles({
         width: "100%",
     },
     info: {
-        padding: 0,
         backgroundColor: "#fafafa",
     },
-});
+    iconbar: {
+        width: "100%", /* Full-width */
+        overflow: "auto",
+    },
+    icons: {
+        float: "left",
+        width: "20%",
+        textAlign: "center",
 
-export default function BookCard(props) {
+    },
+    comment: {
+        justifySelf: "start",
+    }
+}));
+
+export default function QuestionCard(props) {
     const classes = useStyles();
-    const [postData, setPostData] = useState({});
+
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        axios
-            .get(`http://localhost:8000/server/postdata/${props.id}/`)
-            .then((res) => {
-                setBookData(res.data);
-                setLoading(false);
-            });
-    }, []);
+
 
 
 
     return (
-        <Card className={classes.root} elevation="0">
+        <Card className={classes.root}>
             <CardContent className={classes.info}>
-                {loanData.availabilitystatus ? (
-                    <Typography
-                        variant="h6"
-                        align="left"
-                        style={{ color: "green" }}
-                    >
-                        Available
-                    </Typography>
-                ) : (
-                    <Typography
-                        variant="h6"
-                        align="left"
-                        style={{ color: "red" }}
-                    >
-                        Unavailable
-                    </Typography>
-                )}
-
                 <Typography variant="h6" align="left" color="textSecondary">
-                    {loanData.availabilitystatus
-                        ? null
-                        : "Due Date: " + loanData.expectedduedate}
+                    {"Posted on: " + props.creationDate}
+                </Typography>
+                <Typography
+                    variant="subtitle1"
+                    align="left"
+                    color="textSecondary"
+                >
+                    {"Posted by : "  + props.userID}
                 </Typography>
                 <Typography variant="h6" align="left">
                     {props.title}
                 </Typography>
-                <Typography
-                    variant="subtitle1"
-                    align="left"
-                    color="textSecondary"
-                >
-                    {props.author.replace(/[\[\]']+/g, "")}
+                <Typography variant="subtitle1" align="left">
+                    {props.textContent}
                 </Typography>
-                <Typography
-                    variant="subtitle1"
-                    align="left"
-                    color="textSecondary"
-                >
-                    {props.id}
+                <div className={classes.iconbar}>
+                <Typography variant="subtitle1" align="left" className={classes.icons}>
+                    {props.upvote}
+                    <ThumbUpIcon color="secondary" className={classes.icons}/>
                 </Typography>
+                <Typography variant="subtitle1" align="left" className={classes.icons}>
+                    {props.downvote}
+                <ThumbDownIcon color="secondary" className={classes.icons}/>
+                </Typography>
+                <Typography variant="subtitle1" align="left" className={classes.icons}>
+                    <Link to="/post-page" className={classes.comment}>
+                        <ChatBubbleIcon color="secondary" className={classes.icons}>
+                        </ChatBubbleIcon>
+                    </Link>
+                    {props.numOfComment}
+                </Typography>
+                </div>
             </CardContent>
         </Card>
     );

@@ -160,16 +160,20 @@ class Post(models.Model):
         on_delete=models.RESTRICT,
         db_column = 'tagID'
     )
-    moduleID = models.OneToOneField(
+    moduleID = models.ForeignKey(
         Module,
         on_delete=models.RESTRICT,
         null=True,
-        db_column='moduleID'
+        db_column='moduleID',
+        blank=True
     )
     title = models.CharField(max_length=50)
     textContent = models.TextField()
     # imageContent = 
     creationDate = models.DateTimeField(auto_now_add=True)
+    upvote = models.IntegerField(default=0)
+    downvote = models.IntegerField(default=0)
+    numOfComments = models.IntegerField(default=0)
 
     def __str__(self):
         return 'Post Title (' + self.title + ')'
@@ -193,10 +197,10 @@ class Comment(models.Model):
         on_delete=models.CASCADE,   # if post is removed, comment is removed too 
         db_column = 'postID'
     )
-    textContent = models.TextField()
+    textContent = models.TextField()  
     # imageContent = models.ImageField()
     creationDate = models.DateTimeField(auto_now_add=True)
-
+    replyCount =models.IntegerField(default=0)
     def __str__(self):
         return 'Comment ID (' + str(self.commentID) + ')'
 

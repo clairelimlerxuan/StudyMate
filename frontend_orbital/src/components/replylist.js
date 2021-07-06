@@ -62,6 +62,7 @@ export default function ReplyList({ reply }) {
     const [open, setOpen] = useState(false);
     const [data, setData] = useState(reply);
     const [replydata, setReplydata] = useState({});
+    const [commentdata, setCommentdata] = useState({});
     const alert = useAlert();
 
     useEffect(() => {
@@ -69,6 +70,22 @@ export default function ReplyList({ reply }) {
             .get(`http://localhost:8000/server/viewreply/${data.replyID}/`)
             .then((res) => {
                 setReplydata(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }, []);
+
+    useEffect(() => {
+        axios
+            .get(`http://localhost:8000/server/replyparent/${data.replyID}/`,
+            {
+                headers: {
+                    Authorization: "JWT " + localStorage.getItem("token"),
+                },
+            })
+            .then((res) => {
+                setCommentdata(res.data);
             })
             .catch((err) => {
                 console.log(err);
@@ -88,6 +105,13 @@ export default function ReplyList({ reply }) {
     return (
         <Card className={classes.root} elevation="0">
             <div className={classes.info}>
+                <Typography
+                        variant="h5"
+                        onClick={handleOpen}
+                        className={classes.title}
+                    >
+                        {commentdata.title}
+                </Typography>
                 <Typography
                     variant="h5"
                     onClick={handleOpen}
