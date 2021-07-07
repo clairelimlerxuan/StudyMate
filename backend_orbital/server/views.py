@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets
@@ -7,7 +8,6 @@ from rest_framework.serializers import Serializer
 
 from .serializers import *
 from .models import *
-from .forms import *
 
 from django.views.generic import CreateView
 from django.contrib.auth.models import User
@@ -107,6 +107,15 @@ class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all().order_by('taskID')
     serializer_class = TaskSerializer
 
+
+
+# check if user can modify one's post/commment/reply
+def userHasPermission(request, userPK):
+    return request.user.id == userPK or request.user.is_staff
+
+
+
+# Read all instances of the item stored in the database.
 @api_view(['GET'])
 @permission_classes((AllowAny, ))
 def postList(request):
@@ -163,49 +172,36 @@ def facultyList(request):
     serializer = FacultySerializer(faculties, many = True)
     return Response(serializer.data)
 
-@api_view(['GET'])
-@permission_classes((AllowAny, ))
-def getPostData(request, pk):
-    post = Post.objects.get(postID = pk)
-    serializer = PostSerializer(post, many = False)
-    return Response(serializer.data)
-
-@api_view(['GET'])
-@permission_classes((AllowAny, ))
-def getCommentData(request, pk):
-    comment = Comment.objects.get(commentid = pk)
-    serializer = CommentSerializer(comment, many = False)
-    return Response(serializer.data)
-
-@api_view(['GET'])
-@permission_classes((AllowAny, ))
-def getCommentData(request, pk):
-    reply = Reply.objects.get(replyid = pk)
-    serializer = ReplySerializer(reply, many = False)
-    return Response(serializer.data)
 
 
-
-# READ FUNCTIONALITIES
+# Read the instance of the item.
 @api_view(['GET'])
 @permission_classes((AllowAny, ))
 def viewPost(request, postPK):
-    post = Post.objects.get(postID = postPK)
+    try:
+        post = Post.objects.get(postID = postPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such post.'}, status = status.HTTP_404_NOT_FOUND)
     serializer = PostSerializer(post, many = False)
     return Response(serializer.data)
 
 @api_view(['GET'])
-@permission_classes((IsAuthenticated,))
+@permission_classes((AllowAny, ))
 def viewComment(request, commentPK):
-    comment = Comment.objects.get(commentID = commentPK)
+    try:
+        comment = Comment.objects.get(commentID = commentPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such comment.'}, status = status.HTTP_404_NOT_FOUND)
     serializer = CommentSerializer(comment, many = False)
     return Response(serializer.data)
-
-
 
 @api_view(['GET'])
 @permission_classes((AllowAny, ))
 def viewReply(request, replyPK):
+    try:
+        reply = Reply.objects.get(replyID = replyPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such reply.'}, status = status.HTTP_404_NOT_FOUND)
     reply = Reply.objects.get(replyID = replyPK)
     serializer = ReplySerializer(reply, many = False)
     return Response(serializer.data)
@@ -239,16 +235,9 @@ def viewTask(request, taskPK):
     serializer = EventSerializer(task, many = False)
     return Response(serializer.data)
 
-#get tag by categoryID
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def getTag(request, categoryid):
-    tags = Tag.objects.filter(categoryID = categoryid)
-    serializer = TagSerializer(tags, many = True)
-    return Response(serializer.data)
 
 
-#get user's post
+# Read all instances of the item that are made by the user.
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUsersPost(request, userid):
@@ -256,7 +245,6 @@ def getUsersPost(request, userid):
     serializer = PostSerializer(posts, many = True)
     return Response(serializer.data)
 
-#get user's comment
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUsersComment(request, userid):
@@ -264,7 +252,6 @@ def getUsersComment(request, userid):
     serializer = CommentSerializer(comments, many = True)
     return Response(serializer.data)
 
-#get user's reply
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUsersReply(request, userid):
@@ -272,12 +259,36 @@ def getUsersReply(request, userid):
     serializer =ReplySerializer(replies, many = True)
     return Response(serializer.data)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getUsersEvent(request, userid):
+    events = Event.objects.filter(userID = userid)
+    if request.user.id != userid:
+        return Response({'res' : 'User does not have permission to view this event.'}, status = status.HTTP_403_FORBIDDEN)
+    serializer = EventSerializer(events, many = True)
+    return Response(serializer.data)
 
-# check if user can modify one's post/commment/reply
-def userHasPermission(request, userPK):
-    return request.user.id == userPK or request.user.is_staff
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getUsersTask(request, userid):
+    tasks = Task.objects.filter(userID = userid)
+    if request.user.id != userid:
+        return Response({'res' : 'User does not have permission to view this task.'}, status = status.HTTP_403_FORBIDDEN)
+    serializer = TaskSerializer(tasks, many = True)
+    return Response(serializer.data)
 
-#get comment's post
+
+
+# More Read functions
+# get the post
+@api_view(['GET'])
+@permission_classes((AllowAny, ))
+def getPostData(request, pk):
+    post = Post.objects.get(postID = pk)
+    serializer = PostSerializer(post, many = False)
+    return Response(serializer.data)
+
+# get the post of the comment
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getCommentParent(request, commentpk):
@@ -286,7 +297,7 @@ def getCommentParent(request, commentpk):
     serializer = PostSerializer(post, many = False)
     return Response(serializer.data)
 
-#get replies'parent
+# get the comment of the reply
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getReplyParent(request, replyID):
@@ -294,7 +305,8 @@ def getReplyParent(request, replyID):
     comment = Comment.objects.get(commentID =  reply.commentID.commentID)
     serializer = CommentSerializer(comment, many = False)
     return Response(serializer.data)
-    
+
+# get the user of the post
 @api_view(['GET'])
 @permission_classes((AllowAny,))
 def getUser(request, postID) :
@@ -303,6 +315,7 @@ def getUser(request, postID) :
     serializer = MemberUserSerializer(user, many = False)
     return Response(serializer.data)
 
+# get all comments of the post
 @api_view(['GET'])
 @permission_classes((AllowAny,))
 def getPostComment(request, postpk):
@@ -310,6 +323,7 @@ def getPostComment(request, postpk):
     serializer = CommentSerializer(comments, many = True)
     return Response(serializer.data)
 
+# get all replies of the comment
 @api_view(['GET'])
 @permission_classes((AllowAny,))
 def getCommentAnswer(request, commentpk):
@@ -317,6 +331,7 @@ def getCommentAnswer(request, commentpk):
     serializer = ReplySerializer(replies, many = True)
     return Response(serializer.data)
 
+# get the user
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUserbyPK(request, userID) :
@@ -324,9 +339,33 @@ def getUserbyPK(request, userID) :
     serializer = UserSerializer(user, many= False)
     return Response(serializer.data)
 
+# get all tags of the category
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getTag(request, categoryid):
+    tags = Tag.objects.filter(categoryID = categoryid)
+    serializer = TagSerializer(tags, many = True)
+    return Response(serializer.data)
+
+# get faculty of the user
+@api_view(['GET'])
+def getFaculty(request, userID) :
+    member = MemberUser.objects.get(user_id = userID)
+    faculty = member.facultyID
+    serializer = FacultySerializer(faculty, many=False)
+    return Response(serializer.data)
+
+# get major of the user
+@api_view(['GET'])
+def getMajor(request, userID) :
+    member = MemberUser.objects.get(user_id = userID)
+    major = member.majorID
+    serializer = MajorSerializer(major, many=False)
+    return Response(serializer.data)
 
 
-#CREATE FUNCTIOANLITIES
+
+# Create an instance of the item.
 @api_view(['POST'])
 def createPost(request):
     data = request.data
@@ -352,7 +391,6 @@ def createPost(request):
         post.save()
         serializer = PostSerializer(post, many= False)
         return Response(serializer.data)
-
 
 @api_view(['POST'])
 def createComment(request):
@@ -388,36 +426,59 @@ def createReply(request):
     serializer = ReplySerializer(reply, many= False)
     return Response(serializer.data)
 
-# DELETE FUNCTIONALITIES
+
+
+# Delete the instance of the item.
 @api_view(['DELETE'])
-def deletePost(request, postID, userID):
-    user = MemberUser.objects.get(user_id = userID)     
-    post = Post.objects.filter(postID = postID, userID = user)
-    if userHasPermission(request, userID): 
+def deletePost(request, postPK, userPK):
+    try:
+        user = MemberUser.objects.get(user_id = userPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        post = Post.objects.get(postID = postPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such post.'}, status = status.HTTP_404_NOT_FOUND)
+    userPost = Post.objects.filter(postID = postPK, userID = user)
+    if userPost.exists() and userHasPermission(request, userPK): 
         post.delete()
         return Response({'res' : 'Post deleted successfully.'}, status = status.HTTP_200_OK)
     else: 
-        return Response({'res' : 'User does not have permission to delete this post.'}, status = status.HTTP_404_NOT_FOUND)
+        return Response({'res' : 'User does not have permission to delete this post.'}, status = status.HTTP_403_FORBIDDEN)
 
 @api_view(['DELETE'])
 def deleteComment(request, commentPK, userPK,):
-    user = MemberUser.objects.get(user_id = userPK)       
-    comment = Comment.objects.filter(commentID = commentPK, userID = user)
-    if userHasPermission(request, userPK):
+    try:
+        user = MemberUser.objects.get(user_id = userPK)       
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        comment = Comment.objects.get(commentID = commentPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such comment.'}, status = status.HTTP_404_NOT_FOUND)
+    userComment = Comment.objects.filter(commentID = commentPK, userID = user)
+    if userComment.exists() and userHasPermission(request, userPK):
         comment.delete()
         return Response({'res' : 'Comment deleted successfully.'}, status = status.HTTP_200_OK)
     else:
-        return Response({'res' : 'User does not have permission to delete this comment.'}, status = status.HTTP_404_NOT_FOUND)
+        return Response({'res' : 'User does not have permission to delete this comment.'}, status = status.HTTP_403_FORBIDDEN)
 
 @api_view(['DELETE'])
-def deleteReply(request, replyPK, userID):
-    user = MemberUser.objects.get(user_id = userID)    
-    reply = Reply.objects.filter(replyID = replyPK, userID = user)
-    if userHasPermission(request, userID):    
+def deleteReply(request, replyPK, userPK):
+    try:
+        user = MemberUser.objects.get(user_id = userPK)    
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        reply = Reply.objects.get(replyID = replyPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such reply.'}, status = status.HTTP_404_NOT_FOUND)       
+    userReply = Reply.objects.filter(replyID = replyPK, userID = user)
+    if userReply.exists() and userHasPermission(request, userPK):    
         reply.delete()
         return Response({'res' : 'Reply deleted successfully.'}, status = status.HTTP_200_OK)
     else:
-        return Response({'res' : 'User does not have permission to delete this reply.'}, status = status.HTTP_404_NOT_FOUND)
+        return Response({'res' : 'User does not have permission to delete this reply.'}, status = status.HTTP_403_FORBIDDEN)
 
 @api_view(['DELETE'])
 def deleteEvent(request, eventPK, userPK):
@@ -453,7 +514,9 @@ def deleteTask(request, taskPK, userPK):
     else:
         return Response({'res' : 'User does not have permission to delete this task.'}, status = status.HTTP_403_FORBIDDEN)
 
-# UPDATE FUNCTIONALITIES
+
+
+# Update the instance of the item.
 @api_view(['POST'])
 def editProfile(request):
     data = request.data
@@ -468,7 +531,6 @@ def editProfile(request):
     serializer = MemberUserSerializer(user, many=False)
     return Response(serializer.data)
 
-
 @api_view(['POST'])
 def editPost(request):
     data = request.data
@@ -476,17 +538,24 @@ def editPost(request):
     postPK = data['postID']
     title = data['title']
     textContent = data['textContent']
-
-    if request.user.is_authenticated:
+    try:
+        user = MemberUser.objects.get(user_id = userPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
         post = Post.objects.get(postID = postPK)
-        if userHasPermission(request, userPK):
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such post.'}, status = status.HTTP_404_NOT_FOUND)
+    if request.user.is_authenticated:
+        userPost = Post.objects.filter(postID = postPK, userID = user)
+        if userPost.exists() and userHasPermission(request, userPK):
             post.title = title
             post.textContent = textContent
             post.save()
             serializer = PostSerializer(post)
             return Response(serializer.data)
         else:
-            return Response({'res': 'User does not have permission to edit this post.'}, status = status.HTTP_403_FORBIDDEN)
+            return Response({'res' : 'User does not have permission to edit this post.'}, status = status.HTTP_403_FORBIDDEN)
     else:
         return Response({'res' : 'User is not authenticated.'}, status = status.HTTP_403_FORBIDDEN)
 
@@ -494,12 +563,24 @@ def editPost(request):
 def editComment(request):
     data = request.data
     userPK = data['userID']
+    postPK = data['postID']
     commentPK  = data['commentID']
     textContent = data['textContent']
-
-    if request.user.is_authenticated:
+    try: 
+        user = MemberUser.objects.get(user_id = userPK)   
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        post = Post.objects.get(postID = postPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such post.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
         comment = Comment.objects.get(commentID = commentPK)
-        if userHasPermission(request, userPK):
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such comment.'}, status = status.HTTP_404_NOT_FOUND)
+    if request.user.is_authenticated:
+        userComment = Comment.objects.filter(commentID = commentPK, userID = user, postID = post)
+        if userComment.exists() and userHasPermission(request, userPK):
             comment.textContent = textContent
             comment.save()
             serializer = CommentSerializer(comment)
@@ -512,13 +593,30 @@ def editComment(request):
 @api_view(['POST'])
 def editReply(request):
     data = request.data
-    userPK = request['userID']
+    userPK = data['userID']
+    postPK = data['postID']
+    commentPK  = data['commentID']
     replyPK  = data['replyID']
     textContent = data['textContent']
-
-    if request.user.is_authenticated:
+    try:
+        user = MemberUser.objects.get(user_id = userPK)  
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        post = Post.objects.get(postID = postPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such post.'}, status = status.HTTP_404_NOT_FOUND)    
+    try:
+        comment = Comment.objects.get(commentID = commentPK) 
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such comment.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
         reply = Reply.objects.get(replyID = replyPK)
-        if userHasPermission(request, userPK):
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such reply.'}, status = status.HTTP_404_NOT_FOUND)
+    if request.user.is_authenticated:
+        userReply = Reply.objects.filter(replyID = replyPK, userID = user, postID = post, commentID = comment)
+        if userReply.exists() and userHasPermission(request, userPK):
             reply.textContent = textContent
             reply.save()
             serializer = ReplySerializer(reply)
@@ -527,30 +625,6 @@ def editReply(request):
             return Response({'res': 'User does not have permission to edit this reply.'}, status = status.HTTP_403_FORBIDDEN)
     else:
         return Response({'res' : 'User is not authenticated.'}, status = status.HTTP_403_FORBIDDEN)
-
-
-# VOTE FUNCTIONALITIES
-@api_view(['GET'])
-def getVote(request, votePK):
-    voteInstance = Vote.objects.get(voteID = votePK)
-    serializer = VoteSerializer(voteInstance, many=False)
-    return Response(serializer.data)
-
-def getVoteInstance(request):
-    data = request.data
-    votePK = data['voteID']
-    voteInstance = Vote.objects.get(voteID = votePK)
-    return voteInstance
-
-def getVoteType(request):
-    data = request.data
-    voteType = data['type']
-    return voteType
-
-def getUserPK(request):
-    data = request.data
-    userPK = data['userID']
-    return userPK
 
 @api_view(['POST'])
 def editEvent(request):
@@ -594,7 +668,8 @@ def editTask(request):
     userPK = data['userID']
     taskPK = data['taskID']
     title = data['title']
-    isCompleted = data['isCompleted']
+    completed = data['completed']
+    submitted = data['submitted']
     try:
         user = MemberUser.objects.get(user_id = userPK)
     except ObjectDoesNotExist:
@@ -607,33 +682,24 @@ def editTask(request):
         userTask = Task.objects.filter(taskID = taskPK, userID = user)
         if userTask.exists() and request.user.id == userPK:
             task.title = title
-            task.isCompleted = isCompleted
+            task.completed = completed
+            task.submitted = submitted
             task.save()
             serializer = TaskSerializer(task)
             return Response(serializer.data)
         else:
             return Response({'res': 'User does not have permission to edit this task.'}, status = status.HTTP_403_FORBIDDEN)
-
     else:
         return Response({'res' : 'User is not authenticated.'}, status = status.HTTP_403_FORBIDDEN)
 
+
+
+# Vote functions
 @api_view(['GET'])
-def getFaculty(request, userID) :
-    member = MemberUser.objects.get(user_id = userID)
-    faculty = member.facultyID
-    serializer = FacultySerializer(faculty, many=False)
+def getVote(request, votePK):
+    voteInstance = Vote.objects.get(voteID = votePK)
+    serializer = VoteSerializer(voteInstance, many=False)
     return Response(serializer.data)
-
-
-@api_view(['GET'])
-def getMajor(request, userID) :
-    member = MemberUser.objects.get(user_id = userID)
-    major = member.majorID
-    serializer = MajorSerializer(major, many=False)
-    return Response(serializer.data)
-
-
-
 
 @api_view(['POST'])
 def upvotePost(request):
@@ -641,8 +707,7 @@ def upvotePost(request):
         data = request.data
         post = Post.objects.get(postID = data["postID"])
         member = MemberUser.objects.get(user_id = data["userID"])
-        userPK = getUserPK(request)
-        if userHasPermission(request, userPK):
+        if userHasPermission(request, data['userID']):
             try:
                 vote = Vote.objects.get(postID = data["postID"], userID = data['userID'])
                 if vote.type == "Upvote" :
@@ -650,9 +715,7 @@ def upvotePost(request):
                     vote.delete()
                     post.save()
                     serializer = PostSerializer(post)
-
                     return Response(serializer.data)
-
             except:
                 vote = Vote(type="Upvote",postID= post, userID = member)
                 post.upvote += 1
@@ -671,8 +734,7 @@ def downvotePost(request):
         data = request.data
         post = Post.objects.get(postID = data["postID"])
         member = MemberUser.objects.get(user_id = data["userID"])
-        userPK = getUserPK(request)
-        if userHasPermission(request, userPK):
+        if userHasPermission(request, data['userID']):
             try:
                 vote = Vote.objects.get(postID = data["postID"], userID = data['userID'])
                 if vote.type == "Downvote" :
@@ -698,8 +760,7 @@ def downvotePost(request):
 def unvotePost(request):
     if request.user.is_authenticated:
         data = request.data
-        userPK = getUserPK(request)
-        if userHasPermission(request, userPK):
+        if userHasPermission(request, data['userID']):
             vote = Vote.objects.get(postID = data["postID"], userID = data['userID'])
             post = Post.objects.get(postID = data["postID"])
             if (vote.type == "Upvote"):
@@ -716,7 +777,8 @@ def unvotePost(request):
         return Response({'res' : 'User is not authenticated.'}, status = status.HTTP_403_FORBIDDEN)
     
 
-# FILTER FUNCTIONS
+
+# Filter functions
 class FilterPost(generics.ListAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
@@ -743,10 +805,9 @@ class FilterByFaculty(FilterUser):
 class FilterByMajor(FilterUser):
     search_fields = ['=majorID__majorID']  # filter via foreign key
 
-# SEARCH FUNCTION
-class SearchPost(FilterPost):
-    search_fields = ['$title']
 
+
+# Search functions
 from django.db.models import Q
 class PostSearch(generics.ListAPIView):
     serializer_class = PostSerializer
@@ -763,25 +824,4 @@ class PostSearch(generics.ListAPIView):
             else:
                 result = Post.objects.all()
                 queryset = result
-            return queryset
-
-# '^' Starts-with search.
-# '=' Exact matches.
-# '@' Full-text search. (Currently only supported Django's PostgreSQL backend.)
-# '$' Regex search.    
-
-
-class MemberUserCreateView(CreateView):
-    model = MemberUser
-    fields = "__all__"
-    #success_url = 
-
-# CreateAPIView - for create-only endpoints.
-# ListAPIView - for read-only endpoints to represent a collection of model instances.
-# RetrieveAPIView - for read-only endpoints to represent a single model instance.
-# DestroyAPIView - for delete-only endpoints for a single model instance.
-# UpdateAPIView - for update-only endpoints for a single model instance.
-# ListCreateAPIView - for read-write endpoints to represent a collection of model instances.
-# RetrieveUpdateAPIView - for read or update endpoints to represent a single model instance.
-# RetrieveDestroyAPIView - for read or delete endpoints to represent a single model instance.
-# RetrieveUpdateDestroyAPIView- for read-write-delete endpoints to represent a single model instance.
+            return queryset   
