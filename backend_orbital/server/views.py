@@ -1,5 +1,5 @@
 from django.shortcuts import render
-
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets
 
 from rest_framework import response
@@ -98,6 +98,14 @@ class ReplyViewSet(viewsets.ModelViewSet):
 class VoteViewSet(viewsets.ModelViewSet):
     queryset = Vote.objects.all().order_by('voteID')
     serializer_class = VoteSerializer
+
+class EventViewSet(viewsets.ModelViewSet):
+    queryset = Event.objects.all().order_by('eventID')
+    serializer_class = EventSerializer
+
+class TaskViewSet(viewsets.ModelViewSet):
+    queryset = Task.objects.all().order_by('taskID')
+    serializer_class = TaskSerializer
 
 @api_view(['GET'])
 @permission_classes((AllowAny, ))
@@ -208,6 +216,37 @@ def viewUser(request, userPK):
     user = MemberUser.objects.get(user_id = userPK)
     serializer = MemberUserSerializer(user, many = False)
     return Response(serializer.data)
+
+@api_view(['GET'])
+def viewEvent(request, eventPK):
+    try:
+        event = Event.objects.get(eventID = eventPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such event.'}, status = status.HTTP_404_NOT_FOUND)
+    if request.user.id != event.userID.user_id: 
+        return Response({'res' : 'User does not have permission to view this event.'}, status = status.HTTP_403_FORBIDDEN)
+    serializer = EventSerializer(event, many = False)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def viewTask(request, taskPK):
+    try:
+        task = Task.objects.get(taskID = taskPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such task.'}, status = status.HTTP_404_NOT_FOUND)
+    if request.user.id != task.userID.user_id: 
+        return Response({'res' : 'User does not have permission to view this task.'}, status = status.HTTP_403_FORBIDDEN)
+    serializer = EventSerializer(task, many = False)
+    return Response(serializer.data)
+
+#get tag by categoryID
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getTag(request, categoryid):
+    tags = Tag.objects.filter(categoryID = categoryid)
+    serializer = TagSerializer(tags, many = True)
+    return Response(serializer.data)
+
 
 #get user's post
 @api_view(['GET'])
@@ -380,6 +419,39 @@ def deleteReply(request, replyPK, userID):
     else:
         return Response({'res' : 'User does not have permission to delete this reply.'}, status = status.HTTP_404_NOT_FOUND)
 
+@api_view(['DELETE'])
+def deleteEvent(request, eventPK, userPK):
+    try:
+        user = MemberUser.objects.get(user_id = userPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        event = Event.objects.get(eventID = eventPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such event.'}, status = status.HTTP_404_NOT_FOUND)
+    userEvent = Event.objects.filter(eventID = eventPK, userID = user)
+    if userEvent.exists() and request.user.id == userPK:
+        event.delete()
+        return Response({'res' : 'Event deleted successfully.'}, status = status.HTTP_200_OK)
+    else:
+        return Response({'res' : 'User does not have permission to delete this event.'}, status = status.HTTP_403_FORBIDDEN)
+
+@api_view(['DELETE'])
+def deleteTask(request, taskPK, userPK):
+    try:
+        user = MemberUser.objects.get(user_id = userPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        task = Task.objects.get(taskID = taskPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such task.'}, status = status.HTTP_404_NOT_FOUND)
+    userTask = Task.objects.filter(taskID = taskPK, userID = user)
+    if userTask.exists() and request.user.id == userPK:
+        task.delete()
+        return Response({'res' : 'Task deleted successfully.'}, status = status.HTTP_200_OK)
+    else:
+        return Response({'res' : 'User does not have permission to delete this task.'}, status = status.HTTP_403_FORBIDDEN)
 
 # UPDATE FUNCTIONALITIES
 @api_view(['POST'])
@@ -479,6 +551,71 @@ def getUserPK(request):
     data = request.data
     userPK = data['userID']
     return userPK
+
+@api_view(['POST'])
+def editEvent(request):
+    data = request.data
+    userPK = data['userID']
+    eventPK = data['eventID']
+    title = data['title']
+    date = data['date']
+    startTime = data['startTime']
+    endTime = data['endTime']    
+    try:
+        user = MemberUser.objects.get(user_id = userPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        event = Event.objects.get(eventID = eventPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such event.'}, status = status.HTTP_404_NOT_FOUND)
+    if request.user.is_authenticated:
+        userEvent = Event.objects.filter(eventID = eventPK, userID = user)
+        if userEvent.exists() and request.user.id == userPK:
+            event.title = title
+            event.date = date
+            event.startTime = datetime.strptime(startTime, '%H:%M:%S').time()
+            event.endTime = datetime.strptime(endTime, '%H:%M:%S').time()
+            try:
+                event.full_clean()  
+                event.save()
+                serializer = EventSerializer(event)
+                return Response(serializer.data)
+            except ValidationError as err:
+                return Response(err, status = status.HTTP_403_FORBIDDEN)
+        else:
+            return Response({'res': 'User does not have permission to edit this event.'}, status = status.HTTP_403_FORBIDDEN)
+    else:
+        return Response({'res' : 'User is not authenticated.'}, status = status.HTTP_403_FORBIDDEN)
+
+@api_view(['POST'])
+def editTask(request):
+    data = request.data
+    userPK = data['userID']
+    taskPK = data['taskID']
+    title = data['title']
+    isCompleted = data['isCompleted']
+    try:
+        user = MemberUser.objects.get(user_id = userPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        task = Task.objects.get(taskID = taskPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such task.'}, status = status.HTTP_404_NOT_FOUND)
+    if request.user.is_authenticated:
+        userTask = Task.objects.filter(taskID = taskPK, userID = user)
+        if userTask.exists() and request.user.id == userPK:
+            task.title = title
+            task.isCompleted = isCompleted
+            task.save()
+            serializer = TaskSerializer(task)
+            return Response(serializer.data)
+        else:
+            return Response({'res': 'User does not have permission to edit this task.'}, status = status.HTTP_403_FORBIDDEN)
+
+    else:
+        return Response({'res' : 'User is not authenticated.'}, status = status.HTTP_403_FORBIDDEN)
 
 @api_view(['GET'])
 def getFaculty(request, userID) :

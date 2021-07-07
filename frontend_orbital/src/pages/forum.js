@@ -34,6 +34,7 @@ const useStyles = makeStyles((theme) => ({
     container: {
         display: "flex",
         justifyContent:"center",
+        backgroundColor: "#B79C8B",
     },
     topimg: {
         marginTop: "100px",

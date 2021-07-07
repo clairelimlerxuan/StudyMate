@@ -25,12 +25,7 @@ urlpatterns = [
     path('users/', UserList.as_view()),
     path('postuser/<int:postID>/', getUser),
 
-<<<<<<< HEAD
-
     path('postdata/<int:pk>/', getPostData),
-=======
-    path('postdata/<int:postpk>/', getPostData),
->>>>>>> 7adba78a57015bc9676992ae16cab4320d6f49be
 
     path('postlist/', postList),
     path('commentlist/', commentList),
@@ -44,17 +39,13 @@ urlpatterns = [
     path('userpostlist/<int:userid>/',  getUsersPost),
     path('usercommentlist/<int:userid>/', getUsersComment),
     path('userreplylist/<int:userid>/', getUsersReply),
-<<<<<<< HEAD
     path('postcomment/<int:postpk>/', getPostComment),
     path('commentanswer/<int:commentpk>/',getCommentAnswer),
+    path('tagbycategory/<int:categorypk>/', getTag),
     path('getuserbyID/<int:userID>/', getUserbyPK),
     path('getfaculty/<int:userID>/', getFaculty),
     path('getmajor/<int:userID>/', getMajor),
 
-=======
-    path('usereventlist/<int:userid>/', getUsersEvent),
-    path('usertasklist/<int:userid>/', getUsersTask),
->>>>>>> 7adba78a57015bc9676992ae16cab4320d6f49be
 
     path('commentparent/<int:commentpk>/', getCommentParent),
     
@@ -80,12 +71,9 @@ urlpatterns = [
     path('editpost/', editPost),
     path('editcomment/', editComment),
     path('editreply/', editReply),
-<<<<<<< HEAD
     path('editprofile/', editProfile),
-=======
     path('editevent/', editEvent),
     path('edittask/', editTask),
->>>>>>> 7adba78a57015bc9676992ae16cab4320d6f49be
 
     path('getVote/<int:votePK>/', getVote),
     path('upvotepost/', upvotePost),

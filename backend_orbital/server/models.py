@@ -175,13 +175,8 @@ class Post(models.Model):
         Module,
         on_delete=models.RESTRICT,
         null=True,
-<<<<<<< HEAD
         db_column='moduleID',
         blank=True
-=======
-        blank = True,
-        db_column='moduleID'
->>>>>>> 7adba78a57015bc9676992ae16cab4320d6f49be
     )
     title = models.CharField(max_length=50)
     textContent = models.TextField()
@@ -231,13 +226,10 @@ class Comment(models.Model):
         on_delete=models.CASCADE,   # if post is removed, comment is removed too 
         db_column = 'postID'
     )
-<<<<<<< HEAD
     textContent = models.TextField()  
     # imageContent = models.ImageField()
-=======
     textContent = models.TextField()
     #imageContent = models.ImageField()
->>>>>>> 7adba78a57015bc9676992ae16cab4320d6f49be
     creationDate = models.DateTimeField(auto_now_add=True)
     replyCount =models.IntegerField(default=0)
     def __str__(self):
@@ -318,7 +310,6 @@ class Vote(models.Model):
          verbose_name = 'Vote' 
          unique_together = ('userID', 'postID')
 
-    
 class Event(models.Model):
     eventID = models.AutoField(primary_key=True)
     userID = models.ForeignKey(
