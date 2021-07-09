@@ -90,7 +90,6 @@ class MemberUser(models.Model):
 
     def clean(self):
         errorDict = {}
-        userNUSEmail = self.userNUSEmail
         facultyName = self.facultyID
         facultyFK = self.majorID.facultyID
         if facultyName != facultyFK:    # check FK of major against faculty
@@ -135,8 +134,8 @@ class Tag(models.Model):
 
 
 class Module(models.Model):
-    moduleCode = models.CharField(max_length=7, primary_key=True)
-    title = models.CharField(max_length=50)
+    moduleCode = models.CharField(max_length=15, primary_key=True)
+    title = models.CharField(max_length=100)
     tagID = models.ForeignKey(
         Tag,
         on_delete=models.RESTRICT,
@@ -228,8 +227,6 @@ class Comment(models.Model):
     )
     textContent = models.TextField()  
     # imageContent = models.ImageField()
-    textContent = models.TextField()
-    #imageContent = models.ImageField()
     creationDate = models.DateTimeField(auto_now_add=True)
     replyCount =models.IntegerField(default=0)
     def __str__(self):
@@ -369,7 +366,8 @@ class Task(models.Model):
         db_column = 'userID'
     )
     title = models.CharField(max_length = 50)
-    isCompleted = models.BooleanField()
+    completed = models.BooleanField()
+    submitted =  models.BooleanField()
     creationDate = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -23,9 +23,6 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('current_user/', current_user),
     path('users/', UserList.as_view()),
-    path('postuser/<int:postID>/', getUser),
-
-    path('postdata/<int:pk>/', getPostData),
 
     path('postlist/', postList),
     path('commentlist/', commentList),
@@ -39,16 +36,18 @@ urlpatterns = [
     path('userpostlist/<int:userid>/',  getUsersPost),
     path('usercommentlist/<int:userid>/', getUsersComment),
     path('userreplylist/<int:userid>/', getUsersReply),
+    path('usereventlist/<int:userid>/', getUsersEvent),
+    path('usertasklist/<int:userid>/', getUsersTask),
+
+    path('postuser/<int:postID>/', getUser),
+    path('postdata/<int:pk>/', getPostData),
     path('postcomment/<int:postpk>/', getPostComment),
     path('commentanswer/<int:commentpk>/',getCommentAnswer),
     path('tagbycategory/<int:categoryid>/', getTag),
     path('getuserbyID/<int:userID>/', getUserbyPK),
     path('getfaculty/<int:userID>/', getFaculty),
     path('getmajor/<int:userID>/', getMajor),
-
-
     path('commentparent/<int:commentpk>/', getCommentParent),
-    
     path('replyparent/<int:replyID>/', getReplyParent),
 
     path('viewpost/<int:postPK>/', viewPost),
@@ -87,6 +86,4 @@ urlpatterns = [
     path('filterbymajor/', FilterByMajor.as_view()),
 
     path('search/', PostSearch.as_view()),
-
-    # path('addMemberUser/', views.MemberUserCreateView.as_view(), name='addMemberUser'),
 ]

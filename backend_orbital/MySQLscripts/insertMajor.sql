@@ -69,9 +69,3 @@ INSERT INTO Major VALUES ("NSG", "Nursing", "NSG");
 INSERT INTO Major VALUES ("PHAR", "Pharmacy", "PHAR");
 
 INSERT INTO Major VALUES ("MUS", "Music", "MUS");
-
-
-# error code: 1175
-SET SQL_SAFE_UPDATES = 0;
-DELETE FROM Major;
-SET SQL_SAFE_UPDATES = 1;
