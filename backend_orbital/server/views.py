@@ -241,9 +241,12 @@ def viewTask(request, taskPK):
 
 #get tag by categoryID
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def getTag(request, categoryid):
-    tags = Tag.objects.filter(categoryID = categoryid)
+    if categoryid == 1:
+        id = "ACAD"
+    elif categoryid == 2 :
+        id = "NON-ACAD"
+    tags = Tag.objects.filter(categoryID = id)
     serializer = TagSerializer(tags, many = True)
     return Response(serializer.data)
 

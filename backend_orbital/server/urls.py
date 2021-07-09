@@ -41,7 +41,7 @@ urlpatterns = [
     path('userreplylist/<int:userid>/', getUsersReply),
     path('postcomment/<int:postpk>/', getPostComment),
     path('commentanswer/<int:commentpk>/',getCommentAnswer),
-    path('tagbycategory/<int:categorypk>/', getTag),
+    path('tagbycategory/<int:categoryid>/', getTag),
     path('getuserbyID/<int:userID>/', getUserbyPK),
     path('getfaculty/<int:userID>/', getFaculty),
     path('getmajor/<int:userID>/', getMajor),
