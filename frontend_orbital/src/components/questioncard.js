@@ -60,7 +60,7 @@ export default function QuestionCard(props) {
     return (
         <Card className={classes.root}>
             <CardContent className={classes.info}>
-                <Typography variant="h6" align="left" color="textSecondary">
+                <Typography variant="body2" align="left" color="textSecondary">
                     {"Posted on: " + props.creationDate}
                 </Typography>
                 <Typography
@@ -72,6 +72,9 @@ export default function QuestionCard(props) {
                 </Typography>
                 <Typography variant="h6" align="left">
                     {props.title}
+                </Typography>
+                <Typography variant="caption" align="left">
+                    {props.categoryID}
                 </Typography>
                 <Typography variant="subtitle1" align="left">
                     {props.textContent}

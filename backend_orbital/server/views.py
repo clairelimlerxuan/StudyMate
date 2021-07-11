@@ -268,6 +268,16 @@ def viewTask(request, taskPK):
     serializer = EventSerializer(task, many = False)
     return Response(serializer.data)
 
+#get tag by categoryID
+@api_view(['GET'])
+def getTag(request, categoryid):
+    if categoryid == 1:
+        id = "ACAD"
+    elif categoryid == 2 :
+        id = "NON-ACAD"
+    tags = Tag.objects.filter(categoryID = id)
+    serializer = TagSerializer(tags, many = True)
+    return Response(serializer.data)
 
 
 # Read all instances of the item that are made by the user.
@@ -884,27 +894,6 @@ def downvotePost(request):
             return Response({'res': 'User does not have permission to edit this reply.'}, status = status.HTTP_403_FORBIDDEN)
     else:
         return Response({'res' : 'User is not authenticated.'}, status = status.HTTP_403_FORBIDDEN)
-
-@api_view(['POST'])
-def unvotePost(request):
-    if request.user.is_authenticated:
-        data = request.data
-        if userHasPermission(request, data['userID']):
-            vote = Vote.objects.get(postID = data["postID"], userID = data['userID'])
-            post = Post.objects.get(postID = data["postID"])
-            if (vote.type == "Upvote"):
-                post.upvote -= 1
-            else:
-                post.downvote -=1
-            vote.type = 'None'
-            vote.delete()
-            serializer = VoteSerializer(vote)
-            return Response(serializer.data)
-        else:
-                return Response({'res': 'User does not have permission to edit this reply.'}, status = status.HTTP_403_FORBIDDEN)
-    else:
-        return Response({'res' : 'User is not authenticated.'}, status = status.HTTP_403_FORBIDDEN)
-    
 
 
 # Filter functions

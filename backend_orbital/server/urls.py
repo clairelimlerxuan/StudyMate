@@ -46,7 +46,7 @@ urlpatterns = [
     path('postdata/<int:pk>/', getPostData),
     path('postcomment/<int:postpk>/', getPostComment),
     path('commentanswer/<int:commentpk>/',getCommentAnswer),
-    path('tagbycategory/<int:categorypk>/', getTag),
+    path('tagbycategory/<int:categoryid>/', getTag),
     path('getuserbyID/<int:userID>/', getUserbyPK),
     path('getfaculty/<int:userID>/', getFaculty),
     path('getmajor/<int:userID>/', getMajor),
@@ -84,7 +84,6 @@ urlpatterns = [
     path('getVote/<int:votePK>/', getVote),
     path('upvotepost/', upvotePost),
     path('downvotepost/', downvotePost),
-    path('unvotepost/', unvotePost),
 
     path('filterbycategory/', FilterByCategory.as_view()),
     path('filterbytag/', FilterByTag.as_view()),            

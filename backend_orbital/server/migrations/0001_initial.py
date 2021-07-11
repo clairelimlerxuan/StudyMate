@@ -95,8 +95,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Module',
             fields=[
-                ('moduleCode', models.CharField(max_length=15, primary_key=True, serialize=False)),
-                ('title', models.CharField(max_length=100)),
+                ('moduleCode', models.CharField(max_length=7, primary_key=True, serialize=False)),
+                ('title', models.CharField(max_length=50)),
             ],
             options={
                 'verbose_name': 'Module',

@@ -136,7 +136,7 @@ export default function Profile(props) {
                     setLoading(false);
                 })
                 .catch((err) => {
-                    alert.show("Error Fetching Data");
+                    alert.show("Signature Has Expired, Please Login Again");
                 });
         } else if (newType == 'Reply') {
             axios
@@ -156,7 +156,7 @@ export default function Profile(props) {
                 setLoading(false);
             })
             .catch((err) => {
-                alert.show("Error Fetching Data");
+                alert.show("Signature Has Expired, Please Login Again");
             });
         }
     };

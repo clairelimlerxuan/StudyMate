@@ -70,6 +70,8 @@ function Forum(props) {
     const [content, setContent] = useState("");
     const [title, setTitle]  = useState("");
     const [tag, setTag] = useState("");
+    const [acadTag, setAcadTag] = useState([]);
+    const [nonacadTag, setNonAcadTag] = useState([]);
     const [selectCategory, setSelectCategory] = useState("");
     const [module, setModule] = useState("");
     const [moduleLabel, setModuleLabel] = useState("");
@@ -84,6 +86,8 @@ function Forum(props) {
     useEffect(() => {
         setActive("forum");
         getTags();
+        getAcademicTag();
+        getNonAcademicTag();
         getCategories();
         getModules();
         loadAll();
@@ -99,6 +103,32 @@ function Forum(props) {
         .catch((error) => console.log(error));
 };
 
+
+    const getAcademicTag = () => {
+        axios
+        .get("http://localhost:8000/server/tagbycategory/1/",{
+        headers: {
+            Authorization: `JWT ${localStorage.getItem("token")}`,
+        },})
+        .then((res) => {
+            setAcadTag(res.data);
+            setLoading(false);
+        })
+        .catch((error) => console.log(error));
+    };
+
+    const getNonAcademicTag = () => {
+        axios
+        .get("http://localhost:8000/server/tagbycategory/2/",{
+            headers: {
+                Authorization: `JWT ${localStorage.getItem("token")}`,
+        },})
+        .then((res) => {
+            setNonAcadTag(res.data);
+            setLoading(false);
+        })
+        .catch((error) => console.log(error));
+    };
 
     const getCategories = () => {
         axios
@@ -174,7 +204,8 @@ function Forum(props) {
             }
 
 
-            const handleSubmitPost = () => {
+            const handleSubmitPost = (e) => {
+                e.preventDefault();
                 axios
                 .post(`
                 http://localhost:8000/server/createpost/`,
@@ -293,7 +324,7 @@ function Forum(props) {
                                                     {option.categoryName}
                                                     </MenuItem>
                                                 ))}
-                                             </TextField>              
+                                             </TextField>             
                                              <TextField
                                                 style = {{width: "20ch"}}
                                                 id="outlined-multiline-static"
@@ -307,15 +338,24 @@ function Forum(props) {
                                                 disabled={!props.username}
                                                 helperText="Tag"
                                                 required >
-                                                {tags.map((option) => (
+                                                
+                                                {selectCategory == "ACAD" && acadTag.map((option) => (
                                                     <MenuItem value={option.tagID}>
                                                     {option.tagName}
                                                     </MenuItem>
                                                 ))}
+                                                                                                
+                                                {selectCategory == "NON-ACAD" && nonacadTag.map((option) => (
+                                                    <MenuItem value={option.tagID}>
+                                                    {option.tagName}
+                                                    </MenuItem>
+                                                ))}
+
                                              </TextField>
                                              
-                                            {tag == 2 &&
+                                            {tag == "Module" &&
                                             <>
+                                            <p>{module}</p>
                                             <Autocomplete
                                                 value={module}
                                                 onChange={(event, newInputValue) => {
@@ -394,6 +434,7 @@ function Forum(props) {
                                                 userID={post.userID}
                                                 creationDate = {post.creationDate}
                                                 title={post.title}
+                                                categoryID = {post.categoryID}
                                                 textContent = {post.textContent}
                                                 upvote = {post.upvote}
                                                 downvote = {post.downvote}
@@ -407,7 +448,6 @@ function Forum(props) {
                     </Container>
                     )}            
                 </main>
-            )
             </React.Fragment>
         );
 }
