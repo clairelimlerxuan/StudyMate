@@ -435,6 +435,7 @@ function Forum(props) {
                                                 creationDate = {post.creationDate}
                                                 title={post.title}
                                                 categoryID = {post.categoryID}
+                                                tagID = {post.tagID}
                                                 textContent = {post.textContent}
                                                 upvote = {post.upvote}
                                                 downvote = {post.downvote}

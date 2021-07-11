@@ -59,7 +59,12 @@ const useStyles = makeStyles((theme) => ({
         justifyContent: "center",
         minWidth:600,
     },
-
+    topimg: {
+        marginTop: "100px",
+        height: "30vh",
+        width: "auto",
+        marginBottom: "0",
+    },
     paper: {
         width: 550,
         backgroundColor: theme.palette.background.paper,
@@ -119,6 +124,7 @@ export default function Thread({ match, location, id }) {
     const [reply, setReply] = useState({})
     const [replyID, setReplyID] = useState("");
     const [content, setContent] = useState("");
+    const [replyContent, setReplyContent] = useState("");
     const [answerer, setAnswerer] = useState({});
     const [answer, setAnswer] = useState("");
     const [postEdit, setPostEdit] = useState("");
@@ -295,7 +301,7 @@ export default function Thread({ match, location, id }) {
         {
             postID: match.params.postID,
             userID : id,
-            textContent : content,
+            textContent : replyContent,
             commentID :commentID,
         },
         {
@@ -309,7 +315,7 @@ export default function Thread({ match, location, id }) {
         console.log(res);
         console.log(res.data);
         handleOpen();
-        setContent("");
+        setReplyContent("");
     })
     .catch((err) => {
         if (
@@ -489,11 +495,12 @@ export default function Thread({ match, location, id }) {
 
 
     const onReplyEditChange = e => {
-       setReplyEdit(e.target.value);
+        e.preventDefault();
+        setReplyEdit(e.target.value);
     };
 
     const onReplyChange = (e) => {
-        setContent(e.target.value)
+        setReplyContent(e.target.value)
         setAnswerer(username)
     }
 
@@ -548,7 +555,7 @@ export default function Thread({ match, location, id }) {
 
     const setReplyAndID = (id, reply) => {
         setReplyID(id);
-        setContent(reply);
+        setReplyContent(reply);
     }
 
     const setCommentAndID = (commentid, ans) => {
@@ -581,8 +588,12 @@ export default function Thread({ match, location, id }) {
             <CardHeader title={post.title}
             subheader={
             <div className="sub-text">
-                    <h8 className="pr-1">@ {`${post.postID}`}</h8>
-                        &middot; Posted on {`${post.creationDate}`}
+                     <Typography variant="caption" >
+                        @ {`${post.postID}`}
+                        &middot; 
+                       
+                        Posted on {`${post.creationDate}`}
+                    </Typography>
                             <div>Posted by {user_post.username}</div>
             </div>
             }
@@ -599,7 +610,7 @@ export default function Thread({ match, location, id }) {
                     <Typography  variant="body2" component="p" style={{marginBottom:12}}>
                         {post.textContent}
                     </Typography>
-                    <ul className="footer">
+                    <ul className={classes.footer}>
                         <li>
                             <Button title="Like"  startIcon={<ThumbUp />} onClick={() => {
                                 if (setUpvote == true) {
@@ -877,7 +888,7 @@ export default function Thread({ match, location, id }) {
                                                                             defaultValue="Default Value"
                                                                             variant="outlined"
                                                                             placeholder="Add reply... "
-                                                                            value={content}
+                                                                            value={replyContent}
                                                                             onChange={onReplyChange}
                                                                             required />
                                                                         </div>
@@ -1058,6 +1069,11 @@ export default function Thread({ match, location, id }) {
                     {!comments || comments.length == "0" &&
                         <div className="card mb-3">
                             <div className="card-body mr-4">
+                                <img                         
+                                src='/images/void.svg'
+                                alt="Person reading a book"
+                                className={classes.topimg}
+                            />
                                 <div className="muted-text mt-3">
                                     No answer yet for this question! Your contribution would be appreciated!
                                 </div>

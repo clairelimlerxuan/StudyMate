@@ -11,6 +11,7 @@ import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import { CardMedia } from "@material-ui/core";
 import { Link } from "react-router-dom";
+import Chip from '@material-ui/core/Chip';
 import { Autocomplete } from "@material-ui/lab";
 
 const useStyles = makeStyles((theme) => ({
@@ -73,9 +74,8 @@ export default function QuestionCard(props) {
                 <Typography variant="h6" align="left">
                     {props.title}
                 </Typography>
-                <Typography variant="caption" align="left">
-                    {props.categoryID}
-                </Typography>
+                <Chip label={props.categoryID} />
+                <Chip label= {props.tagID}/>
                 <Typography variant="subtitle1" align="left">
                     {props.textContent}
                 </Typography>

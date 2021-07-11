@@ -6,7 +6,6 @@ import Home from "./pages/home";
 import IntroSection from './components/intro-section';
 import SignUp from "./pages/signup";
 import Login from "./pages/login";
-import Profile from "./pages/profile";
 import { useAlert } from "react-alert";
 import Navbar from "./components/navbar";
 import Forum from './pages/forum';
