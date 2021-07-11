@@ -361,6 +361,27 @@ class Event(models.Model):
         verbose_name = 'Event'
 
 
+
+class Task(models.Model):
+    taskID = models.AutoField(primary_key=True)
+    userID = models.ForeignKey(
+        MemberUser,
+        on_delete=models.CASCADE,   # if user is removed, task is removed too
+        db_column = 'userID'
+    )
+    title = models.CharField(max_length = 50)
+    deadline = models.DateTimeField()
+    completed = models.BooleanField()
+    submitted =  models.BooleanField()
+    creationDate = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'Item #' + str(self.taskID) + ': ' + str(self.title)
+
+    class Meta:
+        db_table = 'task'
+        verbose_name = 'Task'
+
 class Lesson(models.Model):
     DAY_CHOICES = (
         ('MON', 'Monday'),
@@ -411,24 +432,3 @@ class ScheduleLesson(models.Model):
         db_table = 'scheduleLesson'
         verbose_name = 'Scheduled Lesson'
         unique_together = ('userID', 'lessonID')
-
-
-class Task(models.Model):
-    taskID = models.AutoField(primary_key=True)
-    userID = models.ForeignKey(
-        MemberUser,
-        on_delete=models.CASCADE,   # if user is removed, task is removed too
-        db_column = 'userID'
-    )
-    title = models.CharField(max_length = 50)
-    deadline = models.DateTimeField()
-    completed = models.BooleanField()
-    submitted =  models.BooleanField()
-    creationDate = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return 'Item #' + str(self.taskID) + ': ' + str(self.title)
-
-    class Meta:
-        db_table = 'task'
-        verbose_name = 'Task'
