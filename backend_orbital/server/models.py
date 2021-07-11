@@ -307,6 +307,7 @@ class Vote(models.Model):
          verbose_name = 'Vote' 
          unique_together = ('userID', 'postID')
 
+
 class Event(models.Model):
     eventID = models.AutoField(primary_key=True)
     userID = models.ForeignKey(
@@ -316,15 +317,18 @@ class Event(models.Model):
     )
     title = models.CharField(max_length = 50)
     description = models.CharField(max_length = 100)
-    date = models.DateField()
-    startTime = models.TimeField()
-    endTime = models.TimeField()
+    startDateTime = models.DateTimeField()
+    endDateTime = models.DateTimeField()
     creationDate = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return 'Event #' + str(self.eventID) + ': ' + str(self.title) 
 
     def overlap(self, fixedStart, fixedEnd, newStart, newEnd):
+        fixedStart = fixedStart.replace(tzinfo=None)
+        fixedEnd = fixedEnd.replace(tzinfo=None)
+        newStart = newStart.replace(tzinfo = None)
+        newEnd = newEnd.replace(tzinfo = None)
         overlap = False
         if newStart == fixedEnd or newEnd == fixedStart:    # edge cases
             overlap = False
@@ -338,24 +342,75 @@ class Event(models.Model):
 
     # "Note, however, that like Model.full_clean(), a model’s clean() method is not invoked when you call your model’s save() method."
     # fixed bug at view.py - editEvent method
-    def full_clean(self):
+    def clean(self):
         errorDict = {}
-        events = Event.objects.filter(userID = self.userID, date = self.date).exclude(eventID = self.eventID)
+        events = Event.objects.filter(userID = self.userID).exclude(eventID = self.eventID)
         if events.exists():
             for event in events:
-                if self.overlap(event.startTime, event.endTime, self.startTime, self.endTime):
-                    errorDict['endTime'] = ValidationError('Invalid event. There is an overlap with another event: ' + str(event.date) 
-                                            + ', ' + str(event.startTime) + ' - ' + str(event.endTime))
-        if self.endTime < self.startTime:
-            errorDict['date'] = ValidationError('Invalid timings. Ending time must end before starting time.')
-        elif self.endTime <= self.startTime:
-             errorDict['date'] = ValidationError('Invalid timings. Ending time must be different from starting time.')
+                if self.overlap(event.startDateTime, event.endDateTime, self.startDateTime, self.endDateTime):
+                    errorDict['endDateTime'] = ValidationError('Invalid event. There is an overlap with another event: ' + str(event.startDateTime) + ' - ' + str(event.endDateTime))
+        if self.endDateTime < self.startDateTime:
+            errorDict['endDateTime'] = ValidationError('Invalid timings. Ending time must end before starting time.')
+        elif self.endDateTime <= self.startDateTime:
+             errorDict['endDateTime'] = ValidationError('Invalid timings. Ending time must be different from starting time.')
         if errorDict:
             raise ValidationError(errorDict)
     
     class Meta:
         db_table = 'event'
         verbose_name = 'Event'
+
+
+class Lesson(models.Model):
+    DAY_CHOICES = (
+        ('MON', 'Monday'),
+        ('TUE', 'Tuesday'),
+        ('WED', 'Wednesday'),
+        ('THU', 'Thursday'),
+        ('FRI', 'Friday'),
+        ('SAT', 'Saturday'),
+        ('SUN', 'Sunday')
+    )
+    lessonID = models.AutoField(primary_key=True)
+    moduleID = models.ForeignKey(
+        Module,
+        on_delete=models.CASCADE,   # if module is removed, lesson is removed too
+        db_column = 'moduleID'
+    )
+    classNo = models.CharField(max_length = 5)
+    startTime = models.TimeField()
+    endTime = models.TimeField()
+    day = models.CharField(max_length = 10, choices=DAY_CHOICES)
+    lessonType = models.CharField(max_length = 20)
+
+    def __str__(self):
+        return str(self.moduleID.moduleCode) + ' ' + str(self.lessonType) + ' ' + str(self.classNo)
+    
+    class Meta:
+        db_table = 'lesson'
+        verbose_name = 'Lesson'
+
+
+class ScheduleLesson(models.Model):
+    scheduleID = models.AutoField(primary_key=True)
+    userID = models.ForeignKey(
+        MemberUser,
+        on_delete=models.CASCADE,   # if user is removed, scheduled lesson is removed too
+        db_column = 'userID'
+    )
+    lessonID = models.ForeignKey(
+        Lesson,
+        on_delete=models.RESTRICT,   # if lesson is removed, scheduled lesson is removed too
+        db_column = 'lessonID'
+    )
+    
+    def __str__(self): 
+        return str(self.userID) + ' ' + str(self.lessonID)
+
+    class Meta:
+        db_table = 'scheduleLesson'
+        verbose_name = 'Scheduled Lesson'
+        unique_together = ('userID', 'lessonID')
 
 
 class Task(models.Model):
@@ -366,6 +421,7 @@ class Task(models.Model):
         db_column = 'userID'
     )
     title = models.CharField(max_length = 50)
+    deadline = models.DateTimeField()
     completed = models.BooleanField()
     submitted =  models.BooleanField()
     creationDate = models.DateTimeField(auto_now_add=True)

@@ -211,20 +211,18 @@ class EventSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         errorDict = {}
         userInst = attrs['userID']
-        dateInst = attrs['date']
-        startTimeInst = attrs['startTime']
-        endTimeInst = attrs['endTime']
+        startDateTimeInst = attrs['startDateTime']
+        endDateTimeInst = attrs['endDateTime']
 
-        events = Event.objects.filter(userID = userInst, date = dateInst)
+        events = Event.objects.filter(userID = userInst)
         if events.exists():
             for event in events:
-                if self.overlap(event.startTime, event.endTime, startTimeInst, endTimeInst):
-                    errorDict['endTime'] = ValidationError('Invalid event. There is an overlap with another event: ' + str(event.date) 
-                                            + ', ' + str(event.startTime) + ' - ' + str(event.endTime))
-        if endTimeInst < startTimeInst:
-            errorDict['date'] = ValidationError('Invalid timings. Ending time must end before starting time.')
-        elif endTimeInst <= startTimeInst:
-             errorDict['date'] = ValidationError('Invalid timings. Ending time must be different from starting time.')
+                if self.overlap(event.startDateTime, event.endDateTime, startDateTimeInst, endDateTimeInst):
+                    errorDict['endDateTime'] = ValidationError('Invalid event. There is an overlap with another event: ' + str(event.startDateTime) + ' - ' + str(event.endDateTime))
+        if endDateTimeInst < startDateTimeInst:
+            errorDict['endDateTime'] = ValidationError('Invalid timings. Ending time must end before starting time.')
+        elif endDateTimeInst <= startDateTimeInst:
+             errorDict['endDateTime'] = ValidationError('Invalid timings. Ending time must be different from starting time.')
         if errorDict:
             raise ValidationError(errorDict)
         else:
@@ -234,6 +232,20 @@ class EventSerializer(serializers.ModelSerializer):
         model = Event
         fields = "__all__"
 
+
+class LessonSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Lesson
+        fields = "__all__"
+
+
+class ScheduleLessonSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ScheduleLesson
+        fields = "__all__"
+        
 
 class TaskSerializer(serializers.ModelSerializer):
     
