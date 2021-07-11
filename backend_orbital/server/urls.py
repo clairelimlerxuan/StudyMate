@@ -33,10 +33,13 @@ urlpatterns = [
     path('majorlist/', majorList),
     path('facultylist/', facultyList),
 
+    path('getmodulelessons/<str:modulePK>', getModuleLessons),
+
     path('userpostlist/<int:userid>/',  getUsersPost),
     path('usercommentlist/<int:userid>/', getUsersComment),
     path('userreplylist/<int:userid>/', getUsersReply),
     path('usereventlist/<int:userid>/', getUsersEvent),
+    path('userlessonlist/<int:userid>', getUsersLesson),
     path('usertasklist/<int:userid>/', getUsersTask),
 
     path('postuser/<int:postID>/', getUser),
@@ -60,11 +63,15 @@ urlpatterns = [
     path('createpost/', createPost),
     path('createcomment/', createComment),
     path('createreply/', createReply),
+    path('createevent/', createEvent),
+    path('createschedulelesson/', createScheduleLesson),
+    path('createtask/', createTask),
 
     path('deletepost/<int:postID>/<int:userID>/', deletePost),
     path('deletecomment/<int:commentPK>/<int:userPK>/', deleteComment),
     path('deletereply/<int:replyPK>/<int:userPK>/', deleteReply),
     path('deleteevent/<int:eventPK>/<int:userPK>/', deleteEvent),
+    path('deleteschedulelesson/<int:scheduleLessonPK>/<int:userPK>/', deleteScheduleLesson),
     path('deletetask/<int:taskPK>/<int:userPK>/', deleteTask),
 
     path('editpost/', editPost),
@@ -77,7 +84,11 @@ urlpatterns = [
     path('getVote/<int:votePK>/', getVote),
     path('upvotepost/', upvotePost),
     path('downvotepost/', downvotePost),
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> ea3f68315f94d1c6eda79e28d58efd5f4cf188d0
     path('filterbycategory/', FilterByCategory.as_view()),
     path('filterbytag/', FilterByTag.as_view()),            
     path('filterbymodule/', FilterByModule.as_view()),

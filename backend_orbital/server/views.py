@@ -1,6 +1,7 @@
 from datetime import datetime
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
+import requests
 from rest_framework import viewsets
 
 from rest_framework import response
@@ -174,6 +175,38 @@ def facultyList(request):
 
 
 
+# Read all instances of the lesson offered by the module.
+@api_view(['GET'])
+def getModuleLessons(request, modulePK):
+    url = 'https://api.nusmods.com/v2/2021-2022/modules/{}.json'.format(modulePK)
+    response = requests.get(url)
+    data = response.json()
+
+    semesterData = data['semesterData'][0]  # list to dict
+    timetable = semesterData['timetable']
+
+    module = Module.objects.get(moduleCode = modulePK)
+    moduleTimetable = Lesson.objects.filter(moduleID = modulePK)
+    if not moduleTimetable.exists():
+        for lesson in timetable:
+            startHHMM = lesson['startTime']
+            startDatetime = startHHMM[0:2] + ':' + startHHMM[2:5] + ":00"
+            endHHMM = lesson['endTime']
+            endDatetime = endHHMM[0:2] + ':' + endHHMM[2:5] + ":00"
+            lesson = Lesson(
+                moduleID = module,  # instance of a module
+                classNo = lesson['classNo'],
+                startTime = startDatetime, 
+                endTime = endDatetime,
+                day = lesson['day'],
+                lessonType = lesson['lessonType']
+            )
+            lesson.save()
+    serializer = LessonSerializer(moduleTimetable, many = True)
+    return Response(serializer.data)
+
+
+
 # Read the instance of the item.
 @api_view(['GET'])
 @permission_classes((AllowAny, ))
@@ -266,24 +299,37 @@ def getUsersComment(request, userid):
 @permission_classes([IsAuthenticated])
 def getUsersReply(request, userid):
     replies = Reply.objects.filter(userID = userid)
-    serializer =ReplySerializer(replies, many = True)
+    serializer = ReplySerializer(replies, many = True)
     return Response(serializer.data)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUsersEvent(request, userid):
-    events = Event.objects.filter(userID = userid)
     if request.user.id != userid:
-        return Response({'res' : 'User does not have permission to view this event.'}, status = status.HTTP_403_FORBIDDEN)
+        return Response({'res' : 'User does not have permission to view this list of event.'}, status = status.HTTP_403_FORBIDDEN)
+    events = Event.objects.filter(userID = userid)
     serializer = EventSerializer(events, many = True)
     return Response(serializer.data)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def getUsersTask(request, userid):
-    tasks = Task.objects.filter(userID = userid)
+def getUsersLesson(request, userid):
     if request.user.id != userid:
-        return Response({'res' : 'User does not have permission to view this task.'}, status = status.HTTP_403_FORBIDDEN)
+        return Response({'res' : 'User does not have permission to view this list of lesson.'}, status = status.HTTP_403_FORBIDDEN)
+    scheduleLessons = ScheduleLesson.objects.filter(userID = userid)
+    listOfLessonID = []
+    for scheduleLesson in scheduleLessons:
+        listOfLessonID.append(scheduleLesson.lessonID.lessonID)
+    lessons = Lesson.objects.filter(lessonID__in = listOfLessonID)  # use of __in
+    serializer = LessonSerializer(lessons, many = True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getUsersTask(request, userid):
+    if request.user.id != userid:
+        return Response({'res' : 'User does not have permission to view this list of task.'}, status = status.HTTP_403_FORBIDDEN)
+    tasks = Task.objects.filter(userID = userid)
     serializer = TaskSerializer(tasks, many = True)
     return Response(serializer.data)
 
@@ -387,6 +433,8 @@ def createPost(request):
     category = Category.objects.get(categoryID = categoryid)
     tagid = data['tagID']
     tag= Tag.objects.get(tagID = tagid)
+    if request.user.id != memberid:
+        return Response({'res' : 'User does not have permission to create this post.'}, status = status.HTTP_403_FORBIDDEN)
     try:
         modulecode = data['moduleCode']
         module = Module.objects.get(moduleCode = modulecode)
@@ -411,6 +459,8 @@ def createComment(request):
     postid= data['postID']
     post = Post.objects.get(postID = postid)
     post.numOfComments += 1
+    if request.user.id != memberid:
+        return Response({'res' : 'User does not have permission to create this comment.'}, status = status.HTTP_403_FORBIDDEN)
     comment = Comment(userID=member,  
     textContent=content, postID = post)
     comment.save()
@@ -429,11 +479,83 @@ def createReply(request):
     commentid = data["commentID"]
     comment = Comment.objects.get(commentID = commentid)
     comment.replyCount += 1
+    if request.user.id != memberid:
+        return Response({'res' : 'User does not have permission to create this reply.'}, status = status.HTTP_403_FORBIDDEN)
     reply = Reply.objects.create(userID = member,  
     textContent=content, postID = post, commentID = comment)
     comment.save()
     reply.save()
     serializer = ReplySerializer(reply, many= False)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+def createEvent(request):
+    data = request.data
+    memberid = data['userID']
+    eventTitle = data['title']
+    eventDesc = data['description']
+    eventStartDateTime = data['startDateTime']
+    eventEndDateTime = data['endDateTime']
+    try:
+        member = MemberUser.objects.get(user_id = memberid)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    if request.user.id != memberid:
+        return Response({'res' : 'User does not have permission to create this event.'}, status = status.HTTP_403_FORBIDDEN)
+    event = Event(
+        userID = member, title = eventTitle, description = eventDesc,
+        startDateTime = eventStartDateTime, endDateTime = eventEndDateTime
+    )
+    try:
+        event.full_clean()  
+        event.save()
+        serializer = EventSerializer(event, many = False)
+        return Response(serializer.data)
+    except ValidationError as err:
+        return Response(err, status = status.HTTP_403_FORBIDDEN) 
+
+@api_view(['POST'])
+def createScheduleLesson(request):
+    data = request.data
+    memberid = data['userID']
+    lessonid = data['lessonID']
+    try:
+        member = MemberUser.objects.get(user_id = memberid)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try: 
+        lesson = Lesson.objects.get(lessonID = lessonid)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such lesson.'}, status = status.HTTP_404_NOT_FOUND)
+    if request.user.id != memberid:
+        return Response({'res' : 'User does not have permission to create this lesson.'}, status = status.HTTP_403_FORBIDDEN)
+    scheduleLesson = ScheduleLesson(
+        userID = member, lessonID = lesson
+    )
+    scheduleLesson.save()
+    serializer = ScheduleLessonSerializer(scheduleLesson, many = False)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+def createTask(request):
+    data = request.data
+    memberid = data['userID']
+    taskTitle = data['title']
+    taskDeadline = data['deadline']
+    taskCompletition = data['completed']
+    taskSubmission = data['submitted']
+    try:
+        member = MemberUser.objects.get(user_id = memberid)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    if request.user.id != memberid:
+        return Response({'res' : 'User does not have permission to create this task.'}, status = status.HTTP_403_FORBIDDEN)
+    task = Task(
+        userID = member, title = taskTitle, deadline = taskDeadline,
+        completed = taskCompletition, submitted = taskSubmission
+    )
+    task.save()
+    serializer = TaskSerializer(task, many = False)
     return Response(serializer.data)
 
 
@@ -506,6 +628,23 @@ def deleteEvent(request, eventPK, userPK):
         return Response({'res' : 'Event deleted successfully.'}, status = status.HTTP_200_OK)
     else:
         return Response({'res' : 'User does not have permission to delete this event.'}, status = status.HTTP_403_FORBIDDEN)
+
+@api_view(['DELETE'])
+def deleteScheduleLesson(request, scheduleLessonPK, userPK):
+    try:
+        user = MemberUser.objects.get(user_id = userPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    try:
+        scheduleLesson = ScheduleLesson.objects.get(scheduleID = scheduleLessonPK)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such lesson scheduled to the user.'}, status = status.HTTP_404_NOT_FOUND)
+    userLesson = ScheduleLesson.objects.filter(scheduleID = scheduleLessonPK, userID = user)
+    if userLesson.exists() and request.user.id == userPK:
+        scheduleLesson.delete()
+        return Response({'res' : 'Lesson scheduled to the user deleted successfully.'}, status = status.HTTP_200_OK)
+    else:
+        return Response({'res' : 'User does not have permission to delete this lesson.'}, status = status.HTTP_403_FORBIDDEN)
 
 @api_view(['DELETE'])
 def deleteTask(request, taskPK, userPK):
@@ -642,9 +781,8 @@ def editEvent(request):
     userPK = data['userID']
     eventPK = data['eventID']
     title = data['title']
-    date = data['date']
-    startTime = data['startTime']
-    endTime = data['endTime']    
+    startDateTime = data['startDateTime']
+    endDateTime = data['endDateTime']    
     try:
         user = MemberUser.objects.get(user_id = userPK)
     except ObjectDoesNotExist:
@@ -657,9 +795,8 @@ def editEvent(request):
         userEvent = Event.objects.filter(eventID = eventPK, userID = user)
         if userEvent.exists() and request.user.id == userPK:
             event.title = title
-            event.date = date
-            event.startTime = datetime.strptime(startTime, '%H:%M:%S').time()
-            event.endTime = datetime.strptime(endTime, '%H:%M:%S').time()
+            event.startDateTime = datetime.strptime(startDateTime, '%Y-%m-%dT%H:%M:%SZ')
+            event.endDateTime = datetime.strptime(endDateTime, '%Y-%m-%dT%H:%M:%SZ')
             try:
                 event.full_clean()  
                 event.save()
@@ -678,6 +815,7 @@ def editTask(request):
     userPK = data['userID']
     taskPK = data['taskID']
     title = data['title']
+    deadline = data['deadline']
     completed = data['completed']
     submitted = data['submitted']
     try:
@@ -692,6 +830,7 @@ def editTask(request):
         userTask = Task.objects.filter(taskID = taskPK, userID = user)
         if userTask.exists() and request.user.id == userPK:
             task.title = title
+            task.deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M:%SZ')
             task.completed = completed
             task.submitted = submitted
             task.save()
