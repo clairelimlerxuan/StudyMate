@@ -321,7 +321,6 @@ def getUsersLesson(request, userid):
     for scheduleLesson in scheduleLessons:
         listOfLessonID.append(scheduleLesson.lessonID.lessonID)
     lessons = Lesson.objects.filter(lessonID__in = listOfLessonID)  # use of __in
-    #serializer = ScheduleLessonSerializer(scheduleLessons, many = True)
     serializer = LessonSerializer(lessons, many = True)
     return Response(serializer.data)
 
@@ -425,7 +424,6 @@ def getMajor(request, userID) :
 # Create an instance of the item.
 @api_view(['POST'])
 def createPost(request):
-    
     data = request.data
     memberid = data['userID']
     member = MemberUser.objects.get(user_id = memberid)
@@ -435,6 +433,8 @@ def createPost(request):
     category = Category.objects.get(categoryID = categoryid)
     tagid = data['tagID']
     tag= Tag.objects.get(tagID = tagid)
+    if request.user.id != memberid:
+        return Response({'res' : 'User does not have permission to create this post.'}, status = status.HTTP_403_FORBIDDEN)
     try:
         modulecode = data['moduleCode']
         module = Module.objects.get(moduleCode = modulecode)
@@ -459,6 +459,8 @@ def createComment(request):
     postid= data['postID']
     post = Post.objects.get(postID = postid)
     post.numOfComments += 1
+    if request.user.id != memberid:
+        return Response({'res' : 'User does not have permission to create this comment.'}, status = status.HTTP_403_FORBIDDEN)
     comment = Comment(userID=member,  
     textContent=content, postID = post)
     comment.save()
@@ -477,6 +479,8 @@ def createReply(request):
     commentid = data["commentID"]
     comment = Comment.objects.get(commentID = commentid)
     comment.replyCount += 1
+    if request.user.id != memberid:
+        return Response({'res' : 'User does not have permission to create this reply.'}, status = status.HTTP_403_FORBIDDEN)
     reply = Reply.objects.create(userID = member,  
     textContent=content, postID = post, commentID = comment)
     comment.save()
@@ -496,6 +500,8 @@ def createEvent(request):
         member = MemberUser.objects.get(user_id = memberid)
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    if request.user.id != memberid:
+        return Response({'res' : 'User does not have permission to create this event.'}, status = status.HTTP_403_FORBIDDEN)
     event = Event(
         userID = member, title = eventTitle, description = eventDesc,
         startDateTime = eventStartDateTime, endDateTime = eventEndDateTime
@@ -521,6 +527,8 @@ def createScheduleLesson(request):
         lesson = Lesson.objects.get(lessonID = lessonid)
     except ObjectDoesNotExist:
         return Response({'res' : 'No such lesson.'}, status = status.HTTP_404_NOT_FOUND)
+    if request.user.id != memberid:
+        return Response({'res' : 'User does not have permission to create this lesson.'}, status = status.HTTP_403_FORBIDDEN)
     scheduleLesson = ScheduleLesson(
         userID = member, lessonID = lesson
     )
@@ -540,6 +548,8 @@ def createTask(request):
         member = MemberUser.objects.get(user_id = memberid)
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
+    if request.user.id != memberid:
+        return Response({'res' : 'User does not have permission to create this task.'}, status = status.HTTP_403_FORBIDDEN)
     task = Task(
         userID = member, title = taskTitle, deadline = taskDeadline,
         completed = taskCompletition, submitted = taskSubmission
