@@ -7,7 +7,7 @@ import SearchIcon from "@material-ui/icons/Search";
 const useStyles = makeStyles((theme) => ({
     margin: {
         marginTop: 50,
-        width: "75%",
+        width: "50%",
     },
     resize: {
         fontSize: 26,

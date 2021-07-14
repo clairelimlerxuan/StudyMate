@@ -39,13 +39,11 @@ const useStyles = makeStyles({
     },
     profile: {
         justifySelf: "start",
-        display: "flex",
     },
     info: {
         display: "flex",
         flexDirection: "column",
         alignItems: "flex-start",
-        margin: "2rem",
     },
 });
 
@@ -57,7 +55,7 @@ export default function Profile(props) {
     const [replies, setReplies] = useState([]);
     const [loading, setLoading] = useState(true);
     const alert = useAlert();
-    const [active, setActive] = useState("Posted");
+    const [active, setActive] = useState("Post");
     console.log("IS STAFF " + props.isStaff);
     
 
@@ -98,7 +96,7 @@ export default function Profile(props) {
             return;
         }
 
-        if (newType == "Posted") {
+        if (newType == "Post") {
             axios
                 .get(
                     `http://localhost:8000/server/userpostlist/${props.id}/`,
@@ -188,10 +186,10 @@ export default function Profile(props) {
                                 >
                                     <NavItem
                                         active={
-                                            active == "Posted" ? true : false
+                                            active == "Post" ? true : false
                                         }
                                         onClick={() =>
-                                            handleChangeData("Posted")
+                                            handleChangeData("Post")
                                         }
                                     >
                                         <Typography variant="h6">
@@ -234,7 +232,7 @@ export default function Profile(props) {
                                     />
                                 </div>
                             ) : data.length != 0 ? (
-                                active == "Posted" ? (
+                                active == "Post" ? (
                                  <CardContent className={classes.posts}>
                                     {data.map((post) => {
                                             return (
@@ -276,11 +274,15 @@ export default function Profile(props) {
     
 
                             ) : (
-                                <CardContent>
+                                <Box
+                                height={48}
+                                display={"flex"}>
+                                <CardContent style={{alignItems:"center"}}>
                                     <Typography variant="h3">
-                                    {"No " + active + "Made"}
+                                    {"No " + active + " Made"}
                                     </Typography>
                                 </CardContent>
+                                </Box>
                  
                             )
                             }

@@ -137,6 +137,7 @@ export default function Thread({ match, location, id }) {
     const [upvote, setUpvote] = useState(false);
     const [downvote, setDownVote] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
+    const [deleteReplyOpen, setDeleteReplyOpen] = useState("");
     const [editOpen, setEditOpen] = useState(false);
     const [like, setLike] = useState(0);
     const [dislike, setDislike] = useState(0);
@@ -167,9 +168,17 @@ export default function Thread({ match, location, id }) {
           setEditOpen(false);
       }
   
-      
     
-
+      const handleDeleteReplyOpen = () => {
+        setDeleteReplyOpen(true);
+      };
+  
+  
+      const handleDeleteReplyClose = () => {
+          setDeleteReplyOpen(false);
+      }
+  
+      
     const descriptionElementRef = React.useRef(null);
 
     useEffect(() => {
@@ -505,7 +514,7 @@ export default function Thread({ match, location, id }) {
     }
 
     
-    const handleDelete = e => { //deleting post
+    const handleDelete = (e) => { //deleting post
         e.preventDefault();
 
         axios
@@ -535,6 +544,25 @@ export default function Thread({ match, location, id }) {
             .then(res => {
                 console.log(res);
                 window.location.reload(false);
+                setCommentID("");
+            })
+            .catch(err => console.log(err));
+    };
+
+    
+    const handleDeleteReply = (e) => { 
+
+        axios
+            .delete(`http://localhost:8000/server/deletereply/${replyID}/${id}/`,
+            {
+                headers: {
+                    Authorization: "JWT " + localStorage.getItem("token"),
+                },
+            }) //delete reply
+            .then(res => {
+                console.log(res);
+                window.location.reload(false);
+                setReplyID("");
             })
             .catch(err => console.log(err));
     };
@@ -713,7 +741,7 @@ export default function Thread({ match, location, id }) {
                                 </form>
                             }
 
-                            {isLoggedIn && username == user_post.username &&
+                            {isLoggedIn && (username == user_post.username ||isStaff == true) &&
                             <div>
                                 <>
                                 <Button  variant="contained" color="secondary"  style={{ width: 100 }} 
@@ -898,35 +926,93 @@ export default function Thread({ match, location, id }) {
                                                                         
                                                                         <br />
                                                                         <Button type="submit" color="secondary" variant="contained" onClick={handleSubmitCommentAns}
-                                                                        disabled={content == "" ? true : false} style={{marginBottom:15}}
+                                                                        disabled={replyContent == "" ? true : false} style={{marginBottom:15}}
                                                                         >
-                                                                            Add Comment
+                                                                            Add Reply
                                                                         </Button>
                                                                     </form>
                                         
                                                                     </div>
                                                     
-                                                                         {replies && replies.map((reply) =>
-                                                                             <DialogContent dividers={scroll === 'paper'}>
-                                                                                <DialogContentText
-                                                                                 id="scroll-dialog-description"
-                                                                                 ref={descriptionElementRef}
-                                                                                 tabIndex={-1}
-                                                                               >
-                                                                                    <div>
-                                                                                        <div className="row content">
-                                                                                            <div className="col-sm-12 ml-2">
-                                                                                                <p className="font-weight-bold pb-0 mb-0">{reply.userID}</p>
-                                                                                                <p className="sub-text pt-0 mt-0">Commented on {reply.creationDate}</p>
-                                                                                            </div>
-                                                                                            <p className="mr-3 ml-4 whiteSpace">{reply.textContent}</p>
-                                                                                        </div>   
+                                                                        
+                                                                            {replies && replies.map((reply) => {
+                                                                                const d = post.creationDate;
+                                                                                const e = d.split("T")[0];
+                                                                                return (
+                                                                                    isLoggedIn && (isStaff == true || id == reply.userID) ? (
+                                                                                        <DialogContent dividers={scroll === 'paper'}>
+                                                                                        <DialogContentText
+                                                                                            id="scroll-dialog-description"
+                                                                                            ref={descriptionElementRef}
+                                                                                            tabIndex={-1}
+                                                                                        >
+                                                                                            <div>
+                                                                                                <div className="row content">
+                                                                                                    <div className="col-sm-12 ml-2">
+                                                                                                        <p className="font-weight-bold pb-0 mb-0">{reply.userID}</p>
+                                                                                                        <p className="sub-text pt-0 mt-0">
+                                                                                                            Commented on {e} 
+                                                                                                            </p>
+                                                                                                    </div>
+                                                                                                    <p className="mr-3 ml-4 whiteSpace">{reply.textContent}</p>
+                                                                                                    <Button className="btn btn-icon float-right"  title="Delete Answer" data-target="#deleteAnswerModal" 
+                                                                                                        onClick={() =>{setReplyID(`${reply.replyID}`); handleDeleteReplyOpen()}} startIcon={<Delete/>}>
+                                                                                                    </Button>
+                                                                                                    <Dialog
+                                                                                                        open={deleteReplyOpen}
+                                                                                                        onClose={handleDeleteReplyClose} 
+                                                                                                        className={classes.modal}
+                                                                                                        aria-labelledby="simple-dialog-title"
+                                                                                                        aria-describedby="simple-dialog-description"
+                                                                                                    >
+                                                                                                    <DialogContent className={classes.paper}>
+                                                                                                        <DialogContentText>
+                                                                                                            <h4 id="simple-dialog-title">Delete Comment</h4>
+                                                                                                            <div className="modal-body text-left pt-3 pb-3">
+                                                                                                                Are you sure you want to delete your reply? 
+                                                                                                            </div>
+                                                                                                            <div className="row content ml-1 mr-1 pt-5 d-flex justify-content-center">
+                                                                                                                <Button variant = "outlined" 
+                                                                                                                className="btn btn-default col-sm-5 btn-outline-danger mr-2" style = {{margin:5}}
+                                                                                                                    onClick={handleDeleteReply}>
+                                                                                                                    Delete
+                                                                                                                </Button>
+                                                                                                                <Button variant = "outlined" style = {{margin:5}} className="btn btn-default col-sm-5 btn-outline-secondary" 
+                                                                                                                onClick={handleDeleteReplyClose}>
+                                                                                                                    Cancel
+                                                                                                                </Button>
+                                                                                                            </div>
                                                                                         
-                                                                                    </div>
-                                                                                </DialogContentText>
-                                                                            </DialogContent>
-                                                                     )}
- 
+                                                                                                        </DialogContentText>
+                                                                                                    </DialogContent>
+                                                                                                    </Dialog>
+                                                                                                </div>   
+                                                                                            </div>
+                                                                                        </DialogContentText>
+                                                                                    </DialogContent>
+                                                                                    ) : (
+                                                                                        <DialogContent dividers={scroll === 'paper'}>
+                                                                                        <DialogContentText
+                                                                                            id="scroll-dialog-description"
+                                                                                            ref={descriptionElementRef}
+                                                                                            tabIndex={-1}
+                                                                                        >
+                                                                                            <div>
+                                                                                                <div className="row content">
+                                                                                                    <div className="col-sm-12 ml-2">
+                                                                                                        <p className="font-weight-bold pb-0 mb-0">{reply.userID}</p>
+                                                                                                        <p className="sub-text pt-0 mt-0">
+                                                                                                            Commented on {e}
+                                                                                                            </p>
+                                                                                                    </div>
+                                                                                                    <p className="mr-3 ml-4 whiteSpace">{reply.textContent}</p>
+                                                                                                </div>   
+                                                                                                
+                                                                                            </div>
+                                                                                        </DialogContentText>
+                                                                                    </DialogContent>
+                                                                                    )
+                                                                                    )})}
                                                                      {replies.length == "0" &&
                                                                          <div className="muted-text mt-3 pl-3 pb-3">
                                                                              No Replies yet!
@@ -992,7 +1078,9 @@ export default function Thread({ match, location, id }) {
                                                                                             <div className="col-sm-12 ml-2">
                                                                                                 <p className="font-weight-bold pb-0 mb-0">{reply.userID}</p>
                                                                                             </div>
-                                                                                            <p className="mr-3 ml-4 whiteSpace">{reply.textContent}</p>
+                                                                                            <p className="mr-3 ml-4 whiteSpace">
+                                                                                                {reply.textContent}
+                                                                                            </p>
                                                                                         </div>   
                                                                                         
                                                                                     </div>

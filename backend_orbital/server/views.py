@@ -305,8 +305,7 @@ def getUsersReply(request, userid):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUsersEvent(request, userid):
-    if request.user.id != userid:
-        return Response({'res' : 'User does not have permission to view this list of event.'}, status = status.HTTP_403_FORBIDDEN)
+    
     events = Event.objects.filter(userID = userid)
     serializer = EventSerializer(events, many = True)
     return Response(serializer.data)
@@ -494,8 +493,8 @@ def createEvent(request):
     memberid = data['userID']
     eventTitle = data['title']
     eventDesc = data['description']
-    eventStartDateTime = data['startDateTime']
-    eventEndDateTime = data['endDateTime']
+    eventStartDateTime = data['start']
+    eventEndDateTime = data['end']
     try:
         member = MemberUser.objects.get(user_id = memberid)
     except ObjectDoesNotExist:
@@ -504,7 +503,7 @@ def createEvent(request):
         return Response({'res' : 'User does not have permission to create this event.'}, status = status.HTTP_403_FORBIDDEN)
     event = Event(
         userID = member, title = eventTitle, description = eventDesc,
-        startDateTime = eventStartDateTime, endDateTime = eventEndDateTime
+        start = eventStartDateTime, end = eventEndDateTime
     )
     try:
         event.full_clean()  
@@ -578,6 +577,7 @@ def deletePost(request, postPK, userPK):
     else: 
         return Response({'res' : 'User does not have permission to delete this post.'}, status = status.HTTP_403_FORBIDDEN)
 
+
 @api_view(['DELETE'])
 def deleteComment(request, commentPK, userPK,):
     try:
@@ -590,6 +590,9 @@ def deleteComment(request, commentPK, userPK,):
         return Response({'res' : 'No such comment.'}, status = status.HTTP_404_NOT_FOUND)
     userComment = Comment.objects.filter(commentID = commentPK, userID = user)
     if userComment.exists() and userHasPermission(request, userPK):
+        post = Post.objects.get(postID = comment.postID.postID)
+        post.numOfComments -= 1
+        post.save()
         comment.delete()
         return Response({'res' : 'Comment deleted successfully.'}, status = status.HTTP_200_OK)
     else:
@@ -781,8 +784,8 @@ def editEvent(request):
     userPK = data['userID']
     eventPK = data['eventID']
     title = data['title']
-    startDateTime = data['startDateTime']
-    endDateTime = data['endDateTime']    
+    startDateTime = data['start']
+    endDateTime = data['end']    
     try:
         user = MemberUser.objects.get(user_id = userPK)
     except ObjectDoesNotExist:
@@ -795,8 +798,8 @@ def editEvent(request):
         userEvent = Event.objects.filter(eventID = eventPK, userID = user)
         if userEvent.exists() and request.user.id == userPK:
             event.title = title
-            event.startDateTime = datetime.strptime(startDateTime, '%Y-%m-%dT%H:%M:%SZ')
-            event.endDateTime = datetime.strptime(endDateTime, '%Y-%m-%dT%H:%M:%SZ')
+            event.start = datetime.strptime(startDateTime, '%Y-%m-%dT%H:%M:%SZ')
+            event.end = datetime.strptime(endDateTime, '%Y-%m-%dT%H:%M:%SZ')
             try:
                 event.full_clean()  
                 event.save()

@@ -4,10 +4,25 @@ import { Button } from './button';
 import { Link } from 'react-router-dom';
 import './navbar.css';
 import Dropdown from './dropdown';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+
 function Navbar(props) {
 
   const [click, setClick] = React.useState(false);
   const [dropdown, setDropdown] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
+
+  const handleOpen = () => {
+    setOpen(true);
+  }
+
+  const handleClose = () => {
+    setOpen(false);
+  }
 
   const handleClick = () => setClick(!click);
   const closeMobileMenu = () => setClick(false);
@@ -67,12 +82,24 @@ function Navbar(props) {
             </li>
             <li className='nav-item'>
             <Link
-              to='/schedules'
               className='nav-links'
-              onClick={closeMobileMenu}
+              onClick={() => {closeMobileMenu(); handleOpen()}}
             >
               Schedules
             </Link>
+            <Dialog
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+            >
+        <DialogTitle id="alert-dialog-title">{"Please Log In to See Your Schedule"}</DialogTitle>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary" autoFocus>
+            Close
+          </Button>
+        </DialogActions>
+        </Dialog>
             </li>
             <li>
             {dropdown ? (

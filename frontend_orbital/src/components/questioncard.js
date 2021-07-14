@@ -16,13 +16,14 @@ import { Autocomplete } from "@material-ui/lab";
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        width: 600,
+        maxWidth: 600,
         color: "black",
         margin: "20px",
         marginBottom: 10,
-        backgroundColor: "#fafafa",
+        backgroundColor: "#eee",
         display: "grid",
         paddingTop: "10px",
+        display :"flex"
     },
     cover: {
         width: "100%",
@@ -32,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
         width: "100%",
     },
     info: {
-        backgroundColor: "#fafafa",
+        backgroundColor: "#eee",
     },
     iconbar: {
         width: "100%", /* Full-width */

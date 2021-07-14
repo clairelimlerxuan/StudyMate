@@ -23,7 +23,7 @@ import { SettingsInputComponent, SettingsOutlined } from "@material-ui/icons";
 
 
 const override = css`
-  display: block;
+  display: flex;
   margin: 0 auto;
   border-color: red;
   align-text: center;
@@ -34,26 +34,34 @@ const useStyles = makeStyles((theme) => ({
     container: {
         display: "flex",
         justifyContent:"center",
-        backgroundColor: "#B79C8B",
+        backgroundColor: "#efebe9",
+        width : "100%",
+        overflow: "hidden",
     },
     topimg: {
         marginTop: "100px",
         height: "50vh",
-        width: "auto",
         marginBottom: "0",
+        display:"flex",
+        width : "50%"
     },
     root: {
-        width: 800,
+        width: 700,
         flexDirection: "column",
         padding: theme.spacing(2),
         marginBottom: 10,
         marginTop: 30,
+        display:"flex"
+    },
+
+    box : {
+        backgroundColor: "#efebe9"
     },
     
     form :  {
     '& .MuiTextField-root': {
         margin: theme.spacing(1),
-        width: '25ch',
+        maxWidth: '30ch',
     },
 }
 }));
@@ -275,7 +283,9 @@ function Forum(props) {
                 justifyContent="center"
                 alignItems="center"
                 flexDirection='column'
-                        >
+                width = "100%"
+                className = {classes.box}
+                >
                     <img
                         src='/images/reading.svg'
                         alt="Person reading a book"
@@ -422,8 +432,10 @@ function Forum(props) {
                         setCategory={setCategory}
                         handleFilter={handleFilter}
                     />
-                        <Grid container xs={12}>
+                        <Grid container xs={12} style={{display:"flex"}}>
                             {posts.map((post) => {
+                                const d = post.creationDate
+                                const e = d.split("T")[0]
                                 return (
                                     <>
                                         <Link
@@ -432,7 +444,7 @@ function Forum(props) {
                                         >
                                             <QuestionCard
                                                 userID={post.userID}
-                                                creationDate = {post.creationDate}
+                                                creationDate = {e}
                                                 title={post.title}
                                                 categoryID = {post.categoryID}
                                                 tagID = {post.tagID}
