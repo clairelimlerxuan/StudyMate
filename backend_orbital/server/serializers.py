@@ -245,7 +245,7 @@ class ScheduleLessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = ScheduleLesson
         fields = "__all__"
-        
+
 
 class TaskSerializer(serializers.ModelSerializer):
     

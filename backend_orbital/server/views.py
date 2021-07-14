@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 import requests
@@ -128,7 +128,7 @@ def postList(request):
 @permission_classes((AllowAny, ))
 def commentList(request):
     comments = Comment.objects.all()[:100]
-    serializer = PostSerializer(comments, many = True)
+    serializer = CommentSerializer(comments, many = True)
     return Response(serializer.data)
 
 @api_view(['GET'])
@@ -206,7 +206,7 @@ def getModuleLessons(request, modulePK):
     return Response(serializer.data)
 
 
-
+   
 # Read the instance of the item.
 @api_view(['GET'])
 @permission_classes((AllowAny, ))
@@ -324,6 +324,69 @@ def getUsersLesson(request, userid):
     serializer = LessonSerializer(lessons, many = True)
     return Response(serializer.data)
 
+def StrToInt(day):
+    if day == 'Monday':
+        return 1
+    elif day == 'Tuesday':
+        return 2
+    elif day == 'Wednesday':
+        return 3
+    elif day == 'Thursday':
+        return 4
+    elif day == 'Friday':
+        return 5
+    elif day == 'Saturday':
+        return 6
+    else:
+        return 7
+
+def DayToDates(lessonPK, startDate, endDate):
+    lesson = Lesson.objects.get(lessonID = lessonPK)
+    dayStr = lesson.day
+    dayInt = StrToInt(dayStr)
+    listOfDates = []
+    week = 0
+    for i in range(int((endDate - startDate).days)):
+        currDate = startDate + timedelta(i)
+        if currDate.isoweekday() == dayInt:
+            week += 1
+            if week == 7:   # recess week
+                continue
+            listOfDates.append(currDate)
+    return listOfDates
+
+def LessonToTimetable(lessonPK, startDate, endDate):
+    lesson = Lesson.objects.get(lessonID = lessonPK)
+    listOfDates = DayToDates(lessonPK, startDate, endDate)
+    response = []
+    for date in listOfDates:
+        dateStr = date.strftime('%Y-%m-%d')     # strftime - datetime obj to str, strptime - str to datetime obj
+        startTime = lesson.startTime.strftime('%H:%M:%S')
+        endTime = lesson.endTime.strftime('%H:%M:%S')
+        data = {
+            "title": lesson.moduleID.moduleCode,
+            "description": lesson.lessonType, 
+            "startDateTime": dateStr + ' ' + startTime,
+            "endDateTime": dateStr + ' ' + endTime,
+        }
+        response.append(data)
+    return response
+
+@api_view(['GET'])
+def getUsersClass(request, userid):
+    scheduleLessons = ScheduleLesson.objects.filter(userID = userid)
+    listOfLessonID = []
+    for scheduleLesson in scheduleLessons:
+        listOfLessonID.append(scheduleLesson.lessonID.lessonID)
+    lessons = Lesson.objects.filter(lessonID__in = listOfLessonID)  # use of __in
+    result = []
+    startDate = date(2021, 8, 9)    # start of ay21/22 sem 1 week 1
+    endDate = date(2021, 11, 12)    # end of ay21/22 sem 1 week 13
+    for lesson in lessons:
+        result.extend(LessonToTimetable(lesson.lessonID, startDate, endDate))
+    return Response(result)
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUsersTask(request, userid):
@@ -433,7 +496,7 @@ def createPost(request):
     category = Category.objects.get(categoryID = categoryid)
     tagid = data['tagID']
     tag= Tag.objects.get(tagID = tagid)
-    if request.user.id != memberid:
+    if not userHasPermission(request, memberid):
         return Response({'res' : 'User does not have permission to create this post.'}, status = status.HTTP_403_FORBIDDEN)
     try:
         modulecode = data['moduleCode']
@@ -459,7 +522,7 @@ def createComment(request):
     postid= data['postID']
     post = Post.objects.get(postID = postid)
     post.numOfComments += 1
-    if request.user.id != memberid:
+    if not userHasPermission(request, memberid):
         return Response({'res' : 'User does not have permission to create this comment.'}, status = status.HTTP_403_FORBIDDEN)
     comment = Comment(userID=member,  
     textContent=content, postID = post)
@@ -479,7 +542,7 @@ def createReply(request):
     commentid = data["commentID"]
     comment = Comment.objects.get(commentID = commentid)
     comment.replyCount += 1
-    if request.user.id != memberid:
+    if not userHasPermission(request, memberid):
         return Response({'res' : 'User does not have permission to create this reply.'}, status = status.HTTP_403_FORBIDDEN)
     reply = Reply.objects.create(userID = member,  
     textContent=content, postID = post, commentID = comment)
