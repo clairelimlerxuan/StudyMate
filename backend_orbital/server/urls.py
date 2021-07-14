@@ -40,6 +40,7 @@ urlpatterns = [
     path('userreplylist/<int:userid>/', getUsersReply),
     path('usereventlist/<int:userid>/', getUsersEvent),
     path('userlessonlist/<int:userid>', getUsersLesson),
+    path('userclasslist/<int:userid>', getUsersClass),
     path('usertasklist/<int:userid>/', getUsersTask),
 
     path('postuser/<int:postID>/', getUser),
@@ -85,7 +86,10 @@ urlpatterns = [
     path('upvotepost/', upvotePost),
     path('downvotepost/', downvotePost),
     
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7c7503ca69d883ab0e6d12f07e5126bdbd986a2b
     path('filterbycategory/', FilterByCategory.as_view()),
     path('filterbytag/', FilterByTag.as_view()),            
     path('filterbymodule/', FilterByModule.as_view()),
