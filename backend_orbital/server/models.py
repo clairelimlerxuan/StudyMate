@@ -154,7 +154,7 @@ class Module(models.Model):
 class Post(models.Model):
     postID = models.AutoField(primary_key=True)  # auto increment id
     userID = models.ForeignKey(
-        MemberUser, 
+        User, 
         on_delete=models.SET_NULL,  # if user is removed, post is still there 
         blank=True, 
         null=True,
@@ -214,7 +214,7 @@ class Post(models.Model):
 class Comment(models.Model):
     commentID = models.AutoField(primary_key=True)  # auto increment id
     userID = models.ForeignKey(
-        MemberUser, 
+        User, 
         on_delete=models.SET_NULL,  # if user is removed, comment is still there
         blank=True, 
         null=True,
@@ -240,7 +240,7 @@ class Comment(models.Model):
 class Reply(models.Model):
     replyID = models.AutoField(primary_key=True)
     userID = models.ForeignKey(
-        MemberUser, 
+        User, 
         on_delete=models.SET_NULL,  # if user is removed, reply is still there
         blank=True, 
         null=True,
@@ -374,7 +374,7 @@ class Lesson(models.Model):
     lessonID = models.AutoField(primary_key=True)
     moduleID = models.ForeignKey(
         Module,
-        on_delete=models.CASCADE,   # if module is removed, lesson is removed too
+        on_delete=models.RESTRICT, 
         db_column = 'moduleID'
     )
     classNo = models.CharField(max_length = 5)
@@ -400,7 +400,7 @@ class ScheduleLesson(models.Model):
     )
     lessonID = models.ForeignKey(
         Lesson,
-        on_delete=models.RESTRICT,   # if lesson is removed, scheduled lesson is removed too
+        on_delete=models.RESTRICT, 
         db_column = 'lessonID'
     )
     
