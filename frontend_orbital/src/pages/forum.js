@@ -3,7 +3,7 @@ import Box from "@material-ui/core/Box";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import FadeLoader from "react-spinners/FadeLoader";
+import { FadeLoader } from "react-spinners";
 import Grid from "@material-ui/core/Grid";
 import { makeStyles } from "@material-ui/core/styles";
 import { Container, CssBaseline } from "@material-ui/core";
@@ -232,7 +232,6 @@ function Forum(props) {
                 }
             )
             .then((res) => {
-        
                 console.log(res);
                 console.log(res.data);
                 handleOpen();
@@ -241,6 +240,7 @@ function Forum(props) {
                 setContent("");
                 setTag("");
                 setTitle("");
+                return res;
             })
             .catch((err) => {
                 if (
@@ -295,6 +295,7 @@ function Forum(props) {
 
                 </Box>
                 <Container maxWidth="false" className={classes.container}>
+                {props.isStaff == false && 
                 <Card className = {classes.root}>
                     <CardHeader
                     title="Hi, what's your question?"
@@ -414,6 +415,7 @@ function Forum(props) {
                             </form>
                     </CardContent>
                 </Card>
+                }
             </Container>
             <main>
                 {loading ? (

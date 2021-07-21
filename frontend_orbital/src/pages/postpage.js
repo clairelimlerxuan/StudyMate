@@ -361,19 +361,19 @@ export default function Thread({ match, location, id }) {
             setPost(res.data);
             setLike(res.data.upvote);
         })
-        .catch((err) => {
-            if (
-                err.response.status === 401 ||
-                err.response.status === 404
-            ) {
-                alert.show("Please Log In to vote this post");
-            } else {
-                console.log(err.response);
-                console.log(err.response.data.res);
-                alert.show(err.response.data.res);
-            }
-        });
+       .catch((err) => { if (
+            err.response.status === 401 ||
+            err.response.status === 404
+        ) {
+            alert.show("Please Log In to vote this post");
+        } else {
+            console.log(err.response);
+            console.log(err.response.data.res);
+            alert.show(err.response.data.res);
         }
+    });
+    }
+
 
     const handleDownvote = () => {
         axios
@@ -390,7 +390,10 @@ export default function Thread({ match, location, id }) {
         )
         .then(
             res => {
+                console.log('Update Complete'); 
                 console.log(res);
+                setPost(res.data);
+                setDislike(res.data.downvote);
             })
         .catch((err) => { if (
             err.response.status === 401 ||
@@ -641,36 +644,22 @@ export default function Thread({ match, location, id }) {
                     <ul className={classes.footer}>
                         <li>
                             <Button title="Like"  startIcon={<ThumbUp />} onClick={() => {
-                                if (setUpvote == true) {
-                                    handleUnvote(
-                                        match.params.postID,
-                                        id
-                                    )
-                                }
-                                else {
                                     setUpvote(true);
                                     handleUpvote(
                                         match.params.postID,
                                         id
-                                )}}}>
+                                )}}>
                                 {like}
                             </Button>
                             <Button  title="Disike"
                             startIcon={<ThumbDown/>}
                             onClick={() => {
-                                if (setDownVote == true) {
-                                    handleUnvote(
-                                        match.params.postID,
-                                        id
-                                    )
-                                } 
-                                else {
                                 setDownVote(true);
                                 handleDownvote(
                                     match.params.postID,
                                     id
-                                )}}}>
-                                {post.downvote}
+                                )}}>
+                                {dislike}
                             </Button>
                             
                             <Button title="View comments"  data-toggle="modal" 

@@ -86,10 +86,7 @@ urlpatterns = [
     path('upvotepost/', upvotePost),
     path('downvotepost/', downvotePost),
     
-<<<<<<< HEAD
 
-=======
->>>>>>> 7c7503ca69d883ab0e6d12f07e5126bdbd986a2b
     path('filterbycategory/', FilterByCategory.as_view()),
     path('filterbytag/', FilterByTag.as_view()),            
     path('filterbymodule/', FilterByModule.as_view()),

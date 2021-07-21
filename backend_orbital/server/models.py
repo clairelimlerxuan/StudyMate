@@ -154,7 +154,7 @@ class Module(models.Model):
 class Post(models.Model):
     postID = models.AutoField(primary_key=True)  # auto increment id
     userID = models.ForeignKey(
-        MemberUser, 
+        User, 
         on_delete=models.SET_NULL,  # if user is removed, post is still there 
         blank=True, 
         null=True,
@@ -214,7 +214,7 @@ class Post(models.Model):
 class Comment(models.Model):
     commentID = models.AutoField(primary_key=True)  # auto increment id
     userID = models.ForeignKey(
-        MemberUser, 
+        User, 
         on_delete=models.SET_NULL,  # if user is removed, comment is still there
         blank=True, 
         null=True,
@@ -240,7 +240,7 @@ class Comment(models.Model):
 class Reply(models.Model):
     replyID = models.AutoField(primary_key=True)
     userID = models.ForeignKey(
-        MemberUser, 
+        User, 
         on_delete=models.SET_NULL,  # if user is removed, reply is still there
         blank=True, 
         null=True,
@@ -348,11 +348,11 @@ class Event(models.Model):
         if events.exists():
             for event in events:
                 if self.overlap(event.start, event.end, self.start, self.end):
-                    errorDict['end'] = ValidationError('Invalid event. There is an overlap with another event: ' + str(event.start) + ' - ' + str(event.end))
+                    errorDict ={'end' : ('Invalid event. There is an overlap with another event: ' + str(event.start) + ' - ' + str(event.end))}
         if self.end < self.start:
-            errorDict['end'] = ValidationError('Invalid timings. Ending time must end before starting time.')
+            errorDict = {'end': ('Invalid timings. Ending time must end before starting time.')}
         elif self.end <= self.start:
-             errorDict['end'] = ValidationError('Invalid timings. Ending time must be different from starting time.')
+             errorDict = {'end' : ('Invalid timings. Ending time must be different from starting time.')}
         if errorDict:
             raise ValidationError(errorDict)
     

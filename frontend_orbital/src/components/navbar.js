@@ -101,6 +101,15 @@ function Navbar(props) {
         </DialogActions>
         </Dialog>
             </li>
+            <li className='nav-item'>
+            <Link
+              to='/todolist'
+              className='nav-links'
+              onClick={closeMobileMenu}
+            >
+              To Do List
+            </Link>
+            </li>
             <li>
             {dropdown ? (
                   <Link to='/login' className='nav-links-mobile'>
@@ -120,7 +129,8 @@ function Navbar(props) {
         </div>
       </nav>
     </>
-  ) : (
+  ) :(
+    !props.isStaff ? (
     <>
     <nav className='navbar'>
       <div className='navbar-container'>
@@ -155,6 +165,15 @@ function Navbar(props) {
               Schedules
             </Link>
           </li>
+          <li className='nav-item'>
+            <Link
+              to='/todolist'
+              className='nav-links'
+              onClick={closeMobileMenu}
+            >
+              To Do List
+            </Link>
+          </li>
           <li className='nav-links-mobile'  onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave} onClick={extendElement}>
               <Button buttonStyle='primary' class="dropbtn">
@@ -177,7 +196,46 @@ onCloseMobileMenu={closeMobileMenu}/>}
       </div>
     </nav>
   </>
-  ));
+  ) : (
+    <>
+    <nav className='navbar'>
+  <div className='navbar-container'>
+    <Link to='/' className='navbar-logo' onClick={closeMobileMenu}>
+      StudyMate
+      <i class='fab fa-typo3' />
+    </Link>
+    <div className='menu-icon' onClick={handleClick}>
+      <i className={click ? 'fas fa-times' : 'fas fa-bars'} />
+    </div>
+    <ul className={click ? 'nav-menu active' : 'nav-menu'}>
+      <li className='nav-item'>
+        <Link to='/' className='nav-links' onClick={closeMobileMenu}>
+          Home
+        </Link>
+      </li>
+      <li className='nav-links-mobile'  onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave} onClick={extendElement}>
+              <Button buttonStyle='primary' class="dropbtn">
+                Hi, {props.username}!
+                <i class="fa fa-caret-down"></i>
+              </Button>
+              {dropdown && <Dropdown  
+onCloseMobileMenu={closeMobileMenu}/>}
+          </li>
+          <li>
+            <Link
+              to='/'
+              className='nav-links-mobile'
+              onClick={(() => props.handleLogout())}
+            >
+              <Button buttonStyle='btn--outline'>Log Out</Button>
+            </Link>
+          </li>
+    </ul>
+  </div>
+</nav>
+</>
+  )));
 }
 
 export default Navbar;

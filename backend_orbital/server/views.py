@@ -365,8 +365,8 @@ def LessonToTimetable(lessonPK, startDate, endDate):
         data = {
             "title": lesson.moduleID.moduleCode,
             "description": lesson.lessonType, 
-            "startDateTime": dateStr + ' ' + startTime,
-            "endDateTime": dateStr + ' ' + endTime,
+            "start": dateStr + ' ' + startTime,
+            "end": dateStr + ' ' + endTime,
         }
         response.append(data)
     return response
@@ -395,6 +395,14 @@ def getUsersTask(request, userid):
     serializer = TaskSerializer(tasks, many = True)
     return Response(serializer.data)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getUserTodayTask(request, userid) :
+    if request.user.id != userid:
+        return Response({'res' : 'User does not have permission to view this list of task.'}, status = status.HTTP_403_FORBIDDEN)
+    tasks = Task.objects.filter(deadline = datetime(date.today().year, date.today().month, date.today().day))
+    serializer = TaskSerializer(tasks, many = True)
+    return Response(serializer.data)
 
 
 # More Read functions
@@ -563,7 +571,7 @@ def createEvent(request):
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     if request.user.id != memberid:
-        return Response({'res' : 'User does not have permission to create this event.'}, status = status.HTTP_403_FORBIDDEN)
+        return Response({'res' : 'User does not have permission to create this lesson.'}, status = status.HTTP_403_FORBIDDEN)
     event = Event(
         userID = member, title = eventTitle, description = eventDesc,
         start = eventStartDateTime, end = eventEndDateTime
@@ -574,7 +582,7 @@ def createEvent(request):
         serializer = EventSerializer(event, many = False)
         return Response(serializer.data)
     except ValidationError as err:
-        return Response(err, status = status.HTTP_403_FORBIDDEN) 
+        return Response({'res': err.message_dict['end'][0]}, status = status.HTTP_403_FORBIDDEN)
 
 @api_view(['POST'])
 def createScheduleLesson(request):
@@ -861,8 +869,8 @@ def editEvent(request):
         userEvent = Event.objects.filter(eventID = eventPK, userID = user)
         if userEvent.exists() and request.user.id == userPK:
             event.title = title
-            event.start = datetime.strptime(startDateTime, '%Y-%m-%dT%H:%M:%SZ')
-            event.end = datetime.strptime(endDateTime, '%Y-%m-%dT%H:%M:%SZ')
+            event.start = datetime.strptime(startDateTime, '%Y-%m-%dT%H:%M:%S')
+            event.end = datetime.strptime(endDateTime, '%Y-%m-%dT%H:%M:%S')
             try:
                 event.full_clean()  
                 event.save()
@@ -931,6 +939,10 @@ def upvotePost(request):
                     post.save()
                     serializer = PostSerializer(post)
                     return Response(serializer.data)
+                elif vote.type == "Downvote" :
+                    return Response({'res' : 
+                    "You have upvoted this post. Please unvote first before proceeding to downvote this post"}, 
+                    status= status.HTTP_403_FORBIDDEN)
             except:
                 vote = Vote(type="Upvote",postID= post, userID = member)
                 post.upvote += 1
@@ -941,7 +953,7 @@ def upvotePost(request):
         else:
             return Response({'res': 'User does not have permission to vote this post.'}, status = status.HTTP_403_FORBIDDEN)
     else:
-        return Response({'res' : 'Please sign in to vote this post'}, status = status.HTTP_403_FORBIDDEN)
+        return Response({'res' : 'Please sign in to vote this post'}, status = status.HTTP_401_UNAUTHORIZED)
 
 @api_view(['POST'])
 def downvotePost(request):
@@ -958,6 +970,10 @@ def downvotePost(request):
                     post.save()
                     serializer = PostSerializer(post)
                     return Response(serializer.data)
+                elif vote.type == "Upvote" :
+                    return Response({'res' : 
+                    "You have downvoted this post. Please unvote first before proceeding to upvote this post"}, 
+                    status= status.HTTP_403_FORBIDDEN)
             except:
                 vote = Vote(type="Downvote",postID= post, userID = member)
                 post = Post.objects.get(postID = data["postID"])

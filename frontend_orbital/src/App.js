@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 
+
 import "./App.css";
 import { Switch, Route, withRouter,  useLocation  } from "react-router-dom";
 import Home from "./pages/home";
@@ -13,6 +14,9 @@ import PostHistory from './pages/posthistory';
 import PostPage from './pages/postpage';
 import Account from './pages/account';
 import Timetable from './pages/timetable';
+import Todolist from './pages/todolist';
+import axios from 'axios';
+
 function App(props) {
     const [isLoggedIn, setIsLoggedIn] = useState(
         localStorage.getItem("token") ? true : false
@@ -22,6 +26,7 @@ function App(props) {
     const [isStaff, setIsStaff] = useState(false);
     const [active, setActive] = useState("");
     const alert = useAlert();
+
 
 
     useEffect(() => {
@@ -102,23 +107,23 @@ function App(props) {
 
     return (
         <div className="App">
-           {(props.location.pathname !== '/sign-up' && props.location.pathname !== '/login') && <Navbar
+            {(props.location.pathname !== '/sign-up' && props.location.pathname !== '/login'
+            ) && <Navbar
                 active={active}
                 setActive={setActive}
                 isLoggedIn={isLoggedIn}
+                isStaff = {isStaff}
                 username={username}
                 handleLogout={handleLogout}
             />}
+ 
 
-            {(props.location.pathname == '/') && <IntroSection
-                active={active}
-                setActive={setActive}
-                isLoggedIn={isLoggedIn}
-                username={username}
-                handleLogout={handleLogout}
-            />}     
+
+   
 
             <Switch>
+  
+
                 <Route
                     path="/sign-up"
                     render={(props) => (
@@ -190,7 +195,26 @@ function App(props) {
                         />
                     )}
                 />
-                <Route path='/'  component={Home}/>
+
+                <Route
+                    path='/todolist'
+                    render={(props) => (
+                        <Todolist
+                            {...props}
+                            username={username}
+                            id={id}
+                            isStaff={isStaff}
+                        />
+                    )}
+                />
+                <Route path='/'  render={(props) => (
+                        <Home
+                            {...props}
+                            username={username}
+                            id={id}
+                            isStaff={isStaff}
+                        />
+                    )}/>
             </Switch>
         </div>
     );

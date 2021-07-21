@@ -4,10 +4,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1rem;
+  font-size: 0.95rem;
   position: sticky;
   top: 0;
-  z-index: 999;
+  z-index: 1001;
   margin: 0;
   padding:0;
 }
@@ -16,6 +16,7 @@
   display: flex;
   justify-content: center;
   height: 80px;
+  padding: 0;
 }
 
 .navbar-logo {
@@ -36,16 +37,17 @@
 
 .nav-menu {
   display: grid;
-  grid-template-columns: repeat(5, auto);
-  grid-gap: 10px;
+  grid-template-columns: repeat(6, auto);
+  grid-gap: 0px;
   list-style: none;
   text-align: center;
-  width: 60vw;
+  width: 80vw;
   justify-content: end;
   margin-right: 0rem;
   float:right;
+  padding-right: 50px;
+  padding-left: 30px;
 }
-
 .nav-item {
   height: 80px;
 }
