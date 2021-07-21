@@ -400,7 +400,36 @@ def getUsersTask(request, userid):
 def getUserTodayTask(request, userid) :
     if request.user.id != userid:
         return Response({'res' : 'User does not have permission to view this list of task.'}, status = status.HTTP_403_FORBIDDEN)
-    tasks = Task.objects.filter(deadline = datetime(date.today().year, date.today().month, date.today().day))
+    tasks = Task.objects.filter(deadline = datetime(date.today().year, date.today().month, date.today().day), userID = userid)
+    serializer = TaskSerializer(tasks, many = True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getUserRecentTask(request, userid) :
+    if request.user.id != userid:
+        return Response({'res' : 'User does not have permission to view this list of task.'}, status = status.HTTP_403_FORBIDDEN)
+    today = date.today()
+    tasks = Task.objects.filter(deadline__range = ([today + date.timedelta(days=7), today]) , userID = userid)
+    serializer = TaskSerializer(tasks, many = True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getUserCompletedTask(request, userid) : 
+    if request.user.id != userid:
+        return Response({'res' : 'User does not have permission to view this list of task.'}, status = status.HTTP_403_FORBIDDEN)
+    tasks = Task.objects.filter(completed=True , userID = userid)
+    serializer = TaskSerializer(tasks, many = True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getUserIncompleteTask(request, userid) : 
+    if request.user.id != userid:
+        return Response({'res' : 'User does not have permission to view this list of task.'}, status = status.HTTP_403_FORBIDDEN)
+    tasks = Task.objects.filter(completed=False , userID = userid)
     serializer = TaskSerializer(tasks, many = True)
     return Response(serializer.data)
 
@@ -496,7 +525,7 @@ def getMajor(request, userID) :
 def createPost(request):
     data = request.data
     memberid = data['userID']
-    member = User.objects.get(id = memberid)
+    member = MemberUser.objects.get(user_id = memberid)
     posttitle = data['title']
     content = data['textContent']
     categoryid= data['categoryID']
@@ -524,7 +553,7 @@ def createPost(request):
 def createComment(request):
     data = request.data
     memberid = data['userID']
-    member = User.objects.get(id = memberid)
+    member = MemberUser.objects.get(user_id = memberid)
     content = data['textContent']
     postid= data['postID']
     post = Post.objects.get(postID = postid)
@@ -542,7 +571,7 @@ def createComment(request):
 def createReply(request):
     data = request.data
     memberid = data['userID']
-    member = User.objects.get(id = memberid)
+    member = MemberUser.objects.get(user_id = memberid)
     content = data['textContent']
     postid= data['postID']
     post = Post.objects.get(postID = postid)
