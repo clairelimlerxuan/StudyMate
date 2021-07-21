@@ -395,7 +395,7 @@ class Lesson(models.Model):
     lessonID = models.AutoField(primary_key=True)
     moduleID = models.ForeignKey(
         Module,
-        on_delete=models.CASCADE,   # if module is removed, lesson is removed too
+        on_delete=models.RESTRICT, 
         db_column = 'moduleID'
     )
     classNo = models.CharField(max_length = 5)
@@ -421,7 +421,7 @@ class ScheduleLesson(models.Model):
     )
     lessonID = models.ForeignKey(
         Lesson,
-        on_delete=models.RESTRICT,   # if lesson is removed, scheduled lesson is removed too
+        on_delete=models.RESTRICT, 
         db_column = 'lessonID'
     )
     

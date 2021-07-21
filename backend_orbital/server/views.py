@@ -496,7 +496,7 @@ def getMajor(request, userID) :
 def createPost(request):
     data = request.data
     memberid = data['userID']
-    member = MemberUser.objects.get(user_id = memberid)
+    member = User.objects.get(id = memberid)
     posttitle = data['title']
     content = data['textContent']
     categoryid= data['categoryID']
@@ -524,7 +524,7 @@ def createPost(request):
 def createComment(request):
     data = request.data
     memberid = data['userID']
-    member = MemberUser.objects.get(user_id = memberid)
+    member = User.objects.get(id = memberid)
     content = data['textContent']
     postid= data['postID']
     post = Post.objects.get(postID = postid)
@@ -542,7 +542,7 @@ def createComment(request):
 def createReply(request):
     data = request.data
     memberid = data['userID']
-    member = MemberUser.objects.get(user_id = memberid)
+    member = User.objects.get(id = memberid)
     content = data['textContent']
     postid= data['postID']
     post = Post.objects.get(postID = postid)
