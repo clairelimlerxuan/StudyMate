@@ -270,6 +270,7 @@ def viewTask(request, taskPK):
     serializer = TaskSerializer(task, many = False)
     return Response(serializer.data)
 
+<<<<<<< HEAD
 #get tag by categoryID
 @api_view(['GET'])
 def getTagbyCategory(request, categoryid):
@@ -280,6 +281,8 @@ def getTagbyCategory(request, categoryid):
     tags = Tag.objects.filter(categoryID = id)
     serializer = TagSerializer(tags, many = True)
     return Response(serializer.data)
+=======
+>>>>>>> b4175a87fb1d4e0db63124b19f0c59b2d2665857
 
 
 # Read all instances of the item that are made by the user.
@@ -307,7 +310,6 @@ def getUsersReply(request, userid):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUsersEvent(request, userid):
-    
     events = Event.objects.filter(userID = userid)
     serializer = EventSerializer(events, many = True)
     return Response(serializer.data)
@@ -425,7 +427,6 @@ def getUserCompletedTask(request, userid) :
     serializer = TaskSerializer(tasks, many = True)
     return Response(serializer.data)
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUserIncompleteTask(request, userid) : 
@@ -496,11 +497,14 @@ def getUserbyPK(request, userID) :
     serializer = UserSerializer(user, many= False)
     return Response(serializer.data)
 
-# get all tags of the category
+# get all tags of the category by categoryID
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def getTag(request, categoryid):
-    tags = Tag.objects.filter(categoryID = categoryid)
+    if categoryid == 1:
+        id = "ACAD"
+    elif categoryid == 2 :
+        id = "NON-ACAD"
+    tags = Tag.objects.filter(categoryID = id)
     serializer = TagSerializer(tags, many = True)
     return Response(serializer.data)
 
@@ -788,12 +792,15 @@ def editProfile(request):
     major = Major.objects.get(majorID = data['majorID'])
     faculty = Faculty.objects.get(facultyID = data['facultyID'])
     year = data['year']
+    if major.facultyID != faculty:
+        return Response({'res' : 'Invalid major selected.'}, status = status.HTTP_403_FORBIDDEN)
     user.yearOfStudy = year
     user.majorID = major
     user.facultyID = faculty
     user.save()
     serializer = MemberUserSerializer(user, many=False)
     return Response(serializer.data)
+
 
 @api_view(['POST'])
 def editPost(request):
@@ -982,7 +989,7 @@ def upvotePost(request):
                     return Response(serializer.data)
                 elif vote.type == "Downvote" :
                     return Response({'res' : 
-                    "You have upvoted this post. Please unvote first before proceeding to downvote this post"}, 
+                    "You have downvoted this post. Please unvote first before proceeding to upvote this post"}, 
                     status= status.HTTP_403_FORBIDDEN)
             except:
                 vote = Vote(type="Upvote",postID= post, userID = member)
@@ -1013,7 +1020,7 @@ def downvotePost(request):
                     return Response(serializer.data)
                 elif vote.type == "Upvote" :
                     return Response({'res' : 
-                    "You have downvoted this post. Please unvote first before proceeding to upvote this post"}, 
+                    "You have upvoted this post. Please unvote first before proceeding to downvote this post"}, 
                     status= status.HTTP_403_FORBIDDEN)
             except:
                 vote = Vote(type="Downvote",postID= post, userID = member)
