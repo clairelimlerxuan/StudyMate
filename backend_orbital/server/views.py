@@ -305,7 +305,6 @@ def getUsersReply(request, userid):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUsersEvent(request, userid):
-    
     events = Event.objects.filter(userID = userid)
     serializer = EventSerializer(events, many = True)
     return Response(serializer.data)
@@ -422,7 +421,6 @@ def getUserCompletedTask(request, userid) :
     tasks = Task.objects.filter(completed=True , userID = userid)
     serializer = TaskSerializer(tasks, many = True)
     return Response(serializer.data)
-
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -776,12 +774,15 @@ def editProfile(request):
     major = Major.objects.get(majorID = data['majorID'])
     faculty = Faculty.objects.get(facultyID = data['facultyID'])
     year = data['year']
+    if major.facultyID != faculty:
+        return Response({'res' : 'Invalid major selected.'}, status = status.HTTP_403_FORBIDDEN)
     user.yearOfStudy = year
     user.majorID = major
     user.facultyID = faculty
     user.save()
     serializer = MemberUserSerializer(user, many=False)
     return Response(serializer.data)
+
 
 @api_view(['POST'])
 def editPost(request):
