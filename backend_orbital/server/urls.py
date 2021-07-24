@@ -65,7 +65,7 @@ urlpatterns = [
     path('viewevent/<int:eventPK>/', viewEvent),
     path('viewtask/<int:taskPK>/', viewTask),
 
-    path('completetask/<int:taskid>/', completeTask),
+    path('completetask/', completeTask),
     path('createpost/', createPost),
     path('createcomment/', createComment),
     path('createreply/', createReply),

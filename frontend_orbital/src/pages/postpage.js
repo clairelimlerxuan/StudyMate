@@ -731,7 +731,7 @@ export default function Thread({ match, location, id }) {
                                 </form>
                             }
 
-                            {isLoggedIn && (username == user_post.username ||isStaff == true) &&
+                            {isLoggedIn && (username == user_post.username || isStaff === true) &&
                             <div>
                                 <>
                                 <Button  variant="contained" color="secondary"  style={{ width: 100 }} 

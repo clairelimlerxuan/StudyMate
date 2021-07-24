@@ -1,4 +1,5 @@
 from datetime import date, datetime, timedelta
+import re
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 import requests
@@ -266,7 +267,7 @@ def viewTask(request, taskPK):
         return Response({'res' : 'No such task.'}, status = status.HTTP_404_NOT_FOUND)
     if request.user.id != task.userID.user_id: 
         return Response({'res' : 'User does not have permission to view this task.'}, status = status.HTTP_403_FORBIDDEN)
-    serializer = EventSerializer(task, many = False)
+    serializer = TaskSerializer(task, many = False)
     return Response(serializer.data)
 
 #get tag by categoryID
@@ -519,11 +520,16 @@ def getMajor(request, userID) :
     serializer = MajorSerializer(major, many=False)
     return Response(serializer.data)
 
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def completeTask(request, taskid):
+def completeTask(request):
+    data = request.data
+    taskid = data['taskID']
     task = Task.objects.get(taskID = taskid)
-    task.completed = True
+    if task.completed == False :
+        task.completed = True
+    else :
+        task.completed = False
     task.save()
     serializer = TaskSerializer(task, many=False)
     return Response(serializer.data)
@@ -534,7 +540,7 @@ def completeTask(request, taskid):
 def createPost(request):
     data = request.data
     memberid = data['userID']
-    member = MemberUser.objects.get(user_id = memberid)
+    member = User.objects.get(id = memberid)
     posttitle = data['title']
     content = data['textContent']
     categoryid= data['categoryID']
@@ -562,7 +568,7 @@ def createPost(request):
 def createComment(request):
     data = request.data
     memberid = data['userID']
-    member = MemberUser.objects.get(user_id = memberid)
+    member = User.objects.get(user_id = memberid)
     content = data['textContent']
     postid= data['postID']
     post = Post.objects.get(postID = postid)
@@ -580,7 +586,7 @@ def createComment(request):
 def createReply(request):
     data = request.data
     memberid = data['userID']
-    member = MemberUser.objects.get(user_id = memberid)
+    member = User.objects.get(user_id = memberid)
     content = data['textContent']
     postid= data['postID']
     post = Post.objects.get(postID = postid)

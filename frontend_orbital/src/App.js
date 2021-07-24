@@ -16,6 +16,8 @@ import Account from './pages/account';
 import Timetable from './pages/timetable';
 import Todolist from './pages/todolist';
 import axios from 'axios';
+import { makeStyles } from "@material-ui/core";
+
 
 function App(props) {
     const [isLoggedIn, setIsLoggedIn] = useState(
@@ -26,7 +28,6 @@ function App(props) {
     const [isStaff, setIsStaff] = useState(false);
     const [active, setActive] = useState("");
     const alert = useAlert();
-
 
 
     useEffect(() => {
@@ -119,7 +120,13 @@ function App(props) {
  
 
 
-   
+            {(props.location.pathname == '/') && <IntroSection
+                active={active}
+                setActive={setActive}
+                isLoggedIn={isLoggedIn}
+                username={username}
+                handleLogout={handleLogout}
+            />}     
 
             <Switch>
   

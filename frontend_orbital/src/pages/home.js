@@ -10,7 +10,7 @@ function Home(props) {
     return (
         !props.isStaff ?(
         <>
-            <IntroSection/>
+            
             <Card/>
             <Footer/>
         </>
