@@ -99,7 +99,7 @@ const useStyles = makeStyles((theme) => ({
     },
 
     header : {
-        backgroundColor: "#8d6e63",
+        backgroundColor: "#c62828",
         width: "100%",
         alignItems: 'stretch',
         flexDirection: 'column',
@@ -631,6 +631,7 @@ export default function Thread({ match, location, id }) {
              classes={{
                 root: classes.header,
                 title: classes.headerTitle,
+                subheader : classes.headerTitle,
               }}
 
            
@@ -692,7 +693,7 @@ export default function Thread({ match, location, id }) {
                                     </small>       
                                     
                                     <br />
-                                    <Button type="submit" color="secondary" variant="contained" onClick={handleSubmitComment}
+                                    <Button type="submit" color="secondary" style={{color:"#bf360c"}} variant="contained" onClick={handleSubmitComment}
                                     disabled={content== "" ? true : false}
                                     >
                                         Answer
