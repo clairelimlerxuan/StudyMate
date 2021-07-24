@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 import requests
 from rest_framework import viewsets
+from django.utils import timezone
 
 from rest_framework import response
 from rest_framework.serializers import Serializer
@@ -270,7 +271,7 @@ def viewTask(request, taskPK):
 
 #get tag by categoryID
 @api_view(['GET'])
-def getTag(request, categoryid):
+def getTagbyCategory(request, categoryid):
     if categoryid == 1:
         id = "ACAD"
     elif categoryid == 2 :
@@ -400,17 +401,17 @@ def getUsersTask(request, userid):
 def getUserTodayTask(request, userid) :
     if request.user.id != userid:
         return Response({'res' : 'User does not have permission to view this list of task.'}, status = status.HTTP_403_FORBIDDEN)
-    tasks = Task.objects.filter(deadline = datetime(date.today().year, date.today().month, date.today().day), userID = userid)
+    today = timezone.now().date()
+    tasks = Task.objects.filter(deadline__date = today, userID = userid)
     serializer = TaskSerializer(tasks, many = True)
     return Response(serializer.data)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUserRecentTask(request, userid) :
-    if request.user.id != userid:
-        return Response({'res' : 'User does not have permission to view this list of task.'}, status = status.HTTP_403_FORBIDDEN)
-    today = date.today()
-    tasks = Task.objects.filter(deadline__range = ([today + date.timedelta(days=7), today]) , userID = userid)
+   
+    today = timezone.now().date()
+    tasks = Task.objects.filter(deadline__gte = (today),deadline__lte = (today + timedelta(days=7)) , userID = userid)
     serializer = TaskSerializer(tasks, many = True)
     return Response(serializer.data)
 
@@ -466,8 +467,8 @@ def getReplyParent(request, replyID):
 @permission_classes((AllowAny,))
 def getUser(request, postID) :
     post = Post.objects.get(postID = postID)
-    user = MemberUser.objects.get(user_id = post.userID.user_id)
-    serializer = MemberUserSerializer(user, many = False)
+    user = User.objects.get(id = post.userID.id)
+    serializer = UserSerializer(user, many = False)
     return Response(serializer.data)
 
 # get all comments of the post
@@ -518,6 +519,14 @@ def getMajor(request, userID) :
     serializer = MajorSerializer(major, many=False)
     return Response(serializer.data)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def completeTask(request, taskid):
+    task = Task.objects.get(taskID = taskid)
+    task.completed = True
+    task.save()
+    serializer = TaskSerializer(task, many=False)
+    return Response(serializer.data)
 
 
 # Create an instance of the item.
@@ -641,8 +650,6 @@ def createTask(request):
     memberid = data['userID']
     taskTitle = data['title']
     taskDeadline = data['deadline']
-    taskCompletition = data['completed']
-    taskSubmission = data['submitted']
     try:
         member = MemberUser.objects.get(user_id = memberid)
     except ObjectDoesNotExist:
@@ -650,8 +657,7 @@ def createTask(request):
     if request.user.id != memberid:
         return Response({'res' : 'User does not have permission to create this task.'}, status = status.HTTP_403_FORBIDDEN)
     task = Task(
-        userID = member, title = taskTitle, deadline = taskDeadline,
-        completed = taskCompletition, submitted = taskSubmission
+        userID = member, title = taskTitle, deadline = taskDeadline
     )
     task.save()
     serializer = TaskSerializer(task, many = False)

@@ -295,7 +295,6 @@ function Forum(props) {
 
                 </Box>
                 <Container maxWidth="false" className={classes.container}>
-                {props.isStaff == false && 
                 <Card className = {classes.root}>
                     <CardHeader
                     title="Hi, what's your question?"
@@ -368,16 +367,11 @@ function Forum(props) {
                                             <>
                                             <p>{module}</p>
                                             <Autocomplete
-                                                value={module}
-                                                onChange={(event, newInputValue) => {
-                                                    if(newInputValue){
-                                                setModule(newInputValue.moduleCode);}
-                                                else {
-                                                    setModule("");
-                                                }
-                                                }}
                                                 id="controllable-states-demo"
                                                 options={modules}
+                                                onChange = {(event,newValue) => {
+                                                    setModule(newValue.moduleCode);
+                                                }}
                                                 getOptionLabel={option => option.moduleCode}
                                                 style={{ width: 300 }}
                                                 renderInput={(params) => <TextField {...params} label="Module" variant="outlined" />}
@@ -415,7 +409,6 @@ function Forum(props) {
                             </form>
                     </CardContent>
                 </Card>
-                }
             </Container>
             <main>
                 {loading ? (
