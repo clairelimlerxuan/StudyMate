@@ -268,16 +268,6 @@ def viewTask(request, taskPK):
     serializer = EventSerializer(task, many = False)
     return Response(serializer.data)
 
-#get tag by categoryID
-@api_view(['GET'])
-def getTag(request, categoryid):
-    if categoryid == 1:
-        id = "ACAD"
-    elif categoryid == 2 :
-        id = "NON-ACAD"
-    tags = Tag.objects.filter(categoryID = id)
-    serializer = TagSerializer(tags, many = True)
-    return Response(serializer.data)
 
 
 # Read all instances of the item that are made by the user.
@@ -492,11 +482,14 @@ def getUserbyPK(request, userID) :
     serializer = UserSerializer(user, many= False)
     return Response(serializer.data)
 
-# get all tags of the category
+# get all tags of the category by categoryID
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def getTag(request, categoryid):
-    tags = Tag.objects.filter(categoryID = categoryid)
+    if categoryid == 1:
+        id = "ACAD"
+    elif categoryid == 2 :
+        id = "NON-ACAD"
+    tags = Tag.objects.filter(categoryID = id)
     serializer = TagSerializer(tags, many = True)
     return Response(serializer.data)
 
@@ -523,7 +516,7 @@ def getMajor(request, userID) :
 def createPost(request):
     data = request.data
     memberid = data['userID']
-    member = MemberUser.objects.get(user_id = memberid)
+    member = User.objects.get(id = memberid)
     posttitle = data['title']
     content = data['textContent']
     categoryid= data['categoryID']
@@ -551,7 +544,7 @@ def createPost(request):
 def createComment(request):
     data = request.data
     memberid = data['userID']
-    member = MemberUser.objects.get(user_id = memberid)
+    member = User.objects.get(user_id = memberid)
     content = data['textContent']
     postid= data['postID']
     post = Post.objects.get(postID = postid)
@@ -569,7 +562,7 @@ def createComment(request):
 def createReply(request):
     data = request.data
     memberid = data['userID']
-    member = MemberUser.objects.get(user_id = memberid)
+    member = User.objects.get(user_id = memberid)
     content = data['textContent']
     postid= data['postID']
     post = Post.objects.get(postID = postid)
@@ -971,7 +964,7 @@ def upvotePost(request):
                     return Response(serializer.data)
                 elif vote.type == "Downvote" :
                     return Response({'res' : 
-                    "You have upvoted this post. Please unvote first before proceeding to downvote this post"}, 
+                    "You have downvoted this post. Please unvote first before proceeding to upvote this post"}, 
                     status= status.HTTP_403_FORBIDDEN)
             except:
                 vote = Vote(type="Upvote",postID= post, userID = member)
@@ -1002,7 +995,7 @@ def downvotePost(request):
                     return Response(serializer.data)
                 elif vote.type == "Upvote" :
                     return Response({'res' : 
-                    "You have downvoted this post. Please unvote first before proceeding to upvote this post"}, 
+                    "You have upvoted this post. Please unvote first before proceeding to downvote this post"}, 
                     status= status.HTTP_403_FORBIDDEN)
             except:
                 vote = Vote(type="Downvote",postID= post, userID = member)
