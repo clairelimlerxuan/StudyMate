@@ -270,7 +270,6 @@ def viewTask(request, taskPK):
     serializer = TaskSerializer(task, many = False)
     return Response(serializer.data)
 
-<<<<<<< HEAD
 #get tag by categoryID
 @api_view(['GET'])
 def getTagbyCategory(request, categoryid):
@@ -281,8 +280,6 @@ def getTagbyCategory(request, categoryid):
     tags = Tag.objects.filter(categoryID = id)
     serializer = TagSerializer(tags, many = True)
     return Response(serializer.data)
-=======
->>>>>>> b4175a87fb1d4e0db63124b19f0c59b2d2665857
 
 
 # Read all instances of the item that are made by the user.
@@ -572,7 +569,7 @@ def createPost(request):
 def createComment(request):
     data = request.data
     memberid = data['userID']
-    member = User.objects.get(user_id = memberid)
+    member = User.objects.get(id = memberid)
     content = data['textContent']
     postid= data['postID']
     post = Post.objects.get(postID = postid)
@@ -590,7 +587,7 @@ def createComment(request):
 def createReply(request):
     data = request.data
     memberid = data['userID']
-    member = User.objects.get(user_id = memberid)
+    member = User.objects.get(id = memberid)
     content = data['textContent']
     postid= data['postID']
     post = Post.objects.get(postID = postid)
@@ -679,7 +676,7 @@ def createTask(request):
 @api_view(['DELETE'])
 def deletePost(request, postPK, userPK):
     try:
-        user = MemberUser.objects.get(user_id = userPK)
+        user = User.objects.get(id = userPK)
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     try:
@@ -696,8 +693,8 @@ def deletePost(request, postPK, userPK):
 
 @api_view(['DELETE'])
 def deleteComment(request, commentPK, userPK,):
-    try:
-        user = MemberUser.objects.get(user_id = userPK)       
+    try:    
+        user = User.objects.get(id = userPK) 
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     try:
@@ -716,8 +713,8 @@ def deleteComment(request, commentPK, userPK,):
 
 @api_view(['DELETE'])
 def deleteReply(request, replyPK, userPK):
-    try:
-        user = MemberUser.objects.get(user_id = userPK)    
+    try:   
+        user = User.objects.get(id = userPK) 
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     try:
@@ -810,7 +807,7 @@ def editPost(request):
     title = data['title']
     textContent = data['textContent']
     try:
-        user = MemberUser.objects.get(user_id = userPK)
+        user = User.objects.get(id = userPK) 
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     try:
@@ -838,7 +835,8 @@ def editComment(request):
     commentPK  = data['commentID']
     textContent = data['textContent']
     try: 
-        user = MemberUser.objects.get(user_id = userPK)   
+        #user = MemberUser.objects.get(user_id = userPK)   
+        user = User.objects.get(id = userPK) 
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     try:
@@ -870,7 +868,8 @@ def editReply(request):
     replyPK  = data['replyID']
     textContent = data['textContent']
     try:
-        user = MemberUser.objects.get(user_id = userPK)  
+        #user = MemberUser.objects.get(user_id = userPK)  
+        user = User.objects.get(id = userPK) 
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     try:

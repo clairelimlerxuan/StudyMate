@@ -73,7 +73,7 @@ urlpatterns = [
     path('createschedulelesson/', createScheduleLesson),
     path('createtask/', createTask),
 
-    path('deletepost/<int:postID>/<int:userID>/', deletePost),
+    path('deletepost/<int:postPK>/<int:userPK>/', deletePost),
     path('deletecomment/<int:commentPK>/<int:userPK>/', deleteComment),
     path('deletereply/<int:replyPK>/<int:userPK>/', deleteReply),
     path('deleteevent/<int:eventPK>/<int:userPK>/', deleteEvent),
