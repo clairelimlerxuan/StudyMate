@@ -1009,7 +1009,6 @@ export default function Thread({ match, location, id }) {
                                                                                                             <DialogContent className={classes.paper}>
                                                                                                                 <DialogContentText>
                                                                                                                     <h4 id="simple-dialog-title">Edit Reply</h4>
-                                                                                                                    <h1>{commentID}</h1>
                                                                                                                 </DialogContentText>
                                                                                                             <form className="post pb-4" className={classes.form}>
                                                                                                                 <div className="form-row align-items-left mb-3 ml-3">
@@ -1223,10 +1222,6 @@ export default function Thread({ match, location, id }) {
                                                                         disabled={!isLoggedIn}
                                                                         required />
                                                                     </div>
-                                                                    <h1>{id}</h1>
-                                                                    <h1>{commentID}</h1>
-                                                                    <h1>{commentID}</h1>
-                                                                    <h1>{match.params.postID}</h1>
                                                                 </div>
                                                                 <DialogActions>
                                                                     <div className="row content ml-1 mr-1 pt-5 d-flex justify-content-center">
