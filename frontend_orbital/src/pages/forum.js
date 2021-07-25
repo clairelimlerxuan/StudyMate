@@ -99,6 +99,7 @@ function Forum(props) {
         getCategories();
         getModules();
         loadAll();
+        console.log(props.username)
     }, []);
 
     const getTags = () => {

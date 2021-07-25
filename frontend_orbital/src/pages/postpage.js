@@ -141,6 +141,8 @@ export default function Thread({ match, location, id }) {
     const [editOpen, setEditOpen] = useState(false);
     const [like, setLike] = useState(0);
     const [dislike, setDislike] = useState(0);
+    const [editCommOpen, setEditCommOpen] = useState(false);
+    const [editRepOpen, setRepOpen] = useState(false);
     const alert = useAlert();
 
     const [isLoggedIn, setIsLoggedIn] = useState(
@@ -149,11 +151,26 @@ export default function Thread({ match, location, id }) {
 
     const [scroll, setScroll] = React.useState('paper');
   
+    const handleEditComOpen = () => {
+        setEditCommOpen(true);
+    };
+
+    const handleEditComClose = () => {
+        setEditCommOpen(false);
+    };
+
+    const handleEditRepOpen = () => {
+        setRepOpen(true);
+    }
+
+    const handleEditRepClose = () => {
+        setRepOpen(false);
+    }
+
     const handleModalOpen = (scrollType) => {
       setModal(true);
       setScroll(scrollType);
     };
-
 
     const handleModalClose = () => {
         setModal(false);
@@ -163,21 +180,18 @@ export default function Thread({ match, location, id }) {
         setEditOpen(true);
       };
   
-  
-      const handleEditClose = () => {
-          setEditOpen(false);
-      }
-  
-    
-      const handleDeleteReplyOpen = () => {
+    const handleEditClose = () => {
+        setEditOpen(false);
+    }
+     
+    const handleDeleteReplyOpen = () => {
         setDeleteReplyOpen(true);
-      };
+    };
   
   
-      const handleDeleteReplyClose = () => {
-          setDeleteReplyOpen(false);
-      }
-  
+    const handleDeleteReplyClose = () => {
+        setDeleteReplyOpen(false);
+    }
       
     const descriptionElementRef = React.useRef(null);
 
@@ -323,8 +337,8 @@ export default function Thread({ match, location, id }) {
 
         console.log(res);
         console.log(res.data);
-        handleOpen();
         setReplyContent("");
+        setCommentID("");
     })
     .catch((err) => {
         if (
@@ -440,15 +454,43 @@ export default function Thread({ match, location, id }) {
 
     
     const handleEditComment = e => {
-            e.preventDefault();
-            const data = {
+        e.preventDefault();
+        axios
+            .post('http://localhost:8000/server/editcomment/',{
                 textContent: commentEdit,
                 commentID : commentID,
                 userID : id,
-            };
+                postID :  match.params.postID,
+            },
+            {
+                headers: {
+                    Authorization: "JWT " + localStorage.getItem("token"),
+                },
+            }
+            )
+            .then(
+                res => {
+                    window.location.reload(false);
+                    setCommentID("");
+                })
+            .catch(err =>  {
+            console.log(err.response);
+            console.log(err.response.data.res);
+            alert.show(err.response.data.res);
+            })
+        }
+
     
+        const handleEditReply = e => {
+            e.preventDefault();   
             axios
-                .post(('http://localhost:8000/server/editcoment', data),
+                .post('http://localhost:8000/server/editreply/',{
+                    textContent: replyEdit,
+                    commentID : commentID,
+                    replyID : replyID,
+                    userID : id,
+                    postID :  match.params.postID,
+                },
                 {
                     headers: {
                         Authorization: "JWT " + localStorage.getItem("token"),
@@ -458,8 +500,15 @@ export default function Thread({ match, location, id }) {
                 .then(
                     res => {
                         window.location.reload(false);
+                        setCommentID("");
+                        setReplyID("");
+                        setReplyEdit("");
                     })
-                .catch(err => console.log(err));
+                .catch(err =>  {
+                console.log(err.response);
+                console.log(err.response.data.res);
+                alert.show(err.response.data.res);
+                })
             }
 
     const onCommentChange = e => {
@@ -495,8 +544,7 @@ export default function Thread({ match, location, id }) {
             setPostEdit(post);
             setPostTitleEdit(title);
     }
-
-    
+   
     const onPostEditChange = (e) => {
         setPostEdit(e.target.value);
     };
@@ -505,6 +553,10 @@ export default function Thread({ match, location, id }) {
         setPostTitleEdit(e.target.value);
     };
 
+    const onCommentEditChange = e => {
+        e.preventDefault();
+        setCommentEdit(e.target.value);
+    };
 
     const onReplyEditChange = e => {
         e.preventDefault();
@@ -586,12 +638,12 @@ export default function Thread({ match, location, id }) {
 
     const setReplyAndID = (id, reply) => {
         setReplyID(id);
-        setReplyContent(reply);
+        setReplyEdit(reply);
     }
 
     const setCommentAndID = (commentid, ans) => {
         setCommentID(commentid);
-        setContent(ans);
+        setCommentEdit(ans);
     }
 
     const refreshPage =() => {
@@ -923,8 +975,6 @@ export default function Thread({ match, location, id }) {
                                                                     </form>
                                         
                                                                     </div>
-                                                    
-                                                                        
                                                                             {replies && replies.map((reply) => {
                                                                                 const d = post.creationDate;
                                                                                 const e = d.split("T")[0];
@@ -945,6 +995,53 @@ export default function Thread({ match, location, id }) {
                                                                                                             </p>
                                                                                                     </div>
                                                                                                     <p className="mr-3 ml-4 whiteSpace">{reply.textContent}</p>
+                                                                                                    <Button className="btn btn-icon float-right"  title="Edit Answer" data-target="#deleteAnswerModal" 
+                                                                                                        onClick={() =>{setReplyAndID(`${reply.replyID}`, 
+                                                                                                        `${reply.textContent}`); handleEditRepOpen();setCommentID(reply.commentID)}} startIcon={<Edit/>}>
+                                                                                                    </Button>
+                                                                                                    <Dialog
+                                                                                                        open={editRepOpen}
+                                                                                                        onClose={handleEditRepClose}
+                                                                                                        className={classes.modal}
+                                                                                                        aria-labelledby="simple-dialog-title"
+                                                                                                        aria-describedby="simple-dialog-description"
+                                                                                                        >
+                                                                                                            <DialogContent className={classes.paper}>
+                                                                                                                <DialogContentText>
+                                                                                                                    <h4 id="simple-dialog-title">Edit Reply</h4>
+                                                                                                                    <h1>{commentID}</h1>
+                                                                                                                </DialogContentText>
+                                                                                                            <form className="post pb-4" className={classes.form}>
+                                                                                                                <div className="form-row align-items-left mb-3 ml-3">
+                                                                                                                    <div>
+                                                                                                                    <TextField
+                                                                                                                        style = {{width: "60ch"}}
+                                                                                                                        id="outlined-multiline-static"
+                                                                                                                        defaultValue="Default Value"
+                                                                                                                        variant="outlined"
+                                                                                                                        placeholder="Title"
+                                                                                                                        value={replyEdit}
+                                                                                                                        onChange={onReplyEditChange}
+                                                                                                                        disabled={!isLoggedIn}
+                                                                                                                        required />
+                                                                                                                    </div> 
+                                                                                                                </div>
+                                                                                                                <DialogActions>
+                                                                                                                    <div className="row content ml-1 mr-1 pt-5 d-flex justify-content-center">
+                                                                                                                        <Button variant = "outlined" 
+                                                                                                                        className="btn btn-default col-sm-5 btn-outline-danger mr-2" style = {{margin:5}}
+                                                                                                                        onClick={handleEditReply}>
+                                                                                                                            Save
+                                                                                                                        </Button>
+                                                                                                                        <Button variant = "outlined" style = {{margin:5}} className="btn btn-default col-sm-5 btn-outline-secondary"
+                                                                                                                        onClick={handleEditRepClose}>
+                                                                                                                            Cancel
+                                                                                                                        </Button>
+                                                                                                                    </div>
+                                                                                                                </DialogActions>
+                                                                                                            </form>
+                                                                                                            </DialogContent>
+                                                                                                        </Dialog> 
                                                                                                     <Button className="btn btn-icon float-right"  title="Delete Answer" data-target="#deleteAnswerModal" 
                                                                                                         onClick={() =>{setReplyID(`${reply.replyID}`); handleDeleteReplyOpen()}} startIcon={<Delete/>}>
                                                                                                     </Button>
@@ -1093,13 +1190,61 @@ export default function Thread({ match, location, id }) {
                                              </div>
 
                                         }
+                                        {/*Edit and Delete Comment*/}
                                         {isLoggedIn && id == `${comment.userID}` &&
                                         <ul>
-                                                <Button className="btn btn-icon float-right" title="Edit Answer" data-toggle="modal" data-target="#editAnswerModal" 
-                                                onClick={() => setCommentAndID(`${comment.commentID}`, 
-                                                `${comment.textContent}`)} startIcon={<Edit/>}>
+                                            <>
+                                                <Button className="btn btn-icon float-right" title="Edit Comment" data-toggle="modal" data-target="#editAnswerModal" 
+                                                onClick={() => {setCommentAndID(`${comment.commentID}`, 
+                                                `${comment.textContent}`);handleEditComOpen()}} startIcon={<Edit/>}>
                                                 </Button>
-                                        
+                                                    <Dialog
+                                                        open={editCommOpen}
+                                                        onClose={handleEditComClose}
+                                                        className={classes.modal}
+                                                        aria-labelledby="simple-dialog-title"
+                                                        aria-describedby="simple-dialog-description"
+                                                        >
+                                                            <DialogContent className={classes.paper}>
+                                                                <DialogContentText>
+                                                                    <h4 id="simple-dialog-title">Edit Comment</h4>
+                                                                </DialogContentText>
+                                                            <form className="post pb-4" className={classes.form}>
+                                                                <div className="form-row align-items-left mb-3 ml-3">
+                                                                    <div>
+                                                                    <TextField
+                                                                        style = {{width: "60ch"}}
+                                                                        id="outlined-multiline-static"
+                                                                        defaultValue="Default Value"
+                                                                        variant="outlined"
+                                                                        placeholder="Title"
+                                                                        value={commentEdit}
+                                                                        onChange={onCommentEditChange}
+                                                                        disabled={!isLoggedIn}
+                                                                        required />
+                                                                    </div>
+                                                                    <h1>{id}</h1>
+                                                                    <h1>{commentID}</h1>
+                                                                    <h1>{commentID}</h1>
+                                                                    <h1>{match.params.postID}</h1>
+                                                                </div>
+                                                                <DialogActions>
+                                                                    <div className="row content ml-1 mr-1 pt-5 d-flex justify-content-center">
+                                                                        <Button variant = "outlined" 
+                                                                        className="btn btn-default col-sm-5 btn-outline-danger mr-2" style = {{margin:5}}
+                                                                        onClick={handleEditComment}>
+                                                                            Save
+                                                                        </Button>
+                                                                        <Button variant = "outlined" style = {{margin:5}} className="btn btn-default col-sm-5 btn-outline-secondary"
+                                                                        onClick={handleEditComClose}>
+                                                                            Cancel
+                                                                        </Button>
+                                                                    </div>
+                                                                </DialogActions>
+                                                            </form>
+                                                            </DialogContent>
+                                                        </Dialog> 
+                                                    </>
                                                 <>
                                                 <Button className="btn btn-icon float-right" type="button" data-toggle="modal" title="Delete Answer" data-target="#deleteAnswerModal" 
                                                 onClick={() =>{setCommentID(`${comment.commentID}`); handleOpen()}} startIcon={<Delete/>}>

@@ -270,7 +270,6 @@ def viewTask(request, taskPK):
     serializer = TaskSerializer(task, many = False)
     return Response(serializer.data)
 
-<<<<<<< HEAD
 #get tag by categoryID
 @api_view(['GET'])
 def getTagbyCategory(request, categoryid):
@@ -281,8 +280,6 @@ def getTagbyCategory(request, categoryid):
     tags = Tag.objects.filter(categoryID = id)
     serializer = TagSerializer(tags, many = True)
     return Response(serializer.data)
-=======
->>>>>>> b4175a87fb1d4e0db63124b19f0c59b2d2665857
 
 
 # Read all instances of the item that are made by the user.
@@ -572,7 +569,7 @@ def createPost(request):
 def createComment(request):
     data = request.data
     memberid = data['userID']
-    member = User.objects.get(user_id = memberid)
+    member = User.objects.get(id = memberid)
     content = data['textContent']
     postid= data['postID']
     post = Post.objects.get(postID = postid)
@@ -590,7 +587,7 @@ def createComment(request):
 def createReply(request):
     data = request.data
     memberid = data['userID']
-    member = User.objects.get(user_id = memberid)
+    member = User.objects.get(id = memberid)
     content = data['textContent']
     postid= data['postID']
     post = Post.objects.get(postID = postid)
@@ -660,6 +657,8 @@ def createTask(request):
     memberid = data['userID']
     taskTitle = data['title']
     taskDeadline = data['deadline']
+    isCompleted = data['completed']
+    isSubmitted = data['submitted']
     try:
         member = MemberUser.objects.get(user_id = memberid)
     except ObjectDoesNotExist:
@@ -667,7 +666,7 @@ def createTask(request):
     if request.user.id != memberid:
         return Response({'res' : 'User does not have permission to create this task.'}, status = status.HTTP_403_FORBIDDEN)
     task = Task(
-        userID = member, title = taskTitle, deadline = taskDeadline
+        userID = member, title = taskTitle, deadline = taskDeadline, completed = isCompleted, submitted = isSubmitted
     )
     task.save()
     serializer = TaskSerializer(task, many = False)
@@ -810,7 +809,7 @@ def editPost(request):
     title = data['title']
     textContent = data['textContent']
     try:
-        user = MemberUser.objects.get(user_id = userPK)
+        user = User.objects.get(user_id = userPK)
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     try:
@@ -838,7 +837,7 @@ def editComment(request):
     commentPK  = data['commentID']
     textContent = data['textContent']
     try: 
-        user = MemberUser.objects.get(user_id = userPK)   
+        user = User.objects.get(id = userPK)   
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     try:
@@ -870,7 +869,7 @@ def editReply(request):
     replyPK  = data['replyID']
     textContent = data['textContent']
     try:
-        user = MemberUser.objects.get(user_id = userPK)  
+        user = User.objects.get(id = userPK)  
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     try:
@@ -886,8 +885,9 @@ def editReply(request):
     except ObjectDoesNotExist:
         return Response({'res' : 'No such reply.'}, status = status.HTTP_404_NOT_FOUND)
     if request.user.is_authenticated:
-        userReply = Reply.objects.filter(replyID = replyPK, userID = user, postID = post, commentID = comment)
-        if userReply.exists() and userHasPermission(request, userPK):
+        userReply = Reply.objects.filter(replyID = replyPK, userID = userPK, postID = postPK, commentID = commentPK)
+        print(userReply.exists())
+        if userReply.exists() and request.user.id == userPK:
             reply.textContent = textContent
             reply.save()
             serializer = ReplySerializer(reply)
@@ -906,7 +906,7 @@ def editEvent(request):
     startDateTime = data['start']
     endDateTime = data['end']    
     try:
-        user = MemberUser.objects.get(user_id = userPK)
+        user = User.objects.get(id = userPK)
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     try:
@@ -915,7 +915,7 @@ def editEvent(request):
         return Response({'res' : 'No such event.'}, status = status.HTTP_404_NOT_FOUND)
     if request.user.is_authenticated:
         userEvent = Event.objects.filter(eventID = eventPK, userID = user)
-        if userEvent.exists() and request.user.id == userPK:
+        if userEvent.exists():
             event.title = title
             event.start = datetime.strptime(startDateTime, '%Y-%m-%dT%H:%M:%S')
             event.end = datetime.strptime(endDateTime, '%Y-%m-%dT%H:%M:%S')

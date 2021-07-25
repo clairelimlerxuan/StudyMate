@@ -46,7 +46,7 @@ class AdminUser(models.Model):
     adminUserPassword = models.CharField(max_length=30)
 
     def __str__(self):
-        return self.user
+        return str(self.user)
 
     class Meta:
         db_table = 'adminUser'

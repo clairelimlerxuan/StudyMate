@@ -256,6 +256,7 @@ export default function Timetable(props) {
 }
   
   const handleEditEvent = (e) => {
+    e.preventDefault();
     axios
       .post(
       `http://localhost:8000/server/editevent/`,
@@ -276,14 +277,11 @@ export default function Timetable(props) {
   .then((res) => {
       console.log(res);
       console.log(res.data);
-      handleOpen();
-      setType("");
-      setTitle("");
-      setDesc("");
-      setStart("");
-      setEnd("");
-      setEventDetail("");
-      setEvents();
+      console.log(res.status)
+      setTitleEdit("");
+      setDescEdit("");
+      setStartEdit("");
+      setEndEdit("");
       if (res.status == 200) {
         handleEditEventClose();
       }
@@ -446,7 +444,7 @@ useEffect(() => {
                 type="datetime-local"
                 value={start}
                 onChange={onStartChange}
-                defaultValue="2017-05-24T10:30"
+                defaultValue="2017-05-24T10:30:00"
                 InputLabelProps={{
                   shrink: true,
                 }}
@@ -461,7 +459,7 @@ useEffect(() => {
                 type="datetime-local"
                 value={end}
                 onChange={onEndChange}
-                defaultValue="2017-05-24T10:30"
+                defaultValue="2017-05-24T10:30:00"
                 InputLabelProps={{
                   shrink: true,
                 }}
@@ -531,7 +529,7 @@ useEffect(() => {
             <Dialog
               open={deleteOpen}
               onClose={handleDeleteClose}
-              className={classes.modal}
+              className={classes.root}
               aria-labelledby="simple-dialog-title"
               aria-describedby="simple-dialog-description"
               >
