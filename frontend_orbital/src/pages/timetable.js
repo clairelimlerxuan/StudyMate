@@ -471,12 +471,17 @@ useEffect(() => {
     setLoading(false);
   })
   .catch((err) => {
-    if (err.response.status ===  401 || err.response.status === 404) {
-      alert.show("Your session has expired. Please login again to see your schedule")
-    } else {
-      console.log(err);
-    }
-  })
+    if (
+      err.status === 401 
+  ) {
+      alert.show("Your session has expired. Please Log In again to answer this question");
+  } else if (err.status === 404) {
+    alert.show("Sorry, we have trouble in retrieveing your timetable");
+  }
+    else {
+    console.log(err)
+  }
+})
 }, []);
 
   const handleDeleteSchedLesson = (e, lessonid) => {
@@ -731,8 +736,7 @@ useEffect(() => {
           <ListItem>
               <ListItemText secondary={
                 <Typography varian="subtitle1">
-                {(event.startStr).split("T")[0] + " "} 
-              &middot; {((event.startStr).split("T")[1]).slice(0,5)} 
+                  {(event.startStr)}
               </Typography>}
               primary="Start Time"
               />
@@ -741,8 +745,9 @@ useEffect(() => {
           <ListItem>
               <ListItemText secondary={
                 <Typography varian="subtitle1">
-                {(event.endStr).split("T")[0] + " "} 
-              &middot; {((event.endStr).split("T")[1]).slice(0,5)} 
+                  {event.endStr ? ((event.endStr).split("T")[0]) : (
+                    ""
+                  )}
               </Typography>}
               primary="End Time"
               />
@@ -844,8 +849,7 @@ useEffect(() => {
       )}
       </main>
       </Container>
-                <h1 className={classes.container}>Lessons</h1>
-                
+                <h1 className={classes.container}>{events ? "HI" : "Hai"}</h1>
       </Container>
       </React.Fragment>
     )

@@ -995,7 +995,33 @@ const handleChangeData = (newType) => {
                                         </form>
                                     </DialogContent>
                                 </Dialog>
-                                <Button startIcon={<DeleteIcon/>}/>
+                                <Button startIcon={<DeleteIcon/>} onClick={() => {handleDeleteOpen();setTaskID(task.taskID)}}/>
+                            <Dialog
+                                open={deleteOpen}
+                                onClose={handleDeleteClose}
+                                className={classes.modal}
+                                aria-labelledby="simple-dialog-title"
+                                aria-describedby="simple-dialog-description"
+                                >
+                                <DialogContent className={classes.paper}>
+                                    <DialogContentText>
+                                        <h4 id="simple-dialog-title">Delete Event</h4>
+                                        <div className="modal-body text-left pt-3 pb-3">
+                                            Are you sure you want to delete this task/exam? 
+                                        </div>
+                                        <div className="row content ml-1 mr-1 pt-5 d-flex justify-content-center">
+                                                <Button variant = "outlined" className="btn btn-default col-sm-5 btn-outline-danger mr-2"
+                                                    style = {{margin:5}} onClick={handleDeleteTask}>
+                                                    Delete
+                                                </Button>
+                                                <Button variant = "outlined" style = {{margin:5}} className="btn btn-default col-sm-5 btn-outline-secondary" 
+                                                onClick={handleDeleteClose}>
+                                                    Cancel
+                                                </Button>
+                                            </div>
+                                    </DialogContentText>
+                            </DialogContent>
+                            </Dialog> 
                                 </CardActions>
                             </div>
                         </CardContent>
@@ -1110,6 +1136,33 @@ const handleChangeData = (newType) => {
                                         </form>
                                     </DialogContent>
                                 </Dialog>
+                                <Button startIcon={<DeleteIcon/>} onClick={() => {handleDeleteOpen();setTaskID(task.taskID)}}/>
+                            <Dialog
+                                open={deleteOpen}
+                                onClose={handleDeleteClose}
+                                className={classes.modal}
+                                aria-labelledby="simple-dialog-title"
+                                aria-describedby="simple-dialog-description"
+                                >
+                                <DialogContent className={classes.paper}>
+                                    <DialogContentText>
+                                        <h4 id="simple-dialog-title">Delete Event</h4>
+                                        <div className="modal-body text-left pt-3 pb-3">
+                                            Are you sure you want to delete this task/exam? 
+                                        </div>
+                                        <div className="row content ml-1 mr-1 pt-5 d-flex justify-content-center">
+                                                <Button variant = "outlined" className="btn btn-default col-sm-5 btn-outline-danger mr-2"
+                                                    style = {{margin:5}} onClick={handleDeleteTask}>
+                                                    Delete
+                                                </Button>
+                                                <Button variant = "outlined" style = {{margin:5}} className="btn btn-default col-sm-5 btn-outline-secondary" 
+                                                onClick={handleDeleteClose}>
+                                                    Cancel
+                                                </Button>
+                                            </div>
+                                    </DialogContentText>
+                            </DialogContent>
+                            </Dialog> 
                                 </CardActions>
                             </div>
                         </CardContent>
@@ -1152,9 +1205,105 @@ const handleChangeData = (newType) => {
                                     name="checkedA" />}
                                     label="Complete"
                                 />
-                                    <Button startIcon={<EditIcon/>}>
-
-                                    </Button>
+                                    <Button startIcon={<EditIcon/>} onClick={handleEditOpen}/>
+                                    <Dialog open={editOpen}
+                                onClose={handleEditClose}
+                                aria-labelledby="alert-dialog-title"
+                                aria-describedby="alert-dialog-description"
+                                className={classes.modal}
+                                >
+                                <DialogTitle id="alert-dialog-title">Edit Task</DialogTitle>
+                                    <DialogContent> 
+                                        <form className={classes.form} onSubmit={handleEditTask}>
+                                            <div>
+                                                <div>
+                                                <TextField
+                                                    style = {{width: "40ch"}}
+                                                    id="outlined-multiline-static"
+                                                    variant="outlined"
+                                                    placeholder="Title"
+                                                    value={titleEdit}
+                                                    onChange={(e) => {
+                                                        setTitleEdit(e.target.value);
+                                                    }}
+                                                    helperText="Title"
+                                                    required>
+                                                    </TextField>
+                                                </div>
+                                                <div>
+                                                    <TextField
+                                                        id="datetime-local"
+                                                        helperText="Deadline"
+                                                        variant="outlined"
+                                                        type="datetime-local"
+                                                        value={deadlineEdit}
+                                                        onChange={(e) => {
+                                                            setDeadlineEdit(e.target.value);
+                                                        }}
+                                                        defaultValue="2017-05-24T10:30:00Z"
+                                                        InputLabelProps={{
+                                                        shrink: true,
+                                                        }}
+                                                        required
+                                                    />
+                                                    <p>{deadlineEdit}</p>
+                                                </div>
+                                                <div>
+                                                <FormControlLabel
+                                                control={<Checkbox checked={completedEdit} 
+                                                onChange={(event) => {handleChange(event); tickCompletedEdit(event)}}
+                                                name="checkedD" />}
+                                                label="Completed"
+                                            />
+                                                </div>
+                                                <div>
+                                                <FormControlLabel
+                                                control={<Checkbox checked={submittedEdit} 
+                                                onChange={(event) => {handleChange(event);tickSubmittedEdit(event)}}
+                                                name="checkedE" />}
+                                                label="Submitted"
+                                            />
+                                                </div>  
+                                            </div>
+                                            <DialogActions>
+                                            <Button type="submit" disabled={(titleEdit == "") 
+                                            || (deadlineEdit == "") ? true : false}>
+                                                Save
+                                            </Button>
+                                            <Button onClick={handleEditClose}>
+                                                Close
+                                            </Button>
+                                        </DialogActions>
+                                        </form>
+                                    </DialogContent>
+                                </Dialog>
+                                <Button startIcon={<DeleteIcon/>} onClick={() => {handleDeleteOpen();setTaskID(task.taskID)}}/>
+                            <Dialog
+                                open={deleteOpen}
+                                onClose={handleDeleteClose}
+                                className={classes.modal}
+                                aria-labelledby="simple-dialog-title"
+                                aria-describedby="simple-dialog-description"
+                                >
+                                <DialogContent className={classes.paper}>
+                                    <DialogContentText>
+                                        <h4 id="simple-dialog-title">Delete Event</h4>
+                                        <div className="modal-body text-left pt-3 pb-3">
+                                            Are you sure you want to delete this task/exam? 
+                                        </div>
+                                        <div className="row content ml-1 mr-1 pt-5 d-flex justify-content-center">
+                                                <Button variant = "outlined" className="btn btn-default col-sm-5 btn-outline-danger mr-2"
+                                                    style = {{margin:5}} onClick={handleDeleteTask}>
+                                                    Delete
+                                                </Button>
+                                                <Button variant = "outlined" style = {{margin:5}} className="btn btn-default col-sm-5 btn-outline-secondary" 
+                                                onClick={handleDeleteClose}>
+                                                    Cancel
+                                                </Button>
+                                            </div>
+                                    </DialogContentText>
+                            </DialogContent>
+                            </Dialog> 
                                 </CardActions>
                             </div>
                         </CardContent>
@@ -1197,9 +1346,105 @@ const handleChangeData = (newType) => {
                                     name="checkedA" />}
                                     label="Complete"
                                 />
-                                    <Button startIcon={<EditIcon/>}>
-
-                                    </Button>
+                                    <Button startIcon={<EditIcon/>} onClick={handleEditOpen}/>
+                                    <Dialog open={editOpen}
+                                onClose={handleEditClose}
+                                aria-labelledby="alert-dialog-title"
+                                aria-describedby="alert-dialog-description"
+                                className={classes.modal}
+                                >
+                                <DialogTitle id="alert-dialog-title">Edit Task</DialogTitle>
+                                    <DialogContent> 
+                                        <form className={classes.form} onSubmit={handleEditTask}>
+                                            <div>
+                                                <div>
+                                                <TextField
+                                                    style = {{width: "40ch"}}
+                                                    id="outlined-multiline-static"
+                                                    variant="outlined"
+                                                    placeholder="Title"
+                                                    value={titleEdit}
+                                                    onChange={(e) => {
+                                                        setTitleEdit(e.target.value);
+                                                    }}
+                                                    helperText="Title"
+                                                    required>
+                                                    </TextField>
+                                                </div>
+                                                <div>
+                                                    <TextField
+                                                        id="datetime-local"
+                                                        helperText="Deadline"
+                                                        variant="outlined"
+                                                        type="datetime-local"
+                                                        value={deadlineEdit}
+                                                        onChange={(e) => {
+                                                            setDeadlineEdit(e.target.value);
+                                                        }}
+                                                        defaultValue="2017-05-24T10:30:00Z"
+                                                        InputLabelProps={{
+                                                        shrink: true,
+                                                        }}
+                                                        required
+                                                    />
+                                                    <p>{deadlineEdit}</p>
+                                                </div>
+                                                <div>
+                                                <FormControlLabel
+                                                control={<Checkbox checked={completedEdit} 
+                                                onChange={(event) => {handleChange(event); tickCompletedEdit(event)}}
+                                                name="checkedD" />}
+                                                label="Completed"
+                                            />
+                                                </div>
+                                                <div>
+                                                <FormControlLabel
+                                                control={<Checkbox checked={submittedEdit} 
+                                                onChange={(event) => {handleChange(event);tickSubmittedEdit(event)}}
+                                                name="checkedE" />}
+                                                label="Submitted"
+                                            />
+                                                </div>  
+                                            </div>
+                                            <DialogActions>
+                                            <Button type="submit" disabled={(titleEdit == "") 
+                                            || (deadlineEdit == "") ? true : false}>
+                                                Save
+                                            </Button>
+                                            <Button onClick={handleEditClose}>
+                                                Close
+                                            </Button>
+                                        </DialogActions>
+                                        </form>
+                                    </DialogContent>
+                                </Dialog>
+                                <Button startIcon={<DeleteIcon/>} onClick={() => {handleDeleteOpen();setTaskID(task.taskID)}}/>
+                            <Dialog
+                                open={deleteOpen}
+                                onClose={handleDeleteClose}
+                                className={classes.modal}
+                                aria-labelledby="simple-dialog-title"
+                                aria-describedby="simple-dialog-description"
+                                >
+                                <DialogContent className={classes.paper}>
+                                    <DialogContentText>
+                                        <h4 id="simple-dialog-title">Delete Event</h4>
+                                        <div className="modal-body text-left pt-3 pb-3">
+                                            Are you sure you want to delete this task/exam? 
+                                        </div>
+                                        <div className="row content ml-1 mr-1 pt-5 d-flex justify-content-center">
+                                                <Button variant = "outlined" className="btn btn-default col-sm-5 btn-outline-danger mr-2"
+                                                    style = {{margin:5}} onClick={handleDeleteTask}>
+                                                    Delete
+                                                </Button>
+                                                <Button variant = "outlined" style = {{margin:5}} className="btn btn-default col-sm-5 btn-outline-secondary" 
+                                                onClick={handleDeleteClose}>
+                                                    Cancel
+                                                </Button>
+                                            </div>
+                                    </DialogContentText>
+                            </DialogContent>
+                            </Dialog> 
                                 </CardActions>
                             </div>
                         </CardContent>
