@@ -903,6 +903,7 @@ def editEvent(request):
     userPK = data['userID']
     eventPK = data['eventID']
     title = data['title']
+    description = data['description']
     startDateTime = data['start']
     endDateTime = data['end']    
     try:
@@ -917,8 +918,19 @@ def editEvent(request):
         userEvent = Event.objects.filter(eventID = eventPK, userID = user)
         if userEvent.exists():
             event.title = title
-            event.start = datetime.strptime(startDateTime, '%Y-%m-%dT%H:%M:%S')
-            event.end = datetime.strptime(endDateTime, '%Y-%m-%dT%H:%M:%S')
+            event.description = description
+            if startDateTime[:16] != datetime.strftime(event.start, '%Y-%m-%dT%H:%M%S')[:16]:
+                event.start = datetime.strptime(startDateTime, '%Y-%m-%dT%H:%M')
+            if endDateTime[:16] != datetime.strftime(event.end, '%Y-%m-%dT%H:%M%S')[:16]:
+                event.end = datetime.strptime(endDateTime, '%Y-%m-%dT%H:%M')
+            '''
+            LHS:
+            startDateTime -> "2021-07-26T16:01:00"
+            startDateTime[:16] -> "2021-07-26T16:01"
+            RHS:
+            event.start -> 2021-07-26 16:01:00  # datetime, not string
+            datetime.strftime(event.start, '%Y-%m-%dT%H:%M%S')[:16] -> '2021-07-26T16:01'
+            '''
             try:
                 event.full_clean()  
                 event.save()
@@ -952,7 +964,8 @@ def editTask(request):
         userTask = Task.objects.filter(taskID = taskPK, userID = user)
         if userTask.exists() and request.user.id == userPK:
             task.title = title
-            task.deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M:%SZ')
+            if deadline[:16] != datetime.strftime(task.deadline, '%Y-%m-%dT%H:%M:%S')[:16]:
+                task.deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M')
             task.completed = completed
             task.submitted = submitted
             task.save()
