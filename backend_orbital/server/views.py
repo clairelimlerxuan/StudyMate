@@ -364,10 +364,11 @@ def LessonToTimetable(lessonPK, startDate, endDate):
         startTime = lesson.startTime.strftime('%H:%M:%S')
         endTime = lesson.endTime.strftime('%H:%M:%S')
         data = {
-            "title": lesson.moduleID.moduleCode,
+            "title": lesson.lessonType + " " + lesson.moduleID.moduleCode,
             "description": lesson.lessonType, 
             "start": dateStr + ' ' + startTime,
             "end": dateStr + ' ' + endTime,
+            "lessonID" : lesson.lessonID,
         }
         response.append(data)
     return response
@@ -392,7 +393,7 @@ def getUsersClass(request, userid):
 def getUsersTask(request, userid):
     if request.user.id != userid:
         return Response({'res' : 'User does not have permission to view this list of task.'}, status = status.HTTP_403_FORBIDDEN)
-    tasks = Task.objects.filter(userID = userid)
+    tasks = Task.objects.filter(userID = userid).order_by('deadline__date')
     serializer = TaskSerializer(tasks, many = True)
     return Response(serializer.data)
 
@@ -748,16 +749,16 @@ def deleteEvent(request, eventPK, userPK):
         return Response({'res' : 'User does not have permission to delete this event.'}, status = status.HTTP_403_FORBIDDEN)
 
 @api_view(['DELETE'])
-def deleteScheduleLesson(request, scheduleLessonPK, userPK):
+def deleteScheduleLesson(request, lessonPK, userPK):
     try:
         user = MemberUser.objects.get(user_id = userPK)
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     try:
-        scheduleLesson = ScheduleLesson.objects.get(scheduleID = scheduleLessonPK)
+        scheduleLesson = ScheduleLesson.objects.get(lessonID = lessonPK)
     except ObjectDoesNotExist:
         return Response({'res' : 'No such lesson scheduled to the user.'}, status = status.HTTP_404_NOT_FOUND)
-    userLesson = ScheduleLesson.objects.filter(scheduleID = scheduleLessonPK, userID = user)
+    userLesson = ScheduleLesson.objects.filter(lessonID = lessonPK, userID = user)
     if userLesson.exists() and request.user.id == userPK:
         scheduleLesson.delete()
         return Response({'res' : 'Lesson scheduled to the user deleted successfully.'}, status = status.HTTP_200_OK)
@@ -809,11 +810,7 @@ def editPost(request):
     title = data['title']
     textContent = data['textContent']
     try:
-<<<<<<< HEAD
         user = User.objects.get(user_id = userPK)
-=======
-        user = User.objects.get(id = userPK) 
->>>>>>> 2105c5b7da4d2054a2adda936114dc9f810373e1
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     try:
@@ -840,13 +837,9 @@ def editComment(request):
     postPK = data['postID']
     commentPK  = data['commentID']
     textContent = data['textContent']
-    try: 
-<<<<<<< HEAD
-        user = User.objects.get(id = userPK)   
-=======
+    try:   
         #user = MemberUser.objects.get(user_id = userPK)   
         user = User.objects.get(id = userPK) 
->>>>>>> 2105c5b7da4d2054a2adda936114dc9f810373e1
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     try:
@@ -878,12 +871,8 @@ def editReply(request):
     replyPK  = data['replyID']
     textContent = data['textContent']
     try:
-<<<<<<< HEAD
-        user = User.objects.get(id = userPK)  
-=======
         #user = MemberUser.objects.get(user_id = userPK)  
         user = User.objects.get(id = userPK) 
->>>>>>> 2105c5b7da4d2054a2adda936114dc9f810373e1
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     try:
@@ -920,7 +909,7 @@ def editEvent(request):
     startDateTime = data['start']
     endDateTime = data['end']    
     try:
-        user = User.objects.get(id = userPK)
+        user = MemberUser.objects.get(user_id = userPK)
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     try:
@@ -931,8 +920,14 @@ def editEvent(request):
         userEvent = Event.objects.filter(eventID = eventPK, userID = user)
         if userEvent.exists():
             event.title = title
-            event.start = datetime.strptime(startDateTime, '%Y-%m-%dT%H:%M:%S')
-            event.end = datetime.strptime(endDateTime, '%Y-%m-%dT%H:%M:%S')
+            if len(startDateTime.split("T")[1].split(":")) == 2 :
+                event.start = datetime.strptime(startDateTime + ":00", '%Y-%m-%dT%H:%M:%S')
+            else :
+                event.start= datetime.strptime(startDateTime, '%Y-%m-%dT%H:%M:%S')
+            if len(endDateTime.split("T")[1].split(":")) == 2 :
+                event.end = datetime.strptime(endDateTime + ":00", '%Y-%m-%dT%H:%M:%S')
+            else :
+                event.end= datetime.strptime(endDateTime, '%Y-%m-%dT%H:%M:%S')
             try:
                 event.full_clean()  
                 event.save()
@@ -966,7 +961,10 @@ def editTask(request):
         userTask = Task.objects.filter(taskID = taskPK, userID = user)
         if userTask.exists() and request.user.id == userPK:
             task.title = title
-            task.deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M:%SZ')
+            if len(deadline.split("T")[1].split(":")) == 2 :
+                task.deadline = datetime.strptime(deadline + ":00", '%Y-%m-%dT%H:%M:%S')
+            else :
+                task.deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M:%S')
             task.completed = completed
             task.submitted = submitted
             task.save()

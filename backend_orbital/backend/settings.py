@@ -152,8 +152,8 @@ JWT_AUTH = {
     'JWT_RESPONSE_PAYLOAD_HANDLER': 'backend.utils.my_jwt_response_handler',
     'JWT' : 'token',
     'JWT_ALLOW_REFRESH': True,
-    'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=1),
-    'JWT_EXPIRATION_DELTA': timedelta(hours=1),
+    'JWT_REFRESH_EXPIRATION_DELTA': timedelta(weeks=1),
+    'JWT_EXPIRATION_DELTA': timedelta(days=1),
 }
 
 # Default primary key field type

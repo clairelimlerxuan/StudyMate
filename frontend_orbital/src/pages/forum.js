@@ -366,7 +366,6 @@ function Forum(props) {
                                              
                                             {tag == "Module" &&
                                             <>
-                                            <p>{module}</p>
                                             <Autocomplete
                                                 id="controllable-states-demo"
                                                 options={modules}

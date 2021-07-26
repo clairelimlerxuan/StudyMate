@@ -9,12 +9,14 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-
+import { Alert } from '@material-ui/lab';
+import { AlertTitle } from '@material-ui/lab';
 function Navbar(props) {
 
   const [click, setClick] = React.useState(false);
   const [dropdown, setDropdown] = React.useState(false);
   const [open, setOpen] = React.useState(false);
+  const [openAlert, setOpenAlert] = useState(false);
 
   const handleOpen = () => {
     setOpen(true);
@@ -23,6 +25,16 @@ function Navbar(props) {
   const handleClose = () => {
     setOpen(false);
   }
+
+  
+  const handleOpenAlert = () => {
+    setOpenAlert(true);
+  }
+
+  const handleCloseAlert = () => {
+    setOpenAlert(false);
+  }
+
 
   const handleClick = () => setClick(!click);
   const closeMobileMenu = () => setClick(false);
@@ -93,22 +105,30 @@ function Navbar(props) {
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
             >
-        <DialogTitle id="alert-dialog-title">{"Please Log In to See Your Schedule"}</DialogTitle>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary" autoFocus>
-            Close
-          </Button>
-        </DialogActions>
+          <Alert severity="warning" onClose={handleClose} color="error">
+            <AlertTitle>Warning</AlertTitle>
+                Only registered user that can proceed further — <strong>Please sign in to see your timetable</strong>
+          </Alert>
         </Dialog>
             </li>
             <li className='nav-item'>
             <Link
-              to='/todolist'
               className='nav-links'
-              onClick={closeMobileMenu}
+              onClick={() => {closeMobileMenu();handleOpenAlert()}}
             >
               To Do List
             </Link>
+            <Dialog
+            open={openAlert}
+            onClose={handleCloseAlert}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+            >
+          <Alert severity="warning" onClose={handleCloseAlert} color="error">
+            <AlertTitle>Warning</AlertTitle>
+                Only registered user that can proceed further — <strong>Please sign in to see your to-do list</strong>
+          </Alert>
+        </Dialog>
             </li>
             <li>
             {dropdown ? (

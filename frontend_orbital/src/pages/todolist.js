@@ -15,8 +15,11 @@ import HistoryIcon from '@material-ui/icons/History';
 import DoneIcon from '@material-ui/icons/Done';
 import ClearIcon from '@material-ui/icons/Clear';
 import MenuIcon  from '@material-ui/icons/Menu';
+import DeleteIcon from '@material-ui/icons/Delete';
 import AssignmentIcon from '@material-ui/icons/Assignment';
-import { DialogContent, DialogActions, DialogTitle} from '@material-ui/core';
+import MuiAlert from '@material-ui/lab/Alert';
+import Snackbar from '@material-ui/core/Snackbar';
+import { DialogContent, DialogActions, DialogTitle, DialogContentText} from '@material-ui/core';
 import { Box, Tooltip,Button, Card, CardContent, CardActions, Fab, Dialog,TextField } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
@@ -39,10 +42,15 @@ const override = css`
   align-text: center;
 `;
 
+function Alert(props) {
+    return <MuiAlert elevation={6} variant="filled" {...props} />;
+  }
+
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
-    width:"100%"
+    width:"100%",
+    justifyContent:'space-between'
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -154,6 +162,27 @@ export default function Todolist(props) {
     const [submittedEdit, setSubmittedEdit] = useState(false);
     const [subOpen, setSubOpen] = useState(false);
     const[editOpen, setEditOpen] = useState(false);
+    const [deleteOpen, setDeleteOpen] = useState(false);
+    const [open, setOpen] = React.useState(false);
+    const handleClick = () => {
+        setOpen(true);
+      };
+    
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+          return;
+        }
+    
+        setOpen(false);
+    };
+    
+    const handleDeleteOpen = () => {
+        setDeleteOpen(true);
+    };
+
+    const handleDeleteClose = () => {
+        setDeleteOpen(false);
+    }
 
     const handleSubOpen = () => {
         setSubOpen(true);
@@ -525,6 +554,9 @@ const handleChangeData = (newType) => {
       }
   )
   .then((res) => {
+    if (res.status === 200) {
+        handleEditClose();
+    }
       console.log(res);
       console.log(res.data);
       setTitleEdit("");
@@ -532,6 +564,12 @@ const handleChangeData = (newType) => {
       setCompletedEdit(false);
       setSubmittedEdit(false);
       setTaskID("");
+      getTasks();
+      getRecentTasks();
+      getTodayTasks();
+      getIncompleteTask();
+      getCompletedTask();
+      
   })
   .catch((err) => {
     if (
@@ -545,6 +583,51 @@ const handleChangeData = (newType) => {
     alert.show(err.response.data.res);
   }
 }); 
+    }
+
+    const handleDeleteTask = (e) => {
+        e.preventDefault();
+        axios
+        .delete(
+        `http://localhost:8000/server/deletetask/${taskID}/${props.id}/`,
+        {
+            headers: {
+                Authorization: "JWT " + localStorage.getItem("token"),
+            },
+        }
+    )
+    .then((res) => {
+      if (res.status === 200) {
+        handleDeleteClose();
+        handleClick();
+        <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+            <Alert onClose={handleClose} severity="success">
+            This is a success message!
+            </Alert>
+        </Snackbar>
+        alert.show("Task deleted succesfully")
+      }
+        console.log(res);
+        console.log(res.data);
+        setTaskID("");
+        getTasks();
+        getRecentTasks();
+        getTodayTasks();
+        getIncompleteTask();
+        getCompletedTask();
+    })
+    .catch((err) => {
+      if (
+        err.response.status === 401 ||
+        err.response.status === 404
+    ) {
+        alert.show("Your session has expired. Please Log In again to answer this question");
+    } else {
+      console.log(err.response);
+      console.log(err.response.data.res);
+      alert.show(err.response.data.res);
+    }
+  }); 
     }
 
     const tickCompleted = () => {
@@ -587,15 +670,12 @@ const handleChangeData = (newType) => {
                         <MenuIcon/>
                     </Fab>
                 </Tooltip>
-                <h1 style={{padding:"10px"}}>All Tasks</h1>
+                <h1 style={{padding:"25px"}}>{component[0].toUpperCase() + component.substring(1)} Tasks</h1>
                 <Drawer  className={classes.drawer} classes={{
                 paper: classes.drawerPaper,}} anchor={anchor} open={state[anchor]} onClose={toggleDrawer(anchor, false)}>
                     {list(anchor)}
                 </Drawer>
-            </React.Fragment>))}
-        </div>
-        <main className={classes.content}>
-            <Tooltip title="Add Task" aria-label="add" className={classes.tooltip} onClick={handleSubOpen}>
+                <Tooltip title="Add Task" aria-label="add" className={classes.tooltip} onClick={handleSubOpen}>
             <Fab className={classes.fab} style={{backgroundColor:"#64485C"}}>
                 <AddIcon/>
             </Fab>
@@ -641,7 +721,6 @@ const handleChangeData = (newType) => {
                                     required
                                 />
                             </div>
-                            <h1>{completed ? "completed" : "incomplete"}</h1>
                             <div>
                             <FormControlLabel
                             control={<Checkbox checked={checked.checkedB} onChange={(event) => {handleChange(event);tickCompleted()}}
@@ -669,6 +748,9 @@ const handleChangeData = (newType) => {
                     </form>
                 </DialogContent>
             </Dialog>
+            </React.Fragment>))}
+        </div>
+        <main className={classes.content}>
             <Box
                 display="flex"
                 flexDirection='column'
@@ -692,7 +774,11 @@ const handleChangeData = (newType) => {
                 <Card className={classes.rootCard}>
                     <CardContent className={classes.info} style={{paddingBottom:"10px"}}>
                         <div>
-                            <Typography variant="body2" align="left" color="textSecondary">
+                            <Typography variant="body2">
+                                {(task.deadline).split("T")[0]}  &middot; 
+                                {((task.deadline).split("T")[1]).slice(0,5)} 
+                            </Typography>
+                            <Typography variant="subtitle2" align="left" color="textSecondary">
                                 {task.title}
                             </Typography>
                         </div>
@@ -704,6 +790,140 @@ const handleChangeData = (newType) => {
                             label="Complete"
                         />
                             <Button startIcon={<EditIcon/>} onClick={() => handleEditOpen(task)}/>
+                            <Dialog open={editOpen}
+                                onClose={handleEditClose}
+                                aria-labelledby="alert-dialog-title"
+                                aria-describedby="alert-dialog-description"
+                                className={classes.modal}
+                                >
+                                <DialogTitle id="alert-dialog-title">Edit Task</DialogTitle>
+                                    <DialogContent> 
+                                        <p>{editOpen ? "true" : "false"}</p>
+                                        <form className={classes.form} onSubmit={handleEditTask}>
+                                            <div>
+                                                <div>
+                                                <TextField
+                                                    style = {{width: "40ch"}}
+                                                    id="outlined-multiline-static"
+                                                    variant="outlined"
+                                                    placeholder="Title"
+                                                    value={titleEdit}
+                                                    onChange={(e) => {
+                                                        setTitleEdit(e.target.value);
+                                                    }}
+                                                    helperText="Title"
+                                                    required>
+                                                    </TextField>
+                                                </div>
+                                                <div>
+                                                    <TextField
+                                                        id="datetime-local"
+                                                        helperText="Deadline"
+                                                        variant="outlined"
+                                                        type="datetime-local"
+                                                        value={deadlineEdit}
+                                                        onChange={(e) => {
+                                                            setDeadlineEdit(e.target.value);
+                                                        }}
+                                                        defaultValue="2017-05-24T10:30:00Z"
+                                                        InputLabelProps={{
+                                                        shrink: true,
+                                                        }}
+                                                        required
+                                                    />
+                                                </div>
+                                                <div>
+                                                <FormControlLabel
+                                                control={<Checkbox checked={completedEdit} 
+                                                onChange={(event) => {handleChange(event); tickCompletedEdit(event)}}
+                                                name="checkedD" />}
+                                                label="Completed"
+                                            />
+                                                </div>
+                                                <div>
+                                                <FormControlLabel
+                                                control={<Checkbox checked={submittedEdit} 
+                                                onChange={(event) => {handleChange(event);tickSubmittedEdit(event)}}
+                                                name="checkedE" />}
+                                                label="Submitted"
+                                            />
+                                                </div>  
+                                            </div>
+                                            <DialogActions>
+                                            <Button type="submit" disabled={(titleEdit == "") 
+                                            || (deadlineEdit == "") ? true : false}>
+                                                Save
+                                            </Button>
+                                            <Button onClick={handleEditClose}>
+                                                Close
+                                            </Button>
+                                        </DialogActions>
+                                        </form>
+                                    </DialogContent>
+                                </Dialog>
+                            <Button startIcon={<DeleteIcon/>} onClick={() => {handleDeleteOpen();setTaskID(task.taskID)}}/>
+                            <Dialog
+                                open={deleteOpen}
+                                onClose={handleDeleteClose}
+                                className={classes.modal}
+                                aria-labelledby="simple-dialog-title"
+                                aria-describedby="simple-dialog-description"
+                                >
+                                <DialogContent className={classes.paper}>
+                                    <DialogContentText>
+                                        <h4 id="simple-dialog-title">Delete Event</h4>
+                                        <div className="modal-body text-left pt-3 pb-3">
+                                            Are you sure you want to delete this task/exam? 
+                                        </div>
+                                        <div className="row content ml-1 mr-1 pt-5 d-flex justify-content-center">
+                                                <Button variant = "outlined" className="btn btn-default col-sm-5 btn-outline-danger mr-2"
+                                                    style = {{margin:5}} onClick={handleDeleteTask}>
+                                                    Delete
+                                                </Button>
+                                                <Button variant = "outlined" style = {{margin:5}} className="btn btn-default col-sm-5 btn-outline-secondary" 
+                                                onClick={handleDeleteClose}>
+                                                    Cancel
+                                                </Button>
+                                            </div>
+                                    </DialogContentText>
+                            </DialogContent>
+                            </Dialog> 
+                        </CardActions>
+                        </div>
+                        
+                    </CardContent>
+                </Card>)
+                ) : (
+                    <>
+                    {tasks.length == 0 &&
+                        <Typography variant="h3">
+                            No Tasks Made
+                        </Typography>
+                        }
+                    </>
+                )}
+                </>}
+                {component == "today" &&
+                <>
+                    {todayTask.length != 0 ? ( todayTask.map((task) =>
+                    <Card className={classes.rootCard}>
+                        <CardContent className={classes.info}>
+                            <div>
+                                <Typography variant="body2">
+                                    {(task.deadline).split("T")[0]}  &middot; 
+                                    {((task.deadline).split("T")[1]).slice(0,5)} 
+                                </Typography>
+                                <Typography variant="body2" align="left" color="textSecondary">
+                                    {task.title}
+                                </Typography>
+                            </div>
+                            <div style={{flexDirection:"row"}}>         
+                                <CardActions>
+                                    <FormControlLabel
+                                    control={<Checkbox checked={task.completed}
+                                     onChange={(event,index) => {handleChange(event,index);handleCompleteTask(event,task.taskID,index)}}/>}
+                                    label="Complete"/>
+                                    <Button startIcon={<EditIcon/>} onClick={() => handleEditOpen(task)}/>
                             <Dialog open={editOpen}
                                 onClose={handleEditClose}
                                 aria-labelledby="alert-dialog-title"
@@ -738,14 +958,14 @@ const handleChangeData = (newType) => {
                                                         onChange={(e) => {
                                                             setDeadlineEdit(e.target.value);
                                                         }}
-                                                        defaultValue="2017-05-24T10:30"
+                                                        defaultValue="2017-05-24T10:30:00Z"
                                                         InputLabelProps={{
                                                         shrink: true,
                                                         }}
                                                         required
                                                     />
+                                                    <p>{deadlineEdit}</p>
                                                 </div>
-                                                <h1>{completed ? "completed" : "incomplete"}</h1>
                                                 <div>
                                                 <FormControlLabel
                                                 control={<Checkbox checked={completedEdit} 
@@ -766,7 +986,7 @@ const handleChangeData = (newType) => {
                                             <DialogActions>
                                             <Button type="submit" disabled={(titleEdit == "") 
                                             || (deadlineEdit == "") ? true : false}>
-                                                Add
+                                                Save
                                             </Button>
                                             <Button onClick={handleEditClose}>
                                                 Close
@@ -775,39 +995,7 @@ const handleChangeData = (newType) => {
                                         </form>
                                     </DialogContent>
                                 </Dialog>
-                        </CardActions>
-                        </div>
-                        
-                    </CardContent>
-                </Card>)
-                ) : (
-                    <>
-                    {tasks.length == 0 &&
-                        <Typography variant="h3">
-                            No Tasks Made
-                        </Typography>
-                        }
-                    </>
-                )}
-                </>}
-                {component == "today" &&
-                <>
-                    {todayTask.length != 0 ? ( todayTask.map((task) =>
-                    <Card className={classes.rootCard}>
-                        <CardContent className={classes.info}>
-                            <div>
-                                <Typography variant="body2" align="left" color="textSecondary">
-                                    {task.title}
-                                </Typography>
-                            </div>
-                            <div style={{flexDirection:"row"}}>         
-                                <CardActions>
-                                    <FormControlLabel
-                                    control={<Checkbox checked={task.completed}
-                                     onChange={(event,index) => {handleChange(event,index);handleCompleteTask(event,task.taskID,index)}}/>}
-                                    label="Complete"/>
-                                    <Button startIcon={<EditIcon/>}>
-                                    </Button>
+                                <Button startIcon={<DeleteIcon/>}/>
                                 </CardActions>
                             </div>
                         </CardContent>
@@ -835,6 +1023,10 @@ const handleChangeData = (newType) => {
                     <Card className={classes.rootCard}>
                         <CardContent className={classes.info}>
                             <div>
+                                <Typography variant="body2">
+                                    {(task.deadline).split("T")[0]}  &middot; 
+                                    {((task.deadline).split("T")[1]).slice(0,5)} 
+                                </Typography>
                                 <Typography variant="body2" align="left" color="textSecondary">
                                     {task.title}
                                 </Typography>
@@ -846,9 +1038,78 @@ const handleChangeData = (newType) => {
                                     onChange={(event,index) => 
                                         {handleChange(event,index);handleCompleteTask(event,task.taskID,index)}} name="checkedA1" />}
                                     label="Complete"/>
-                                    <Button startIcon={<EditIcon/>}>
-
-                                    </Button>
+                                     <Button startIcon={<EditIcon/>} onClick={() => handleEditOpen(task)}/>
+                            <Dialog open={editOpen}
+                                onClose={handleEditClose}
+                                aria-labelledby="alert-dialog-title"
+                                aria-describedby="alert-dialog-description"
+                                className={classes.modal}
+                                >
+                                <DialogTitle id="alert-dialog-title">Edit Task</DialogTitle>
+                                    <DialogContent> 
+                                        <form className={classes.form} onSubmit={handleEditTask}>
+                                            <div>
+                                                <div>
+                                                <TextField
+                                                    style = {{width: "40ch"}}
+                                                    id="outlined-multiline-static"
+                                                    variant="outlined"
+                                                    placeholder="Title"
+                                                    value={titleEdit}
+                                                    onChange={(e) => {
+                                                        setTitleEdit(e.target.value);
+                                                    }}
+                                                    helperText="Title"
+                                                    required>
+                                                    </TextField>
+                                                </div>
+                                                <div>
+                                                    <TextField
+                                                        id="datetime-local"
+                                                        helperText="Deadline"
+                                                        variant="outlined"
+                                                        type="datetime-local"
+                                                        value={deadlineEdit}
+                                                        onChange={(e) => {
+                                                            setDeadlineEdit(e.target.value);
+                                                        }}
+                                                        defaultValue="2017-05-24T10:30:00Z"
+                                                        InputLabelProps={{
+                                                        shrink: true,
+                                                        }}
+                                                        required
+                                                    />
+                                                    <p>{deadlineEdit}</p>
+                                                </div>
+                                                <div>
+                                                <FormControlLabel
+                                                control={<Checkbox checked={completedEdit} 
+                                                onChange={(event) => {handleChange(event); tickCompletedEdit(event)}}
+                                                name="checkedD" />}
+                                                label="Completed"
+                                            />
+                                                </div>
+                                                <div>
+                                                <FormControlLabel
+                                                control={<Checkbox checked={submittedEdit} 
+                                                onChange={(event) => {handleChange(event);tickSubmittedEdit(event)}}
+                                                name="checkedE" />}
+                                                label="Submitted"
+                                            />
+                                                </div>  
+                                            </div>
+                                            <DialogActions>
+                                            <Button type="submit" disabled={(titleEdit == "") 
+                                            || (deadlineEdit == "") ? true : false}>
+                                                Save
+                                            </Button>
+                                            <Button onClick={handleEditClose}>
+                                                Close
+                                            </Button>
+                                        </DialogActions>
+                                        </form>
+                                    </DialogContent>
+                                </Dialog>
                                 </CardActions>
                             </div>
                         </CardContent>
@@ -876,6 +1137,10 @@ const handleChangeData = (newType) => {
                     <Card className={classes.rootCard}>
                         <CardContent className={classes.info}>
                             <div>
+                                <Typography variant="body2">
+                                    {(task.deadline).split("T")[0]}  &middot; 
+                                    {((task.deadline).split("T")[1]).slice(0,5)} 
+                                </Typography>
                                 <Typography variant="body2" align="left" color="textSecondary">
                                     {task.title}
                                 </Typography>
@@ -917,6 +1182,10 @@ const handleChangeData = (newType) => {
                     <Card className={classes.rootCard}>
                         <CardContent className={classes.info}>
                             <div>
+                                <Typography variant="body2">
+                                    {(task.deadline).split("T")[0]}  &middot; 
+                                    {((task.deadline).split("T")[1]).slice(0,5)} 
+                                </Typography>
                                 <Typography variant="body2" align="left" color="textSecondary">
                                     {task.title}
                                 </Typography>

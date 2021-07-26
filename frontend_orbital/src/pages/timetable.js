@@ -8,6 +8,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import axios from 'axios';
 import { makeStyles } from "@material-ui/core/styles";
 import { Button, Container, CssBaseline, Typography, Grid } from '@material-ui/core';
+import { Autocomplete } from '@material-ui/lab';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -27,6 +28,7 @@ import { ListItem } from '@material-ui/core';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Drawer from '@material-ui/core/Drawer';
+import { set } from 'react-hook-form';
 
 
 const override = css`
@@ -42,6 +44,11 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 
 const useStyles = makeStyles((theme) => ({
+  mainContainer : {
+    display: "flex",
+    justifyContent:'center',
+    flexDirection:'row',
+  },
   container: {
     display: "flex",
     paddingTop: "50px",
@@ -72,12 +79,22 @@ const useStyles = makeStyles((theme) => ({
     display:"flex",
     height:"auto",
   },
+
+  appBar: {
+    position: 'relative',
+  },
+
+  title: {
+    marginLeft: theme.spacing(2),
+    flex: 1,
+  },
 }));
 
 export default function Timetable(props) {
     const [id, setID] = useState(props.id);
     const classes = useStyles();
     const [events, setEvents] = useState([]);
+    const [lessons, setLessons] = useState([]);
     const [event, setEvent] = useState({});
     const [eventDetail, setEventDetail] = useState({});
     const alert = useAlert();
@@ -94,13 +111,15 @@ export default function Timetable(props) {
     const [startEdit, setStartEdit] = useState("");
     const [endEdit, setEndEdit] = useState("");
     const [eventID, setEventID] = useState("");
+    const [lessonDetail, setLessonDetail] = useState("");
     const [modules, setModules] = useState([]);
     const [lessonID, setLessonID] = useState("");
     const [moduleID, setModuleID] = useState("");
     const [editEventOpen, setEditEventOpen] = useState(false);
     const [deleteOpen, setDelete] = useState(false);
+    const [deleteLessonOpen, setDeleteLessonOpen] = useState(false);
 
-    const getModules = () => {
+  const getModules = () => {
       axios
       .get("http://localhost:8000/server/modulelist/")
       .then((res) => {
@@ -118,17 +137,22 @@ export default function Timetable(props) {
     setDelete(false);
   };
 
+  const handleDeleteLessonOpen = () => {
+    setDeleteLessonOpen(true);
+  };
+
+  const handleDeleteLessonClose = () => {
+    setDeleteLessonOpen(false);
+  };
+
+
   const handleOpen= () => {
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
-    setType("");
-    setTitle("");
-    setDesc("");
-    setStart("");
-    setEnd("");
+    setType("")
   };
 
   const handleEditEventOpen = () => {
@@ -207,10 +231,36 @@ export default function Timetable(props) {
     setLessonID(e.target.value);
   };
 
-  const onModuleIDChange = (e) => {
-    e.preventDefault();
-    setModuleID(e.target.value);
-  };
+  const getModuleLesson = (moduleid) => {
+    axios
+      .get(
+      `http://localhost:8000/server/getmodulelessons/${moduleid}`,
+      {
+          headers: {
+              Authorization: "JWT " + localStorage.getItem("token"),
+          },
+      }
+  )
+  .then((res) => {
+      console.log(res);
+      console.log(res.data);
+      setLessons(res.data);
+  })
+  .catch((err) => {
+    if (
+      err.response.status === 401 ||
+      err.response.status === 404
+  ) {
+      alert.show("Your session has expired. Please Log In again to answer this question");
+  } else {
+    console.log(err.response);
+    console.log(err.response.data.res);
+    alert.show(err.response.data.res);
+  }
+});
+}
+  
+
 
   const handleSubmitEvent = (e) => {
     e.preventDefault();
@@ -300,100 +350,187 @@ export default function Timetable(props) {
   });
   }
 
-const handleDeleteEvent = (e, eventid) => {
-  e.preventDefault();
-  axios
-  .delete(`http://localhost:8000/server/deleteevent/${eventid}/${props.id}/`,
-  {
+  const handleDeleteEvent = (e, eventid) => {
+    e.preventDefault();
+    axios
+    .delete(`http://localhost:8000/server/deleteevent/${eventid}/${props.id}/`,
+    {
+        headers: {
+            Authorization: "JWT " + localStorage.getItem("token"),
+        },
+    })//delete post
+    .then(res => {
+        console.log(res);
+        getEvents();  
+        if (res.status == 200) {
+          handleDetailClose();
+        }
+    })
+    .catch(err => {
+      if (
+        err.response.status === 401 ||
+        err.response.status === 404
+    ) {
+        alert.show("Your session has expired. Please Log In again to answer this question");
+    } else {
+        console.log(err.response);
+        console.log(err.response.data.res);
+        alert.show(err.response.data.res);
+    }
+  });
+  };
+
+const getEvents = () => {
+  axios.all([
+    axios.get(`http://localhost:8000/server/usereventlist/${props.id}/`,
+    {
       headers: {
-          Authorization: "JWT " + localStorage.getItem("token"),
+          Authorization: `JWT ${localStorage.getItem("token")}`,
       },
-  })//delete post
-  .then(res => {
-      console.log(res);
-      getEvents();  
-      if (res.status == 200) {
-        handleDetailClose();
-      }
+    }),
+    axios.get(`http://localhost:8000/server/userclasslist/${props.id}/`,
+    {
+      headers: {
+          Authorization: `JWT ${localStorage.getItem("token")}`,
+      },
+    })
+  ])
+  .then(resArr =>{
+    const data = [];
+    resArr.map(res=> data.push(...res.data));
+    console.log(data);
+    setEvents(data);
+    setLoading(false);
   })
-  .catch(err => {
+  .catch((err) => {
+    if (err.response.status ===  401 || err.response.status === 404) {
+      alert.show("Your session has expired. Please login again to see your schedule")
+    } else {
+      console.log(err);
+    }
+  })
+}
+  
+  const handleSubmitScheduleLesson = (e) => {
+    e.preventDefault();
+    axios
+      .post(
+      `http://localhost:8000/server/createschedulelesson/`,
+      {
+          userID : props.id,
+          lessonID : lessonID,
+      },
+      {
+          headers: {
+              Authorization: "JWT " + localStorage.getItem("token"),
+          },
+      }
+  )
+  .then((res) => {
+      console.log(res);
+      console.log(res.data);
+      handleClose();
+      setModuleID("");
+      setLessonID("");
+      getEvents();
+  })
+  .catch((err) => {
     if (
       err.response.status === 401 ||
       err.response.status === 404
   ) {
       alert.show("Your session has expired. Please Log In again to answer this question");
   } else {
-      console.log(err.response);
-      console.log(err.response.data.res);
-      alert.show(err.response.data.res);
+    console.log(err.response);
+    console.log(err.response.data.res);
+    alert.show(err.response.data.res);
   }
 });
-};
+}
 
-const getEvents = () => {
-axios
-.get(
-    `http://localhost:8000/server/usereventlist/${props.id}/`,
+useEffect(() => {
+  axios.all([
+    axios.get(`http://localhost:8000/server/usereventlist/${props.id}/`,
     {
       headers: {
           Authorization: `JWT ${localStorage.getItem("token")}`,
       },
-    }  
-)
-.then((res) => {
-    console.log(res.data);
-    setEvents(res.data);
+    }),
+    axios.get(`http://localhost:8000/server/userclasslist/${props.id}/`,
+    {
+      headers: {
+          Authorization: `JWT ${localStorage.getItem("token")}`,
+      },
+    })
+  ])
+  .then(resArr =>{
+    const data = [];
+    resArr.map(res=> data.push(...res.data));
+    console.log(data);
+    setEvents(data);
     setLoading(false);
-})
-.catch((err) => {
-  if (err.response.status ===  401 || err.response.status === 404) {
-    alert.show("Your session has expired. Please login again to see your schedule")
-  } else {
-    console.log(err);
-  }})};
+  })
+  .catch((err) => {
+    if (err.response.status ===  401 || err.response.status === 404) {
+      alert.show("Your session has expired. Please login again to see your schedule")
+    } else {
+      console.log(err);
+    }
+  })
+}, []);
+
+  const handleDeleteSchedLesson = (e, lessonid) => {
+    e.preventDefault();
+    axios
+    .delete(`http://localhost:8000/server/deleteevent/${lessonid}/${props.id}/`,
+    {
+        headers: {
+            Authorization: "JWT " + localStorage.getItem("token"),
+        },
+    })//delete post
+    .then(res => {
+        console.log(res);
+        getEvents();  
+        if (res.status == 200) {
+          handleDeleteLessonClose();
+        }
+    })
+    .catch(err => {
+      if (
+        err.response.status === 401 ||
+        err.response.status === 404
+    ) {
+        alert.show("Your session has expired. Please Log In again to answer this question");
+    } else {
+        console.log(err.response);
+        console.log(err.response.data.res);
+        alert.show(err.response.data.res);
+    }
+  });
+  };
 
 
-useEffect(() => {
-      axios
-          .get(
-              `http://localhost:8000/server/usereventlist/${id}/`,
-              {
-                headers: {
-                    Authorization: `JWT ${localStorage.getItem("token")}`,
-                },
-              }  
-          )
-          .then((res) => {
-              console.log(res.data);
-              setEvents(res.data);
-              setLoading(false);
-          })
-          .catch((err) => {
-            if (err.response.status ===  401 || err.response.status === 404) {
-              alert.show("Your session has expired. Please login again to see your schedule")
-            } else {
-              console.log(err);
-            }
-          });
-  }, []);
 
     return (
       <React.Fragment>
         <CssBaseline/>
+        <Container maxWidth="false" className={classes.mainContainer}>
       <Container maxWidth="false" className={classes.container}>
         <Button onClick={handleOpen}>
           Add Event
         </Button>
+        <h1>{events.slice(1).eventID}</h1>
         <Dialog open={open}
             onClose={handleClose}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
             className={classes.root}
+            style={{padding:'15px'}}
             >
         <DialogTitle id="alert-dialog-title">Add Event</DialogTitle>
         <DialogContent>
           
-          <TextField
+        <TextField
               style = {{width: "20ch"}}
               id="outlined-multiline-static"
               select
@@ -411,72 +548,108 @@ useEffect(() => {
                   Personal Event
               </MenuItem>
            </TextField>
-           <form className={classes.form} onSubmit={handleSubmitEvent}>
-             {type == "Personal Event" &&
-             <div>
-               <div>
-              <TextField
-              style = {{width: "30ch"}}
-              id="outlined-multiline-static"
-              variant="outlined"
-              placeholder="Title"
-              value={title}
-              onChange={onTitleChange}
-              helperText="Title"
-              required/>
-              </div>
-              <div>
-              <TextField
-              style = {{width: "30ch"}}
-              id="outlined-multiline-static"
-              variant="outlined"
-              placeholder="Description"
-              value={desc}
-              onChange={onDescChange}
-              helperText="Description"
-              required/>
-              </div>
-              <div>
-              <TextField
-                id="datetime-local"
-                helperText="Start Time"
-                variant="outlined"
-                type="datetime-local"
-                value={start}
-                onChange={onStartChange}
-                defaultValue="2017-05-24T10:30:00"
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                required
-              />
-              </div>
-              <div>
-              <TextField
-                id="datetime-local"
-                helperText="End Time"
-                variant="outlined"
-                type="datetime-local"
-                value={end}
-                onChange={onEndChange}
-                defaultValue="2017-05-24T10:30:00"
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                required
-              />
-              </div>
-              </div>
-              }
-              <DialogActions>
-              <Button type="submit" disabled={((title == "" 
-              || (start == "" || (desc == "" || end == ""))) || type == "Lesson") ? true : false}>
-                Add
-              </Button>
-              <Button onClick={handleClose}>
-                Close
-              </Button>
-          </DialogActions>
+                <form className={classes.form} onSubmit={handleSubmitScheduleLesson}>
+                  {type == "Lesson" &&
+                    <div>
+                      <div>
+                      <Autocomplete
+                        id="controllable-states-demo"
+                        options={modules}
+                        onChange = {(event,newValue) => {
+                            setModuleID(newValue.moduleCode);
+                            getModuleLesson(newValue.moduleCode);
+                        }}
+                        placeholder="Module"
+                        getOptionLabel={option => option.moduleCode}
+                        style={{ width: 300 }}
+                        renderInput={(params) => <TextField {...params} label="Module" variant="outlined" />}
+                    />
+                    </div>
+                    <div>
+                    <Autocomplete
+                      id="controllable-states-demo"
+                      options={lessons}
+                      onChange = {(event,newValue) => {
+                        console.log(newValue)
+                        setLessonID(newValue.lessonID);
+                      }}
+                      onInputChange={(event, newInputValue) => {
+                        setLessonDetail(newInputValue);
+                      }}
+                      getOptionLabel={option => (option.lessonType + " " + option.classNo + " " + option.day + "," + (option.startTime).slice(0,5) + 
+                      "-" + (option.endTime).slice(0,5))}
+                      style={{ width: 300 }}
+                      renderInput={(params) => <TextField {...params} label="Class" variant="outlined" />}
+                  />
+                    </div>
+                  </div>
+                  }
+                    {type == "Personal Event" &&
+                    <div>
+                      <div>
+                    <TextField
+                    style = {{width: "30ch"}}
+                    id="outlined-multiline-static"
+                    variant="outlined"
+                    placeholder="Title"
+                    value={title}
+                    onChange={onTitleChange}
+                    helperText="Title"
+                    required/>
+                    </div>
+                    <div>
+                    <TextField
+                    style = {{width: "30ch"}}
+                    id="outlined-multiline-static"
+                    variant="outlined"
+                    placeholder="Description"
+                    value={desc}
+                    onChange={onDescChange}
+                    helperText="Description"
+                    required/>
+                    </div>
+                    <div>
+                    <TextField
+                      id="datetime-local"
+                      helperText="Start Time"
+                      variant="outlined"
+                      type="datetime-local"
+                      value={start}
+                      onChange={onStartChange}
+                      defaultValue="2017-05-24T10:30:00"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      required
+                    />
+                    </div>
+                    <div>
+                    <TextField
+                      id="datetime-local"
+                      helperText="End Time"
+                      variant="outlined"
+                      type="datetime-local"
+                      value={end}
+                      onChange={onEndChange}
+                      defaultValue="2017-05-24T10:30:00"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      required
+                    />
+                    </div>
+                  </div>
+                  }
+                  <DialogActions>
+                  <Button type="submit" disabled={((type == "Lesson" ? (moduleID == "" && lessonID == "") :
+                  (title == "" 
+                  || (start == "" || (desc == "" || end == ""))))) ? true : false}>
+                    Add
+                  </Button>
+                  <Button onClick={handleClose}>
+                    Close
+                  </Button>
+              </DialogActions>
           </form>
           </DialogContent>
         </Dialog>
@@ -512,7 +685,7 @@ useEffect(() => {
         eventClick={(arg) => handleDetailOpen(arg)}
         events= {events}
       />
-      <Dialog fullScreen open={detail} onClose={handleDetailClose} TransitionComponent={Transition} className={classes.root}>
+      <Dialog fullScreen open={detail} onClose={handleDetailClose} TransitionComponent={Transition} style={{padding:"0px"}}>
         <AppBar className={classes.appBar}>
           <Toolbar>
             <Button edge="start" color="inherit" onClick={handleDetailClose} aria-label="close" startIcon={
@@ -556,7 +729,23 @@ useEffect(() => {
         </AppBar>
         <List>
           <ListItem>
-              <ListItemText primary={event.startStr}/>
+              <ListItemText secondary={
+                <Typography varian="subtitle1">
+                {(event.startStr).split("T")[0] + " "} 
+              &middot; {((event.startStr).split("T")[1]).slice(0,5)} 
+              </Typography>}
+              primary="Start Time"
+              />
+          </ListItem>
+          <Divider />
+          <ListItem>
+              <ListItemText secondary={
+                <Typography varian="subtitle1">
+                {(event.endStr).split("T")[0] + " "} 
+              &middot; {((event.endStr).split("T")[1]).slice(0,5)} 
+              </Typography>}
+              primary="End Time"
+              />
           </ListItem>
           <Divider />
           <ListItem>
@@ -654,6 +843,8 @@ useEffect(() => {
       </div>
       )}
       </main>
+      </Container>
+                <h1 className={classes.container}>Hi</h1>
       </Container>
       </React.Fragment>
     )

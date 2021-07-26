@@ -40,16 +40,16 @@ const useStyles = makeStyles((theme) => ({
         display: "flex",
         paddingTop: "50px",
         justifyContent:'center',
-        justifyContent: 'space-between',
+        flexDirection:"column"
     },
     root: {
-        width: 1000,
+        maxWidth: 1000,
         flexDirection: "column",
         marginBottom: 20,
     },
 
     commentroot : {
-        width: 800,
+        maxWidth: 800,
         marginBottom: 30,
     },
 
@@ -57,7 +57,8 @@ const useStyles = makeStyles((theme) => ({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        minWidth:600,
+        width:600,
+        widht:"100%"
     },
     topimg: {
         marginTop: "100px",
@@ -658,13 +659,7 @@ export default function Thread({ match, location, id }) {
         <CssBaseline />
 
         <Container maxWidth="false" className={classes.container}>
-            <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="start"
-                m={1}
-                flexDirection='column'
-                        >
+
         <p className="whiteSpace"></p>
         
         <Card className = {classes.root}>
@@ -795,6 +790,7 @@ export default function Thread({ match, location, id }) {
                                     open={editOpen}
                                     onClose={handleEditClose}
                                     className={classes.modal}
+                                    
                                     aria-labelledby="simple-dialog-title"
                                     aria-describedby="simple-dialog-description"
                                     >
@@ -926,6 +922,7 @@ export default function Thread({ match, location, id }) {
                                                     open={modal}
                                                     onClose={handleModalClose}
                                                     scroll={scroll}
+                                                    style={{width:"100%"}}
                                                     aria-labelledby="scroll-dialog-title"
                                                     aria-describedby="scroll-dialog-description"
                                                     closeAfterTransition
@@ -933,8 +930,8 @@ export default function Thread({ match, location, id }) {
                                                     BackdropProps={{
                                                       timeout: 500,}}>
                                                
-                                                  <Fade in={modal}>
-                                                      <div className={classes.paper}>
+                                                  <Fade in={modal} >
+                                                      <div className={classes.paper} >
                                                          <div id="scroll-dialog-title" className="modal fade" role="dialog">
                                                              <div className="modal-dialog modal-lg">
                                                                  <div className="modal-content">
@@ -1301,8 +1298,7 @@ export default function Thread({ match, location, id }) {
                 </Linkify>
             </div>
         {/*END*/}
-    
-        </Box>
+
         </Container>
         </React.Fragment>
     );
