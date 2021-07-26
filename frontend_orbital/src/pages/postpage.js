@@ -800,7 +800,7 @@ export default function Thread({ match, location, id }) {
                                     >
                                         <DialogContent className={classes.paper}>
                                             <DialogContentText>
-                                                <h4 id="simple-dialog-title">Edi post</h4>
+                                                <h4 id="simple-dialog-title">Edit post</h4>
                                             </DialogContentText>
                                         <form className="post pb-4" className={classes.form}>
                                             <div className="form-row align-items-left mb-3 ml-3">

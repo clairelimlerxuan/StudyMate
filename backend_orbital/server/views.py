@@ -809,11 +809,7 @@ def editPost(request):
     title = data['title']
     textContent = data['textContent']
     try:
-<<<<<<< HEAD
-        user = User.objects.get(user_id = userPK)
-=======
         user = User.objects.get(id = userPK) 
->>>>>>> 2105c5b7da4d2054a2adda936114dc9f810373e1
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     try:
@@ -840,13 +836,8 @@ def editComment(request):
     postPK = data['postID']
     commentPK  = data['commentID']
     textContent = data['textContent']
-    try: 
-<<<<<<< HEAD
-        user = User.objects.get(id = userPK)   
-=======
-        #user = MemberUser.objects.get(user_id = userPK)   
+    try:  
         user = User.objects.get(id = userPK) 
->>>>>>> 2105c5b7da4d2054a2adda936114dc9f810373e1
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     try:
@@ -878,12 +869,7 @@ def editReply(request):
     replyPK  = data['replyID']
     textContent = data['textContent']
     try:
-<<<<<<< HEAD
-        user = User.objects.get(id = userPK)  
-=======
-        #user = MemberUser.objects.get(user_id = userPK)  
         user = User.objects.get(id = userPK) 
->>>>>>> 2105c5b7da4d2054a2adda936114dc9f810373e1
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     try:
@@ -920,7 +906,7 @@ def editEvent(request):
     startDateTime = data['start']
     endDateTime = data['end']    
     try:
-        user = User.objects.get(id = userPK)
+        user = MemberUser.objects.get(user_id = userPK)
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     try:
