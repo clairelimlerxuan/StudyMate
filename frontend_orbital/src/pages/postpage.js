@@ -1050,7 +1050,7 @@ export default function Thread({ match, location, id }) {
                                                                                                     >
                                                                                                     <DialogContent className={classes.paper}>
                                                                                                         <DialogContentText>
-                                                                                                            <h4 id="simple-dialog-title">Delete Comment</h4>
+                                                                                                            <h4 id="simple-dialog-title">Delete Reply</h4>
                                                                                                             <div className="modal-body text-left pt-3 pb-3">
                                                                                                                 Are you sure you want to delete your reply? 
                                                                                                             </div>
