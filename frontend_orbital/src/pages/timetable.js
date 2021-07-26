@@ -844,7 +844,8 @@ useEffect(() => {
       )}
       </main>
       </Container>
-                <h1 className={classes.container}>Hi</h1>
+                <h1 className={classes.container}>Lessons</h1>
+                
       </Container>
       </React.Fragment>
     )
