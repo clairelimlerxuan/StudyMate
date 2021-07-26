@@ -810,11 +810,7 @@ def editPost(request):
     title = data['title']
     textContent = data['textContent']
     try:
-<<<<<<< HEAD
-        user = User.objects.get(user_id = userPK)
-=======
         user = User.objects.get(id = userPK) 
->>>>>>> e094dbdcfad9256b9034a39bca4343141f7be2ba
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
     try:
@@ -841,12 +837,7 @@ def editComment(request):
     postPK = data['postID']
     commentPK  = data['commentID']
     textContent = data['textContent']
-<<<<<<< HEAD
-    try:   
-        #user = MemberUser.objects.get(user_id = userPK)   
-=======
     try:  
->>>>>>> e094dbdcfad9256b9034a39bca4343141f7be2ba
         user = User.objects.get(id = userPK) 
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
@@ -879,10 +870,6 @@ def editReply(request):
     replyPK  = data['replyID']
     textContent = data['textContent']
     try:
-<<<<<<< HEAD
-        #user = MemberUser.objects.get(user_id = userPK)  
-=======
->>>>>>> e094dbdcfad9256b9034a39bca4343141f7be2ba
         user = User.objects.get(id = userPK) 
     except ObjectDoesNotExist:
         return Response({'res' : 'No such user.'}, status = status.HTTP_404_NOT_FOUND)
@@ -932,7 +919,6 @@ def editEvent(request):
         userEvent = Event.objects.filter(eventID = eventPK, userID = user)
         if userEvent.exists():
             event.title = title
-<<<<<<< HEAD
             if len(startDateTime.split("T")[1].split(":")) == 2 :
                 event.start = datetime.strptime(startDateTime + ":00", '%Y-%m-%dT%H:%M:%S')
             else :
@@ -941,7 +927,6 @@ def editEvent(request):
                 event.end = datetime.strptime(endDateTime + ":00", '%Y-%m-%dT%H:%M:%S')
             else :
                 event.end= datetime.strptime(endDateTime, '%Y-%m-%dT%H:%M:%S')
-=======
             event.description = description
             if startDateTime[:16] != datetime.strftime(event.start, '%Y-%m-%dT%H:%M%S')[:16]:
                 event.start = datetime.strptime(startDateTime, '%Y-%m-%dT%H:%M')
@@ -955,7 +940,6 @@ def editEvent(request):
             event.start -> 2021-07-26 16:01:00  # datetime, not string
             datetime.strftime(event.start, '%Y-%m-%dT%H:%M%S')[:16] -> '2021-07-26T16:01'
             '''
->>>>>>> e094dbdcfad9256b9034a39bca4343141f7be2ba
             try:
                 event.full_clean()  
                 event.save()
@@ -989,15 +973,12 @@ def editTask(request):
         userTask = Task.objects.filter(taskID = taskPK, userID = user)
         if userTask.exists() and request.user.id == userPK:
             task.title = title
-<<<<<<< HEAD
             if len(deadline.split("T")[1].split(":")) == 2 :
                 task.deadline = datetime.strptime(deadline + ":00", '%Y-%m-%dT%H:%M:%S')
             else :
                 task.deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M:%S')
-=======
             if deadline[:16] != datetime.strftime(task.deadline, '%Y-%m-%dT%H:%M:%S')[:16]:
                 task.deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M')
->>>>>>> e094dbdcfad9256b9034a39bca4343141f7be2ba
             task.completed = completed
             task.submitted = submitted
             task.save()
