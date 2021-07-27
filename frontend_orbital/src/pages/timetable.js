@@ -468,6 +468,7 @@ const getEvents = () => {
 }
 
 useEffect(() => {
+  getModules();
   axios.all([
     axios.get(`http://localhost:8000/server/usereventlist/${props.id}/`,
     {
@@ -572,7 +573,7 @@ useEffect(() => {
                   Personal Event
               </MenuItem>
            </TextField>
-                <form className={classes.form} onSubmit={handleSubmitScheduleLesson}>
+                <form className={classes.form} onSubmit={type == "Lesson" ? handleSubmitScheduleLesson : handleSubmitEvent}>
                   {type == "Lesson" &&
                     <div>
                       <div>
@@ -719,7 +720,7 @@ useEffect(() => {
             </Typography>
             {!(eventDetail.description == "Tutorial" ||
             eventDetail.description == "Recitation" || eventDetail.description == "Lecture" ||
-            eventDetail.description == "Lab") && (
+            eventDetail.description == "Laboratory") && (
             <Button autoFocus color="inherit" onClick={() => {handleEditEventOpen();handleDetailClose()}}>
               Edit
             </Button>)
@@ -744,7 +745,7 @@ useEffect(() => {
                                   <Button variant = "outlined" className="btn btn-default col-sm-5 btn-outline-danger mr-2"
                                     style = {{margin:5}} onClick={(eventDetail.description == "Tutorial" ||
                                     eventDetail.description == "Recitation" || eventDetail.description == "Lecture" ||
-                                    eventDetail.description == "Lab") ?
+                                    eventDetail.description == "Laboratory") ?
                                       ((e) => handleDeleteSchedLesson(e, eventDetail.lessonID)) : (
                                         (e) => handleDeleteEvent(e,eventID)
                                       )}>
