@@ -324,6 +324,7 @@ export default function Timetable(props) {
       setDescEdit("");
       setStartEdit("");
       setEndEdit("");
+      getEvents();
       if (res.status == 200) {
         handleEditEventClose();
       }
@@ -716,9 +717,13 @@ useEffect(() => {
             <Typography variant="h6" className={classes.title}>
               {event.title}
             </Typography>
+            {!(eventDetail.description == "Tutorial" ||
+            eventDetail.description == "Recitation" || eventDetail.description == "Lecture" ||
+            eventDetail.description == "Lab") && (
             <Button autoFocus color="inherit" onClick={() => {handleEditEventOpen();handleDetailClose()}}>
               Edit
-            </Button>
+            </Button>)
+            }
             <Button  color="inherit" onClick={handleDeleteOpen}>
               Delete
             </Button>
@@ -759,7 +764,12 @@ useEffect(() => {
           <ListItem>
               <ListItemText secondary={
                 <Typography varian="subtitle1">
-                  {(event.startStr)}
+                  {event.startStr ? (<Typography variant="body2">
+                                {(event.startStr).split("T")[0]}  &middot; 
+                                {((event.startStr).split("T")[1]).slice(0,5)} 
+                            </Typography>) : (
+                    ""
+                  )}
               </Typography>}
               primary="Start Time"
               />
@@ -768,7 +778,10 @@ useEffect(() => {
           <ListItem>
               <ListItemText secondary={
                 <Typography varian="subtitle1">
-                  {event.endStr ? ((event.endStr).split("T")[0]) : (
+                  {event.endStr ? (<Typography variant="body2">
+                                {(event.endStr).split("T")[0]}  &middot; 
+                                {((event.endStr).split("T")[1]).slice(0,5)} 
+                            </Typography>) : (
                     ""
                   )}
               </Typography>}
