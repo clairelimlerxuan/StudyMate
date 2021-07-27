@@ -110,6 +110,7 @@ function App(props) {
         <div className="App">
             {(props.location.pathname !== '/sign-up' && props.location.pathname !== '/login'
             ) && <Navbar
+                {...props}
                 active={active}
                 setActive={setActive}
                 isLoggedIn={isLoggedIn}

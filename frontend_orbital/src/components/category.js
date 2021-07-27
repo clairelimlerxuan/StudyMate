@@ -31,8 +31,8 @@ const useStyles = makeStyles({
 });
 
 const categories =    
-    {1 : "Academic",
-    2 : "Non-Academic"};
+    {"ACAD" : "Academic",
+    "NON-ACAD" : "Non-Academic"};
 
 export default function Category(props) {
     const classes = useStyles();

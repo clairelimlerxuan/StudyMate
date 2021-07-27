@@ -95,6 +95,7 @@ export default function Timetable(props) {
     const classes = useStyles();
     const [events, setEvents] = useState([]);
     const [lessons, setLessons] = useState([]);
+    const [schedLessons, setSchedLessons] = useState([]);
     const [event, setEvent] = useState({});
     const [eventDetail, setEventDetail] = useState({});
     const alert = useAlert();
@@ -117,7 +118,6 @@ export default function Timetable(props) {
     const [moduleID, setModuleID] = useState("");
     const [editEventOpen, setEditEventOpen] = useState(false);
     const [deleteOpen, setDelete] = useState(false);
-    const [deleteLessonOpen, setDeleteLessonOpen] = useState(false);
 
   const getModules = () => {
       axios
@@ -136,15 +136,6 @@ export default function Timetable(props) {
   const handleDeleteClose = () => {
     setDelete(false);
   };
-
-  const handleDeleteLessonOpen = () => {
-    setDeleteLessonOpen(true);
-  };
-
-  const handleDeleteLessonClose = () => {
-    setDeleteLessonOpen(false);
-  };
-
 
   const handleOpen= () => {
     setOpen(true);
@@ -180,6 +171,7 @@ export default function Timetable(props) {
     setEvent(arg.event);
     setEventDetail(arg.event.extendedProps);
     setEventID(arg.event.extendedProps.eventID);
+    console.log(arg.event.extendedProps)
   };
 
   const handleDetailClose = () => {
@@ -380,6 +372,32 @@ export default function Timetable(props) {
   });
   };
 
+const getScheduleLessons = () => {
+    axios.get(`http://localhost:8000/server/userclasslist/${props.id}/`,
+    {
+      headers: {
+          Authorization: `JWT ${localStorage.getItem("token")}`,
+      },
+    })
+  .then(res =>{
+    console.log(res.data);
+    setSchedLessons(res.data);
+    setLoading(false);
+  })
+  .catch((err) => {
+    if (
+      err.status === 401 
+  ) {
+      alert.show("Your session has expired. Please Log In again to answer this question");
+  } else if (err.status === 404) {
+    alert.show("Sorry, we have trouble in retrieveing your timetable");
+  }
+    else {
+    console.log(err)
+  }
+})
+}
+
 const getEvents = () => {
   axios.all([
     axios.get(`http://localhost:8000/server/usereventlist/${props.id}/`,
@@ -487,7 +505,7 @@ useEffect(() => {
   const handleDeleteSchedLesson = (e, lessonid) => {
     e.preventDefault();
     axios
-    .delete(`http://localhost:8000/server/deleteevent/${lessonid}/${props.id}/`,
+    .delete(`http://localhost:8000/server/deleteschedulelesson/${lessonid}/${props.id}/`,
     {
         headers: {
             Authorization: "JWT " + localStorage.getItem("token"),
@@ -497,7 +515,7 @@ useEffect(() => {
         console.log(res);
         getEvents();  
         if (res.status == 200) {
-          handleDeleteLessonClose();
+          handleDeleteClose();
         }
     })
     .catch(err => {
@@ -719,7 +737,12 @@ useEffect(() => {
                           </div>
                           <div className="row content ml-1 mr-1 pt-5 d-flex justify-content-center">
                                   <Button variant = "outlined" className="btn btn-default col-sm-5 btn-outline-danger mr-2"
-                                    style = {{margin:5}} onClick={(e) => handleDeleteEvent(e,eventID)}>
+                                    style = {{margin:5}} onClick={(eventDetail.description == "Tutorial" ||
+                                    eventDetail.description == "Recitation" || eventDetail.description == "Lecture" ||
+                                    eventDetail.description == "Lab") ?
+                                      ((e) => handleDeleteSchedLesson(e, eventDetail.lessonID)) : (
+                                        (e) => handleDeleteEvent(e,eventID)
+                                      )}>
                                       Delete
                                   </Button>
                                   <Button variant = "outlined" style = {{margin:5}} className="btn btn-default col-sm-5 btn-outline-secondary" 
@@ -848,8 +871,7 @@ useEffect(() => {
       </div>
       )}
       </main>
-      </Container>
-                <h1 className={classes.container}>{events ? "HI" : "Hai"}</h1>
+      </Container >
       </Container>
       </React.Fragment>
     )

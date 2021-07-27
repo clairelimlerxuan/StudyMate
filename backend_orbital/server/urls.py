@@ -23,7 +23,6 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('current_user/', current_user),
     path('users/', UserList.as_view()),
-
     path('postlist/', postList),
     path('commentlist/', commentList),
     path('replylist/', replyList),
@@ -64,6 +63,7 @@ urlpatterns = [
     path('viewuser/<int:userPK>/', viewUser),
     path('viewevent/<int:eventPK>/', viewEvent),
     path('viewtask/<int:taskPK>/', viewTask),
+    path('viewduetask/<int:userid>/', viewDueTask),
 
     path('completetask/', completeTask),
     path('createpost/', createPost),
@@ -77,7 +77,7 @@ urlpatterns = [
     path('deletecomment/<int:commentPK>/<int:userPK>/', deleteComment),
     path('deletereply/<int:replyPK>/<int:userPK>/', deleteReply),
     path('deleteevent/<int:eventPK>/<int:userPK>/', deleteEvent),
-    path('deleteschedulelesson/<int:scheduleLessonPK>/<int:userPK>/', deleteScheduleLesson),
+    path('deleteschedulelesson/<int:lessonPK>/<int:userPK>/', deleteScheduleLesson),
     path('deletetask/<int:taskPK>/<int:userPK>/', deleteTask),
 
     path('editpost/', editPost),

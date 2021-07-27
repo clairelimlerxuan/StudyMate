@@ -9,9 +9,4 @@ export const MenuItems = [
       path: '/post',
       cName: 'dropdown-link'
     },
-    {
-      title: 'Notification',
-      path: '/notification',
-      cName: 'dropdown-link'
-    },
   ];

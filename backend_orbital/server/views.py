@@ -24,7 +24,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer, UserSerializerWithToken
 
-
 # Create your views here.
 
 @api_view(['GET'])
@@ -269,6 +268,26 @@ def viewTask(request, taskPK):
         return Response({'res' : 'User does not have permission to view this task.'}, status = status.HTTP_403_FORBIDDEN)
     serializer = TaskSerializer(task, many = False)
     return Response(serializer.data)
+
+#get due task to send notification
+@api_view(['GET'])
+def viewDueTask(request, userid):
+    today = timezone.now().date()
+    user = MemberUser.objects.get(user_id = userid)
+    try:
+        task = Task.objects.filter(userID = userid, deadline__date = today, completed = False) | Task.objects.filter(userID = userid, deadline__date = today, submitted= False)
+    except ObjectDoesNotExist:
+        return Response({'res' : 'No such task.'}, status = status.HTTP_404_NOT_FOUND)
+    if task.exists() :
+        tasks = TaskSerializer(task, many = True)
+        datas = []
+        for task in tasks.data :
+            data = {
+                "message": task["title"] + " is due today. Please submit it immediately.",
+                "lessonID" : task['title'],
+            }
+            datas.append(data)
+        return Response(datas)
 
 #get tag by categoryID
 @api_view(['GET'])

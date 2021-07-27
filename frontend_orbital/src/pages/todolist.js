@@ -19,6 +19,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import MuiAlert from '@material-ui/lab/Alert';
 import Snackbar from '@material-ui/core/Snackbar';
+import { Badge } from '@material-ui/core';
 import { DialogContent, DialogActions, DialogTitle, DialogContentText} from '@material-ui/core';
 import { Box, Tooltip,Button, Card, CardContent, CardActions, Fab, Dialog,TextField } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
@@ -33,7 +34,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import { green } from '@material-ui/core/colors';
-import { FlashOffRounded, SettingsBackupRestoreOutlined } from '@material-ui/icons';
+import { FlashOffRounded, Notifications, SettingsBackupRestoreOutlined } from '@material-ui/icons';
 const drawerWidth = 240;
 const override = css`
   display: flex;
@@ -136,11 +137,12 @@ const ListItem = withStyles({
 export default function Todolist(props) {
     const classes = useStyles();
     const [taskID, setTaskID] = useState("");
-        const [tasks, setTasks] = useState([]);
+    const [tasks, setTasks] = useState([]);
     const [recentTasks, setRecent] = useState([]);
     const [todayTask, setTodayTasks] = useState([]);
     const [completedTasks, setCompletedTasks] = useState([]);
     const [incompleteTasks, setIncompleteTasks] = useState([]);
+    const [dueTasks, setDueTasks] = useState([]);
     const [title, setTitle] = useState("");    
     const [deadline, setDeadline] = useState("");
     const [completed, setCompleted] = useState(false);
@@ -246,7 +248,16 @@ export default function Todolist(props) {
                     <ListItemIcon>{<ClearIcon/>}</ListItemIcon>
                     <ListItemText primary={"Incomplete"} />
             </ListItem>
-                
+            </List>
+            <Divider/>
+            <List>
+                <ListItem  button key={"Notification"} onClick={(event) => {handleChangeData("due"); handleListItemClick(event, 5)}}
+            selected={selectedIndex === 5}>
+                    <ListItemIcon>{<Notifications/>}</ListItemIcon>
+                    <ListItemText primary={ <Badge color="secondary" badgeContent={dueTasks.length}>
+                    <Typography>Due Tasks</Typography>
+                    </Badge>} />
+                </ListItem>
             </List>
         </div>
     )
@@ -422,6 +433,7 @@ export default function Todolist(props) {
         console.log(res.data);
         setTasks(res.data);
         setLoading(false);
+        getDueTask();
     })
     .catch((err) => {
         if (
@@ -453,8 +465,27 @@ const handleChangeData = (newType) => {
         getCompletedTask();
     } else if (newType == "incomplete") {
         getIncompleteTask();
+    } else if (newType == "Due") {
+        getDueTask();
     };
     }
+
+    const getDueTask = () => {
+        axios
+        .get(`http://localhost:8000/server/viewduetask/${props.id}/`,
+    {
+      headers: {
+          Authorization: "JWT " + localStorage.getItem("token"),
+      },
+    })
+    .then((res) => {
+        setDueTasks(res.data);
+    })
+    .catch((err) => {
+        console.log(err);
+    });
+    }
+
     const handleCompleteTask = (e, taskid, index) => {
         axios
       .post(
@@ -519,6 +550,7 @@ const handleChangeData = (newType) => {
       setDeadline("");
       setCompleted(false);
       setSubmitted(false);
+      getTasks();
   })
   .catch((err) => {
     if (
@@ -907,7 +939,7 @@ const handleChangeData = (newType) => {
                 <>
                     {todayTask.length != 0 ? ( todayTask.map((task) =>
                     <Card className={classes.rootCard}>
-                        <CardContent className={classes.info}>
+                        <CardContent className={classes.info} style={{paddingBottom:"10px"}}>
                             <div>
                                 <Typography variant="body2">
                                     {(task.deadline).split("T")[0]}  &middot; 
@@ -1047,7 +1079,7 @@ const handleChangeData = (newType) => {
                 <>
                     {recentTasks.length != 0 ? (recentTasks.map((task) =>
                     <Card className={classes.rootCard}>
-                        <CardContent className={classes.info}>
+                        <CardContent className={classes.info} style={{paddingBottom:"10px"}}>
                             <div>
                                 <Typography variant="body2">
                                     {(task.deadline).split("T")[0]}  &middot; 
@@ -1188,7 +1220,7 @@ const handleChangeData = (newType) => {
                 <>
                     {completedTasks.length != 0 ? (completedTasks.map((task) =>
                     <Card className={classes.rootCard}>
-                        <CardContent className={classes.info}>
+                        <CardContent className={classes.info}  style={{paddingBottom:"10px"}}>
                             <div>
                                 <Typography variant="body2">
                                     {(task.deadline).split("T")[0]}  &middot; 
@@ -1329,7 +1361,7 @@ const handleChangeData = (newType) => {
                 <>
                 {incompleteTasks.length != 0 ? (incompleteTasks.map((task) =>
                     <Card className={classes.rootCard}>
-                        <CardContent className={classes.info}>
+                        <CardContent className={classes.info}  style={{paddingBottom:"10px"}}>
                             <div>
                                 <Typography variant="body2">
                                     {(task.deadline).split("T")[0]}  &middot; 
@@ -1466,6 +1498,37 @@ const handleChangeData = (newType) => {
                         </>
                     )}
                 </>}
+                {component == "due" &&
+                <>
+                    {dueTasks.length != 0 ? (dueTasks.map((task) =>
+                    <>
+                    <Card className={classes.rootCard} elevation="0">
+                        <CardContent className={classes.info}  style={{paddingBottom:"10px"}}>
+                            <div>
+                                <Typography variant="body2">
+                                    {task.message}
+                                </Typography>
+                                </div>
+                                </CardContent>
+                                </Card>
+                                <Divider/>
+                                </>)) : (
+                                    <>
+                                    {dueTasks.length == 0 &&
+                                        <div className="card-body mr-4">
+                                            <img                         
+                                            src='/images/nodata.svg'
+                                            alt="No Task"
+                                            className={classes.topimg}
+                                            />
+                                            <Typography variant="h5">
+                                                Everything has been submitted
+                                            </Typography>
+                                        </div>
+                                        }
+                                    </>
+                                )}</>}
+
                 </div>)}
             </Box>
         </main>

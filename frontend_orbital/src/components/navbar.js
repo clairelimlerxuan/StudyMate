@@ -11,12 +11,15 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { Alert } from '@material-ui/lab';
 import { AlertTitle } from '@material-ui/lab';
+import axios from 'axios';
 function Navbar(props) {
 
   const [click, setClick] = React.useState(false);
   const [dropdown, setDropdown] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   const [openAlert, setOpenAlert] = useState(false);
+  const [dueData, setDuedata] = useState([]);
+  const [id, setID] = useState(props.id);
 
   const handleOpen = () => {
     setOpen(true);
@@ -26,7 +29,6 @@ function Navbar(props) {
     setOpen(false);
   }
 
-  
   const handleOpenAlert = () => {
     setOpenAlert(true);
   }
@@ -61,6 +63,7 @@ function Navbar(props) {
 
   useEffect(() => {
     onMouseEnter();
+
   }, []);
 
   window.addEventListener('resize', onMouseEnter);
@@ -201,7 +204,7 @@ function Navbar(props) {
                 <i class="fa fa-caret-down"></i>
               </Button>
               {dropdown && <Dropdown  
-onCloseMobileMenu={closeMobileMenu}/>}
+onCloseMobileMenu={closeMobileMenu} number={dueData.length} data={props.dueData}/>}
           </li>
           <li>
             <Link

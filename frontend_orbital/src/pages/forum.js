@@ -174,19 +174,22 @@ function Forum(props) {
                 const postlist = res.data;
                 setPosts(postlist);
                 setLoading(false);
+                console.log(postlist)
+                
             })
             .catch((error) => console.log(error));
     };
 
     const handleSearch = (keyword) => {
         axios
-            .get(`http://localhost:8000/server/search/?q=${keyword}/`
+            .get(`http://localhost:8000/server/search/?q=${keyword}`
             
             )
             .then((res) => {
                 setPosts(res.data);
                 setLoading(false);
                 setCategory("");
+                console.log(res.data)
             })
             .catch((error) => console.log(error));
     };
@@ -194,9 +197,10 @@ function Forum(props) {
     const handleFilter = (category) => {
         axios
             .get(
-                `http://localhost:8000/server/filterbycategory/?search=${category}/`)
+                `http://localhost:8000/server/filterbycategory/?search=${category}`)
             .then((res) => {
                 setPosts(res.data);
+                console.log(res.data);
             })
             .catch((err) => {
                 if (
