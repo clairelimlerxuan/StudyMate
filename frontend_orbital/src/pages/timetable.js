@@ -573,11 +573,7 @@ useEffect(() => {
                   Personal Event
               </MenuItem>
            </TextField>
-<<<<<<< HEAD
                 
-=======
-                <form className={classes.form} onSubmit={type == "Lesson" ? handleSubmitScheduleLesson : handleSubmitEvent}>
->>>>>>> 885fffa49d20c72cb548d123e8dabca6d873a437
                   {type == "Lesson" &&
                   <form className={classes.form} onSubmit={handleSubmitScheduleLesson}>
                     <div>
