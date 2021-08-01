@@ -938,6 +938,7 @@ def editEvent(request):
         userEvent = Event.objects.filter(eventID = eventPK, userID = user)
         if userEvent.exists():
             event.title = title
+            '''
             if len(startDateTime.split("T")[1].split(":")) == 2 :
                 event.start = datetime.strptime(startDateTime + ":00", '%Y-%m-%dT%H:%M:%S')
             else :
@@ -946,6 +947,7 @@ def editEvent(request):
                 event.end = datetime.strptime(endDateTime + ":00", '%Y-%m-%dT%H:%M:%S')
             else :
                 event.end= datetime.strptime(endDateTime, '%Y-%m-%dT%H:%M:%S')
+            '''
             event.description = description
             if startDateTime[:16] != datetime.strftime(event.start, '%Y-%m-%dT%H:%M%S')[:16]:
                 event.start = datetime.strptime(startDateTime, '%Y-%m-%dT%H:%M')
@@ -992,10 +994,12 @@ def editTask(request):
         userTask = Task.objects.filter(taskID = taskPK, userID = user)
         if userTask.exists() and request.user.id == userPK:
             task.title = title
+            '''
             if len(deadline.split("T")[1].split(":")) == 2 :
                 task.deadline = datetime.strptime(deadline + ":00", '%Y-%m-%dT%H:%M:%S')
             else :
                 task.deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M:%S')
+            '''
             if deadline[:16] != datetime.strftime(task.deadline, '%Y-%m-%dT%H:%M:%S')[:16]:
                 task.deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M')
             task.completed = completed

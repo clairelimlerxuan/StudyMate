@@ -573,7 +573,11 @@ useEffect(() => {
                   Personal Event
               </MenuItem>
            </TextField>
+<<<<<<< HEAD
                 
+=======
+                <form className={classes.form} onSubmit={type == "Lesson" ? handleSubmitScheduleLesson : handleSubmitEvent}>
+>>>>>>> 885fffa49d20c72cb548d123e8dabca6d873a437
                   {type == "Lesson" &&
                   <form className={classes.form} onSubmit={handleSubmitScheduleLesson}>
                     <div>
@@ -733,7 +737,7 @@ useEffect(() => {
             </Typography>
             {!(eventDetail.description == "Tutorial" ||
             eventDetail.description == "Recitation" || eventDetail.description == "Lecture" ||
-            eventDetail.description == "Lab") && (
+            eventDetail.description == "Laboratory") && (
             <Button autoFocus color="inherit" onClick={() => {handleEditEventOpen();handleDetailClose()}}>
               Edit
             </Button>)
@@ -758,7 +762,7 @@ useEffect(() => {
                                   <Button variant = "outlined" className="btn btn-default col-sm-5 btn-outline-danger mr-2"
                                     style = {{margin:5}} onClick={(eventDetail.description == "Tutorial" ||
                                     eventDetail.description == "Recitation" || eventDetail.description == "Lecture" ||
-                                    eventDetail.description == "Lab") ?
+                                    eventDetail.description == "Laboratory") ?
                                       ((e) => handleDeleteSchedLesson(e, eventDetail.lessonID)) : (
                                         (e) => handleDeleteEvent(e,eventID)
                                       )}>
