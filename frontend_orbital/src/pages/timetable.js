@@ -468,6 +468,7 @@ const getEvents = () => {
 }
 
 useEffect(() => {
+  getModules();
   axios.all([
     axios.get(`http://localhost:8000/server/usereventlist/${props.id}/`,
     {
@@ -572,8 +573,9 @@ useEffect(() => {
                   Personal Event
               </MenuItem>
            </TextField>
-                <form className={classes.form} onSubmit={handleSubmitScheduleLesson}>
+                
                   {type == "Lesson" &&
+                  <form className={classes.form} onSubmit={handleSubmitScheduleLesson}>
                     <div>
                       <div>
                       <Autocomplete
@@ -607,8 +609,20 @@ useEffect(() => {
                   />
                     </div>
                   </div>
+                  <DialogActions>
+                  <Button type="submit" disabled={((type == "Lesson" ? (moduleID == "" && lessonID == "") :
+                  (title == "" 
+                  || (start == "" || (desc == "" || end == ""))))) ? true : false}>
+                    Add
+                  </Button>
+                  <Button onClick={handleClose}>
+                    Close
+                  </Button>
+              </DialogActions>
+                  </form>
                   }
                     {type == "Personal Event" &&
+                    <form className={classes.form} onSubmit={handleSubmitEvent}>
                     <div>
                       <div>
                     <TextField
@@ -663,7 +677,6 @@ useEffect(() => {
                     />
                     </div>
                   </div>
-                  }
                   <DialogActions>
                   <Button type="submit" disabled={((type == "Lesson" ? (moduleID == "" && lessonID == "") :
                   (title == "" 
@@ -674,7 +687,8 @@ useEffect(() => {
                     Close
                   </Button>
               </DialogActions>
-          </form>
+                  </form>
+                  }
           </DialogContent>
         </Dialog>
         <main>    

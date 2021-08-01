@@ -100,7 +100,7 @@ const useStyles = makeStyles((theme) => ({
     },
 
     header : {
-        backgroundColor: "#c62828",
+        backgroundColor: "#687477",
         width: "100%",
         alignItems: 'stretch',
         flexDirection: 'column',
@@ -254,7 +254,39 @@ export default function Thread({ match, location, id }) {
             });
     }, []);
 
+    const getPosts = () => {
+        axios
+            .get(
+                `http://localhost:8000/server/viewpost/${match.params.postID}/`
+            )
+            .then((res) => {
+                console.log(res.data);
+                setPostdata(res.data);
+                setLike(res.data.upvote);
+                setDislike(res.data.downvote);
+                setLoading(false);
+                getUserPost();
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
     
+    const getComments = () => {
+        axios
+            .get(
+                `http://localhost:8000/server/postcomment/${match.params.postID}/`
+            )
+            .then((res) => {
+                console.log(res.data);
+                setCommentsdata(res.data);
+                setLoading(false);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
+
     const getReplies = (commentid) => {
         axios
         .get(
@@ -303,6 +335,7 @@ export default function Thread({ match, location, id }) {
         console.log(res.data);
         handleOpen();
         setContent("");
+        getComments();
     })
     .catch((err) => {
         if (
@@ -340,6 +373,7 @@ export default function Thread({ match, location, id }) {
         console.log(res.data);
         setReplyContent("");
         setCommentID("");
+        getReplies();
     })
     .catch((err) => {
         if (
@@ -477,6 +511,7 @@ export default function Thread({ match, location, id }) {
             .catch(err =>  {
             console.log(err.response);
             console.log(err.response.data.res);
+            getComments();
             alert.show(err.response.data.res);
             })
         }
@@ -504,6 +539,7 @@ export default function Thread({ match, location, id }) {
                         setCommentID("");
                         setReplyID("");
                         setReplyEdit("");
+                        getReplies();
                     })
                 .catch(err =>  {
                 console.log(err.response);
@@ -581,7 +617,11 @@ export default function Thread({ match, location, id }) {
                 },
             })//delete post
             .then(res => {
+                if (res.status === 200) {
+                    handleDeleteClose(); //close delete post modal
+                }
                 console.log(res);
+                getPosts();
                 window.location.reload(false);
             
             })
@@ -598,6 +638,10 @@ export default function Thread({ match, location, id }) {
                 },
             }) //delete comment
             .then(res => {
+                if(res.status === 200) {
+                    handleClose();
+                }
+                getComments();
                 console.log(res);
                 window.location.reload(false);
                 setCommentID("");
@@ -616,8 +660,12 @@ export default function Thread({ match, location, id }) {
                 },
             }) //delete reply
             .then(res => {
+                if(res.status === 200) {
+                    handleDeleteReplyClose();
+                }
                 console.log(res);
                 window.location.reload(false);
+                getReplies();
                 setReplyID("");
             })
             .catch(err => console.log(err));

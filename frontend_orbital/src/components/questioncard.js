@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
         color: "black",
         margin: "20px",
         marginBottom: 10,
-        backgroundColor: "#eee",
+        backgroundColor: "#f7f3f5",
         display: "grid",
         paddingTop: "10px",
         display :"flex"
@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
         width: "100%",
     },
     info: {
-        backgroundColor: "#eee",
+        backgroundColor: "#f7f3f5",
     },
     iconbar: {
         width: "100%", /* Full-width */

@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
     container: {
         display: "flex",
         justifyContent:"center",
-        backgroundColor: "#efebe9",
+        backgroundColor: "#e2c2b3",
         width : "100%",
         overflow: "hidden",
     },
@@ -55,7 +55,7 @@ const useStyles = makeStyles((theme) => ({
     },
 
     box : {
-        backgroundColor: "#efebe9"
+        backgroundColor: "#e2c2b3"
     },
     
     form :  {
@@ -292,15 +292,15 @@ function Forum(props) {
                 className = {classes.box}
                 >
                     <img
-                        src='/images/reading.svg'
-                        alt="Person reading a book"
+                        src='/images/faq.svg'
+                        alt="FAQ"
                         className={classes.topimg}
                     />
                     <SearchBar handleSearch={handleSearch} loadAll={loadAll} />
 
                 </Box>
                 <Container maxWidth="false" className={classes.container}>
-                <Card className = {classes.root}>
+                <Card className = {classes.root} style={{backgroundColor:"#f7f3f5"}}>
                     <CardHeader
                     title="Hi, what's your question?"
                     /> 
