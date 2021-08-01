@@ -431,7 +431,7 @@ function Forum(props) {
                         setCategory={setCategory}
                         handleFilter={handleFilter}
                     />
-                        <Grid container xs={12} style={{display:"flex"}}>
+                        <Grid container xs={12} style={{display:"flex", flexDirection:"column"}}>
                             {posts.map((post) => {
                                 const d = post.creationDate
                                 const e = d.split("T")[0]
