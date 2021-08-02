@@ -517,7 +517,7 @@ useEffect(() => {
         console.log(res);
         getEvents();  
         if (res.status == 200) {
-          handleDeleteClose();
+          handleDetailClose();
         }
     })
     .catch(err => {
@@ -573,11 +573,6 @@ useEffect(() => {
                   Personal Event
               </MenuItem>
            </TextField>
-<<<<<<< HEAD
-                
-=======
-                <form className={classes.form} onSubmit={type == "Lesson" ? handleSubmitScheduleLesson : handleSubmitEvent}>
->>>>>>> 885fffa49d20c72cb548d123e8dabca6d873a437
                   {type == "Lesson" &&
                   <form className={classes.form} onSubmit={handleSubmitScheduleLesson}>
                     <div>
@@ -737,7 +732,7 @@ useEffect(() => {
             </Typography>
             {!(eventDetail.description == "Tutorial" ||
             eventDetail.description == "Recitation" || eventDetail.description == "Lecture" ||
-            eventDetail.description == "Laboratory") && (
+            eventDetail.description == "Laboratory" || eventDetail == "Sectional Teaching") && (
             <Button autoFocus color="inherit" onClick={() => {handleEditEventOpen();handleDetailClose()}}>
               Edit
             </Button>)

@@ -70,7 +70,7 @@ const useStyles = makeStyles((theme) => ({
     width:250,
   },
   content: {
-    padding: theme.spacing(3),
+    padding: theme.spacing(2),
     overflow: "hidden",
     flexDirection:"column",
   },
@@ -87,12 +87,14 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom:"0px"
   },
   rootCard: {
-    width: 600,
+    width: "600px",
     flexDirection: "column",
     marginBottom:"20px",
     display:"flex",
     overflow:"hidden",
-    justifyContent:"center"
+    justifyContent:"center",
+    flexGrow:1,
+    flexBasis:0
     },
 
     topimg: {
@@ -251,7 +253,7 @@ export default function Todolist(props) {
             </List>
             <Divider/>
             <List>
-                <ListItem  button key={"Notification"} onClick={(event) => {handleChangeData("due"); handleListItemClick(event, 5)}}
+                <ListItem  button key={"Notification"} onClick={(event) => {handleChangeData("Due"); handleListItemClick(event, 5)}}
             selected={selectedIndex === 5}>
                     <ListItemIcon>{<Notifications/>}</ListItemIcon>
                     <ListItemText primary={ <Badge color="secondary" badgeContent={dueTasks.length}>
@@ -788,7 +790,7 @@ const handleChangeData = (newType) => {
                 flexDirection='column'
                 width = "100%"
                 alignItems ="center"
-                className = {classes.box}
+                justifyContent="center"
                 >
             {loading ? (
               <div className={classes.loading}>
@@ -928,9 +930,18 @@ const handleChangeData = (newType) => {
                 ) : (
                     <>
                     {tasks.length == 0 &&
+                    
+                    <div className="card-body mr-4">
+                        <img                         
+                        src='/images/nodata.svg'
+                        alt="No Task"
+                        className={classes.topimg}
+                        />
                         <Typography variant="h3">
                             No Tasks Made
                         </Typography>
+                        
+                    </div>
                         }
                     </>
                 )}
@@ -1498,7 +1509,7 @@ const handleChangeData = (newType) => {
                         </>
                     )}
                 </>}
-                {component == "due" &&
+                {component == "Due" &&
                 <>
                     {dueTasks.length != 0 ? (dueTasks.map((task) =>
                     <>

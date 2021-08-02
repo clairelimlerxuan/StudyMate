@@ -89,18 +89,73 @@ function Forum(props) {
     const [tags, setTags] = useState([]);
     const [modules, setModules] = useState([]);
     const [value, setValue] = React.useState(null);
+    const [user, setUser] = useState({});
 
 
     useEffect(() => {
+        loadAll();
         setActive("forum");
         getTags();
         getAcademicTag();
         getNonAcademicTag();
         getCategories();
         getModules();
-        loadAll();
         console.log(props.username)
     }, []);
+
+    const loadAll= () => {
+        axios
+        .get("http://localhost:8000/server/postlist/")
+        .then((res) => {
+            const postlist = res.data;
+            setPosts(postlist);
+            console.log(postlist)
+            const userpost = {};
+            res.data.map((post) => {
+                const userid = post.userID;
+                axios
+                .get(`http://localhost:8000/server/getuserbyID/${userid}/`)
+                .then((res) => {
+                    userpost[userid] = res.data.username;
+                    setUser(userpost);
+                })
+                .catch((error) => console.log(error));
+            }) 
+            setLoading(false);
+        })
+        .catch((error) => console.log(error));
+    }
+
+    const getPosts = () => {
+        axios
+        .get("http://localhost:8000/server/postlist/")
+        .then((res) => {
+            const postlist = res.data;
+            setPosts(postlist);
+            console.log(postlist)
+            const userpost = {};
+            res.data.map((post) => {
+                const userid = post.userID;
+                axios
+                .get(`http://localhost:8000/server/getuserbyID/${userid}/`)
+                .then((res) => {
+                    userpost[userid] = res.data.username;
+                    setUser(userpost);
+                })
+                .catch((error) => console.log(error));
+            })
+            console.log(user); 
+            setLoading(false);
+        })
+        .catch((error) => console.log(error));
+        setActive("forum");
+        getTags();
+        getAcademicTag();
+        getNonAcademicTag();
+        getCategories();
+        getModules();
+        console.log(props.username)
+    }
 
     const getTags = () => {
         axios
@@ -166,20 +221,7 @@ function Forum(props) {
     const handleClose = () => {
         setOpen(false);
     }
-
-    const loadAll = () => {
-        axios
-            .get("http://localhost:8000/server/postlist/")
-            .then((res) => {
-                const postlist = res.data;
-                setPosts(postlist);
-                setLoading(false);
-                console.log(postlist)
-                
-            })
-            .catch((error) => console.log(error));
-    };
-
+    
     const handleSearch = (keyword) => {
         axios
             .get(`http://localhost:8000/server/search/?q=${keyword}`
@@ -245,6 +287,7 @@ function Forum(props) {
                 setContent("");
                 setTag("");
                 setTitle("");
+                getPosts();
                 return res;
             })
             .catch((err) => {
@@ -283,6 +326,7 @@ function Forum(props) {
     return (
         <React.Fragment>
             <CssBaseline />
+            <main style={{backgroundColor: "#e2c2b3"}}>
                 <Box
                 display="flex"
                 justifyContent="center"
@@ -442,7 +486,7 @@ function Forum(props) {
                                             style={{ textDecoration: "none" }}
                                         >
                                             <QuestionCard
-                                                userID={post.userID}
+                                                userID={user[post.userID]}
                                                 creationDate = {e}
                                                 title={post.title}
                                                 categoryID = {post.categoryID}
@@ -459,6 +503,7 @@ function Forum(props) {
                         </Grid>
                     </Container>
                     )}            
+                </main>
                 </main>
             </React.Fragment>
         );

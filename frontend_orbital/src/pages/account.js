@@ -43,7 +43,8 @@ const useStyles = makeStyles((theme) => ({
     container: {
         display: "grid",
         height: "100%",
-        backgroundColor:"#fffde7"
+        backgroundColor:"#fffde7",
+        overflow: "hidden",
         
     },
     icon: {
@@ -77,6 +78,7 @@ const useStyles = makeStyles((theme) => ({
     topimg: {
         marginTop: "100px",
         height: "50vh",
+        flexShrink: 2,
         marginBottom: "0",
         display:"flex",
         width : "50%"
@@ -191,7 +193,6 @@ function Account(props) {
                     if(res.status === 200) {
                         handleClose();
                     }
-                    window.location.reload(false);
                     getMember();
                 })
             .catch(err => console.log(err));
@@ -202,7 +203,7 @@ function Account(props) {
         <React.Fragment>
         <CssBaseline />
         <main style={{backgroundColor:"#fffde7"}}>
-            <Container maxWidth="md" className={classes.container}>
+            <Container maxWidth="false" className={classes.container}>
                 <CardContent className={classes.profile}>
                     <AccountCircleIcon className={classes.icon} />
                     <CardContent className={classes.info}>

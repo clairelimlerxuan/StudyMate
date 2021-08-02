@@ -118,6 +118,7 @@ export default function Thread({ match, location, id }) {
     const [isStaff, setIsStaff] = useState(false);
     const [user_post, setUserPost] = useState({});
     const [post, setPostdata] = useState({});
+    const [postDate, setPostDate] = useState([])
     const [comments, setCommentsdata] = useState([]);
     const [commentID, setCommentID] = useState("");
     const [comment, setComment] = useState({});
@@ -144,6 +145,8 @@ export default function Thread({ match, location, id }) {
     const [dislike, setDislike] = useState(0);
     const [editCommOpen, setEditCommOpen] = useState(false);
     const [editRepOpen, setRepOpen] = useState(false);
+    const [repliesUsers, setRepliesUsers] = useState({});
+    const [commentsUsers, setCommentsUsers] = useState({});
     const alert = useAlert();
 
     const [isLoggedIn, setIsLoggedIn] = useState(
@@ -230,6 +233,19 @@ export default function Thread({ match, location, id }) {
                 console.log(res.data);
                 setCommentsdata(res.data);
                 setLoading(false);
+                const commentusers = {};
+                res.data.map((comment) => {
+                    const userid = comment.userID;
+                    axios
+                    .get(`http://localhost:8000/server/getuserbyID/${userid}/`)
+                    .then((res) => {
+                        commentusers[userid] = res.data.username;
+                        
+                    })
+                    .catch((error) => console.log(error));
+                })
+                console.log(commentusers)
+                setCommentsUsers(commentusers);
             })
             .catch((err) => {
                 console.log(err);
@@ -244,6 +260,8 @@ export default function Thread({ match, location, id }) {
             .then((res) => {
                 console.log(res.data);
                 setPostdata(res.data);
+                const date = (res.data.creationDate).split("T")[0]
+                setPostDate(date);
                 setLike(res.data.upvote);
                 setDislike(res.data.downvote);
                 setLoading(false);
@@ -280,7 +298,18 @@ export default function Thread({ match, location, id }) {
             .then((res) => {
                 console.log(res.data);
                 setCommentsdata(res.data);
-                setLoading(false);
+                setLoading(false);const commentusers = {};
+                res.data.map((comment) => {
+                    const userid = comment.userID;
+                    axios
+                    .get(`http://localhost:8000/server/getuserbyID/${userid}/`)
+                    .then((res) => {
+                        commentusers[userid] = res.data.username;
+                    })
+                    .catch((error) => console.log(error));
+                })
+                console.log("a" + commentusers)
+                setCommentsUsers(commentusers);
             })
             .catch((err) => {
                 console.log(err);
@@ -296,6 +325,17 @@ export default function Thread({ match, location, id }) {
                 setReplyID(id);
                 setLoading(false);
                 setCommentID(commentid);
+                var userreply = new Object();;
+                res.data.map((reply) => {
+                    const userid = reply.userID;
+                    axios
+                    .get(`http://localhost:8000/server/getuserbyID/${userid}/`)
+                    .then((res) => {
+                        userreply[userid] = res.data.username;
+                        setRepliesUsers(userreply)
+                    })
+                    .catch((error) => console.log(error));
+                })
             });
         }
 
@@ -661,12 +701,13 @@ export default function Thread({ match, location, id }) {
             }) //delete reply
             .then(res => {
                 if(res.status === 200) {
+                    getReplies(commentID)
                     handleDeleteReplyClose();
                 }
                 console.log(res);
-                window.location.reload(false);
                 getReplies();
                 setReplyID("");
+                getComments();
             })
             .catch(err => console.log(err));
     };
@@ -677,7 +718,7 @@ export default function Thread({ match, location, id }) {
         //get the user who post the question/post
         const postID = match.params.postID; //get post id
         axios
-            .get( `http://localhost:8000/server/postuser/${match.params.postID}/`
+            .get(`http://localhost:8000/server/postuser/${match.params.postID}/`
             ) //search user who post the question
             .then(res => {
                 setUserPost(res.data); //set user_post 
@@ -718,7 +759,7 @@ export default function Thread({ match, location, id }) {
                         @ {`${post.postID}`}
                         &middot; 
                        
-                        Posted on {`${post.creationDate}`}
+                        Posted on {postDate}
                     </Typography>
                             <div>Posted by {user_post.username}</div>
             </div>
@@ -788,7 +829,7 @@ export default function Thread({ match, location, id }) {
                                     </small>       
                                     
                                     <br />
-                                    <Button type="submit" color="secondary" style={{color:"#bf360c"}} variant="contained" onClick={handleSubmitComment}
+                                    <Button type="submit" color="secondary" variant="contained" onClick={handleSubmitComment}
                                     disabled={content== "" ? true : false}
                                     >
                                         Answer
@@ -938,6 +979,7 @@ export default function Thread({ match, location, id }) {
             <div>
                 <h2 className="pt-5 pb-2"> <b>Answers: </b></h2>
                 < Linkify >
+                
                     {comments && comments.map((comment) =>
                         <Card y={10}  className={classes.commentroot}>
                         <CardContent>
@@ -946,9 +988,9 @@ export default function Thread({ match, location, id }) {
                                 <div className="card-body mr-4 pb-0">
                                     <Typography variant="subtitle2">
                                         <div className="sub-text">
-                                            Posted by {comment.userID}
+                                            Posted by {commentsUsers[comment.userID]}
                                             <div className="pl-0">
-                                                Answered on {comment.creationDate}
+                                                Answered on {(comment.creationDate).split("T")[0]}
                                             </div>
                                         </div>
                                     </Typography>
@@ -1021,8 +1063,11 @@ export default function Thread({ match, location, id }) {
                                         
                                                                     </div>
                                                                             {replies && replies.map((reply) => {
-                                                                                const d = post.creationDate;
+                                                                                const d = reply.creationDate;
                                                                                 const e = d.split("T")[0];
+                                                                                const id = reply.userID
+                                                                                console.log(repliesUsers)
+                                                                                console.log(repliesUsers[id])
                                                                                 return (
                                                                                     isLoggedIn && (isStaff == true || id == reply.userID) ? (
                                                                                         <DialogContent dividers={scroll === 'paper'}>
@@ -1034,7 +1079,9 @@ export default function Thread({ match, location, id }) {
                                                                                             <div>
                                                                                                 <div className="row content">
                                                                                                     <div className="col-sm-12 ml-2">
-                                                                                                        <p className="font-weight-bold pb-0 mb-0">{reply.userID}</p>
+                                                                                                        <p className="font-weight-bold pb-0 mb-0">
+                                                                                                            @{repliesUsers[id]}
+                                                                                                            </p>
                                                                                                         <p className="sub-text pt-0 mt-0">
                                                                                                             Commented on {e} 
                                                                                                             </p>
@@ -1095,6 +1142,7 @@ export default function Thread({ match, location, id }) {
                                                                                                         className={classes.modal}
                                                                                                         aria-labelledby="simple-dialog-title"
                                                                                                         aria-describedby="simple-dialog-description"
+                                                                                                        className={classes.modal}
                                                                                                     >
                                                                                                     <DialogContent className={classes.paper}>
                                                                                                         <DialogContentText>
@@ -1131,7 +1179,7 @@ export default function Thread({ match, location, id }) {
                                                                                             <div>
                                                                                                 <div className="row content">
                                                                                                     <div className="col-sm-12 ml-2">
-                                                                                                        <p className="font-weight-bold pb-0 mb-0">{reply.userID}</p>
+                                                                                                        <p className="font-weight-bold pb-0 mb-0">@{repliesUsers[reply.userID]}</p>
                                                                                                         <p className="sub-text pt-0 mt-0">
                                                                                                             Commented on {e}
                                                                                                             </p>
@@ -1207,7 +1255,7 @@ export default function Thread({ match, location, id }) {
                                                                                     <div>
                                                                                         <div className="row content">
                                                                                             <div className="col-sm-12 ml-2">
-                                                                                                <p className="font-weight-bold pb-0 mb-0">{reply.userID}</p>
+                                                                                                <p className="font-weight-bold pb-0 mb-0">{repliesUsers[reply.userID]}</p>
                                                                                             </div>
                                                                                             <p className="mr-3 ml-4 whiteSpace">
                                                                                                 {reply.textContent}
