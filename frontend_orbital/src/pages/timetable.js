@@ -732,7 +732,7 @@ useEffect(() => {
             </Typography>
             {!(eventDetail.description == "Tutorial" ||
             eventDetail.description == "Recitation" || eventDetail.description == "Lecture" ||
-            eventDetail.description == "Laboratory" || eventDetail == "Sectional Teaching") && (
+            eventDetail.description == "Laboratory" || eventDetail.description == "Sectional Teaching") && (
             <Button autoFocus color="inherit" onClick={() => {handleEditEventOpen();handleDetailClose()}}>
               Edit
             </Button>)
@@ -757,7 +757,7 @@ useEffect(() => {
                                   <Button variant = "outlined" className="btn btn-default col-sm-5 btn-outline-danger mr-2"
                                     style = {{margin:5}} onClick={(eventDetail.description == "Tutorial" ||
                                     eventDetail.description == "Recitation" || eventDetail.description == "Lecture" ||
-                                    eventDetail.description == "Laboratory") ?
+                                    eventDetail.description == "Laboratory" || eventDetail.description == "Sectional Teaching") ?
                                       ((e) => handleDeleteSchedLesson(e, eventDetail.lessonID)) : (
                                         (e) => handleDeleteEvent(e,eventID)
                                       )}>
