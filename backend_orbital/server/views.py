@@ -744,7 +744,10 @@ def deleteReply(request, replyPK, userPK):
     except ObjectDoesNotExist:
         return Response({'res' : 'No such reply.'}, status = status.HTTP_404_NOT_FOUND)       
     userReply = Reply.objects.filter(replyID = replyPK, userID = user)
-    if userReply.exists() and userHasPermission(request, userPK):    
+    if userReply.exists() and userHasPermission(request, userPK):  
+        comment = Comment.objects.get(commentID = reply.commentID.commentID)
+        comment.replyCount -= 1
+        comment.save()  
         reply.delete()
         return Response({'res' : 'Reply deleted successfully.'}, status = status.HTTP_200_OK)
     else:
