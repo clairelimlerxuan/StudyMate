@@ -508,9 +508,9 @@ def getCommentAnswer(request, commentpk):
 
 # get the user
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes((AllowAny,))
 def getUserbyPK(request, userID) :
-    user = User.objects.get(user_id = userID)
+    user = User.objects.get(id = userID)
     serializer = UserSerializer(user, many= False)
     return Response(serializer.data)
 
