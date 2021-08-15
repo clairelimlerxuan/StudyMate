@@ -302,7 +302,8 @@ export default function Thread({ match, location, id }) {
             .then((res) => {
                 console.log(res.data);
                 setCommentsdata(res.data);
-                setLoading(false);const commentusers = {};
+                setLoading(false);
+                const commentusers = {};
                 res.data.map((comment) => {
                     const userid = comment.userID;
                     axios
@@ -1056,7 +1057,7 @@ export default function Thread({ match, location, id }) {
                                                                                                 <div className="row content">
                                                                                                     <div className="col-sm-12 ml-2">
                                                                                                         <p className="font-weight-bold pb-0 mb-0">
-                                                                                                            @{repliesUsers[id]}
+                                                                                                            Posted by {repliesUsers[id]}
                                                                                                             </p>
                                                                                                         <p className="sub-text pt-0 mt-0">
                                                                                                             Commented on {e} 
