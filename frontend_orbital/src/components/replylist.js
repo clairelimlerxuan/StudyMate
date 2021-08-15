@@ -63,6 +63,7 @@ export default function ReplyList({ reply }) {
     const [data, setData] = useState(reply);
     const [replydata, setReplydata] = useState({});
     const [commentdata, setCommentdata] = useState({});
+    const [replyDate, setReplyDate] = useState("");
     const alert = useAlert();
 
     useEffect(() => {
@@ -70,6 +71,7 @@ export default function ReplyList({ reply }) {
             .get(`http://localhost:8000/server/viewreply/${data.replyID}/`)
             .then((res) => {
                 setReplydata(res.data);
+                setReplyDate((res.data.creationDate).split("T")[0])
             })
             .catch((err) => {
                 console.log(err);
@@ -120,7 +122,7 @@ export default function ReplyList({ reply }) {
                     {replydata.textContent}
                 </Typography>
                 <Typography variant="h6" color="textSecondary">
-                    {"Posted on :"  + replydata.creationDate}
+                    {"Posted on :"  + replyDate}
                 </Typography>
 
             </div>

@@ -63,6 +63,7 @@ export default function BorrowedBookList({ comment }) {
     const [data, setData] = useState(comment);
     const [commentdata, setCommentdata] = useState({});
     const [postdata, setPostdata] = useState({});
+    const [commentDate, setCommentDate] = useState("");
     const alert = useAlert();
 
     useEffect(() => {
@@ -76,6 +77,7 @@ export default function BorrowedBookList({ comment }) {
             )
             .then((res) => {
                 setCommentdata(res.data);
+                setCommentDate((res.data.creationDate).split("T")[0]);
             })
             .catch((err) => {
                 console.log(err);
@@ -126,7 +128,7 @@ export default function BorrowedBookList({ comment }) {
                     {commentdata.textContent}
                 </Typography>
                 <Typography variant="h6" color="textSecondary">
-                    {"Posted on :"  + commentdata.creationDate}
+                    {"Posted on :"  + commentDate}
                 </Typography>
 
             </div>

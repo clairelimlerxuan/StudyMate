@@ -62,6 +62,7 @@ export default function PostList({ post }) {
     const [open, setOpen] = useState(false);
     const [data, setData] = useState(post);
     const [postdata, setPostdata] = useState({});
+    const [postDate, setPostDate] = useState("");
     const alert = useAlert();
 
     useEffect(() => {
@@ -69,6 +70,7 @@ export default function PostList({ post }) {
             .get(`http://localhost:8000/server/viewpost/${data.postID}/`)
             .then((res) => {
                 setPostdata(res.data);
+                setPostDate((res.data.creationDate).split("T")[0]);
             })
             .catch((err) => {
                 console.log(err);
@@ -103,7 +105,7 @@ export default function PostList({ post }) {
                     {postdata.textContent}
                 </Typography>
                 <Typography variant="h6" color="textSecondary">
-                    {"Posted on :"  + postdata.creationDate}
+                    {"Posted on :"  + postDate}
                 </Typography>
 
             </div>

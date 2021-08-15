@@ -508,9 +508,9 @@ def getCommentAnswer(request, commentpk):
 
 # get the user
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes((AllowAny,))
 def getUserbyPK(request, userID) :
-    user = User.objects.get(user_id = userID)
+    user = User.objects.get(id = userID)
     serializer = UserSerializer(user, many= False)
     return Response(serializer.data)
 
@@ -745,7 +745,12 @@ def deleteReply(request, replyPK, userPK):
         return Response({'res' : 'No such reply.'}, status = status.HTTP_404_NOT_FOUND)       
     userReply = Reply.objects.filter(replyID = replyPK, userID = user)
     if userReply.exists() and userHasPermission(request, userPK):    
+        comment = Comment.objects.get(commentID = reply.commentID.commentID)
+        comment.replyCount -= 1
+        comment.save()
         reply.delete()
+
+
         return Response({'res' : 'Reply deleted successfully.'}, status = status.HTTP_200_OK)
     else:
         return Response({'res' : 'User does not have permission to delete this reply.'}, status = status.HTTP_403_FORBIDDEN)

@@ -1,16 +1,16 @@
 import React, { useState, useEffect} from "react";
 import axios from "axios";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
 import jwt_decode from 'jwt-decode';
 import { NavLink } from 'react-router-dom';
 import TextareaAutosize from 'react-textarea-autosize';
 import { useAlert } from "react-alert";
 import { Reply } from "@material-ui/icons";
+import CloseIcon from '@material-ui/icons/Close';
 import Linkify from 'react-linkify';
-import { CssBaseline } from "@material-ui/core";
-import { Box } from "@material-ui/core";
-import { Modal } from "@material-ui/core";
+import { CssBaseline,AppBar, Toolbar, Box } from "@material-ui/core";
+import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -57,8 +57,6 @@ const useStyles = makeStyles((theme) => ({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        width:600,
-        widht:"100%"
     },
     topimg: {
         marginTop: "100px",
@@ -95,7 +93,7 @@ const useStyles = makeStyles((theme) => ({
     form :  {
         '& .MuiTextField-root': {
             margin: theme.spacing(1),
-            width: '25ch',
+            maxWidth: '40ch',
         },
     },
 
@@ -108,11 +106,17 @@ const useStyles = makeStyles((theme) => ({
     },
     headerTitle : {
         color: theme.palette.secondary.contrastText,
+    },
+
+    appBar : {
+        position:"relative",
     }
     }));
 
 
 export default function Thread({ match, location, id }) {
+    const theme = useTheme();
+    const fullScreen = useMediaQuery(theme.breakpoints.down('xs'));
     const [user, setUser] = useState({});
     const [username, setUsername]  = useState("");
     const [isStaff, setIsStaff] = useState(false);
@@ -496,37 +500,6 @@ export default function Thread({ match, location, id }) {
         }
     });
     }
-
-    const handleUnvote = () => {
-        axios
-        .post(`http://localhost:8000/server/downvotepost/`, 
-        {
-            postID : match.params.postID,
-            userID : id
-        },
-        {
-            headers: {
-                Authorization: "JWT " + localStorage.getItem("token"),
-            },
-        }
-        )
-        .then(
-            res => {
-                console.log(res);
-            })
-        .catch((err) => { if (
-            err.response.status === 401 ||
-            err.response.status === 404
-        ) {
-            alert.show("Please Log In to vote this post");
-        } else {
-            console.log(err.response);
-            console.log(err.response.data.res);
-            alert.show(err.response.data.res);
-        }
-    });
-    }
-
     
     const handleEditComment = e => {
         e.preventDefault();
@@ -579,6 +552,7 @@ export default function Thread({ match, location, id }) {
                         setCommentID("");
                         setReplyID("");
                         setReplyEdit("");
+                        setReplyContent("");
                         getReplies();
                     })
                 .catch(err =>  {
@@ -811,7 +785,7 @@ export default function Thread({ match, location, id }) {
                                 <form className="post pb-4">
                                     <div className="form-row align-items-left mb-3 ml-3">
                                     <TextField
-                                        style = {{width: "60ch"}}
+                                        style = {{minWidth:"40ch",maxWidth: "70ch"}}
                                         id="outlined-multiline-static"
                                         label="Comment.."
                                         multiline
@@ -830,7 +804,7 @@ export default function Thread({ match, location, id }) {
                                     
                                     <br />
                                     <Button type="submit" color="secondary" variant="contained" onClick={handleSubmitComment}
-                                    disabled={content== "" ? true : false}
+                                    disabled={content== "" ? true : false}  style={{ margin:"10px" }} 
                                     >
                                         Answer
                                     </Button>
@@ -841,7 +815,7 @@ export default function Thread({ match, location, id }) {
                                 <form className="post pb-4">
                                     <div className="form-row align-items-left mb-3 ml-3">
                                     <TextField
-                                        style = {{width: "60ch"}}
+                                        style = {{minWidth:"40ch",maxWidth: "70ch"}}
                                         id="outlined-multiline-static"
                                         label="Comment.."
                                         multiline
@@ -870,23 +844,21 @@ export default function Thread({ match, location, id }) {
                             {isLoggedIn && (username == user_post.username || isStaff === true) &&
                             <div>
                                 <>
-                                <Button  variant="contained" color="secondary"  style={{ width: 100 }} 
+                                <Button  variant="contained" color="secondary"  style={{ width: 100, margin:"10px" }} 
                                 startIcon={<Edit/>} onClick={() => {handleEditOpen();setPost(post.textContent,
                                 post.title);}}>
                                         Edit
                                 </Button>
-                                <Dialog
-                                    open={editOpen}
-                                    onClose={handleEditClose}
-                                    className={classes.modal}
-                                    
-                                    aria-labelledby="simple-dialog-title"
-                                    aria-describedby="simple-dialog-description"
-                                    >
-                                        <DialogContent className={classes.paper}>
-                                            <DialogContentText>
-                                                <h4 id="simple-dialog-title">Edit post</h4>
-                                            </DialogContentText>
+                                <Dialog fullScreen={fullScreen} open={editOpen} onClose={handleEditClose}>
+                                    <AppBar className={classes.appBar}>
+                                        <Toolbar>
+                                            <Button edge="start" color="inherit" onClick={handleEditClose} aria-label="close" startIcon={<CloseIcon />}/>
+                                            <Typography variant="h4" className={classes.title}>
+                                                Edit post
+                                            </Typography>
+                                        </Toolbar>
+                                    </AppBar>
+                                        <DialogContent>
                                         <form className="post pb-4" className={classes.form}>
                                             <div className="form-row align-items-left mb-3 ml-3">
                                                 <div>
@@ -941,13 +913,18 @@ export default function Thread({ match, location, id }) {
                                     <Dialog
                                     open={deleteOpen}
                                     onClose={handleDeleteClose}
-                                    className={classes.modal}
+                                    fullScreen={fullScreen}
                                     aria-labelledby="simple-dialog-title"
                                     aria-describedby="simple-dialog-description"
                                     >
-                                        <DialogContent className={classes.paper}>
-                                            <DialogContentText>
+                                        <AppBar className={classes.appBar}>
+                                            <Toolbar>
+                                                <Button edge="start" color="inherit" onClick={handleDeleteClose} aria-label="close" startIcon={<CloseIcon />}/>
                                                 <h4 id="simple-dialog-title">Delete post</h4>
+                                            </Toolbar>
+                                        </AppBar>
+                                        <DialogContent>
+                                            <DialogContentText>
                                                 <div className="modal-body text-left pt-3 pb-3">
                                                     Are you sure you want to delete this post? 
                                                 </div>
@@ -961,7 +938,6 @@ export default function Thread({ match, location, id }) {
                                                             Cancel
                                                         </Button>
                                                 </div>
-                            
                                             </DialogContentText>
                                         </DialogContent>
                                     </Dialog> 
@@ -1008,8 +984,8 @@ export default function Thread({ match, location, id }) {
                                                  </Button>
                                                  
                                                 <Dialog
-                                                    className={classes.modal}
                                                     open={modal}
+                                                    fullScreen={fullScreen}
                                                     onClose={handleModalClose}
                                                     scroll={scroll}
                                                     style={{width:"100%"}}
@@ -1019,49 +995,49 @@ export default function Thread({ match, location, id }) {
                                                     BackdropComponent={Backdrop}
                                                     BackdropProps={{
                                                       timeout: 500,}}>
-                                               
-                                                  <Fade in={modal} >
-                                                      <div className={classes.paper} >
-                                                         <div id="scroll-dialog-title" className="modal fade" role="dialog">
-                                                             <div className="modal-dialog modal-lg">
-                                                                 <div className="modal-content">
-                                                                     <div className="modal-header blueBg">
-                                                                         <h2 id="transition-modal-title">Replies</h2>
-                                                                    </div>
-                                                                    <div className="col-xl-11 col-md-10 col-sm-10 col-xs-10">
-                                                                            <p className="font-italic pb-1 mb-0 pl-2">Commenting as {username}</p>
+                                                        <AppBar className={classes.appBar}>
+                                                            <Toolbar>
+                                                                <Button edge="start" color="inherit" onClick={handleModalClose} aria-label="close" startIcon={<CloseIcon />}/>
+                                                                <h4 id="simple-dialog-title">Replies</h4>
+                                                            </Toolbar>
+                                                        </AppBar>
+                                                            <Fade in={modal} >
+                                                                <DialogContent>
+                                                                <div >
+                                                                    <div id="scroll-dialog-title" className="modal fade" role="dialog">
+                                                                        <div className="modal-dialog modal-lg">
+                                                                            <div className="modal-content">
+                                                                                <div className="col-xl-11 col-md-10 col-sm-10 col-xs-10">
+                                                                                        <p className="font-italic pb-1 mb-0 pl-2">Commenting as {username}</p>
+                                                                                </div>
+                                                                                    <div className="modal-body text-left pt-0">
+                                                                                        <div className="row content mb-0 greyBg pt-4 pb-3">
+                                                                                <           form className="post pb-4">
+                                                                                                <div className="form-row align-items-left mb-3 ml-3">
+                                                                                                    <TextField
+                                                                                                        style = {{ maxWidth: "100%"}}
+                                                                                                        id="outlined-multiline-static"
+                                                                                                        label="Reply"
+                                                                                                        multiline
+                                                                                                        rows={5}
+                                                                                                        defaultValue="Default Value"
+                                                                                                        variant="outlined"
+                                                                                                        placeholder="Add reply... "
+                                                                                                        value={replyContent}
+                                                                                                        onChange={onReplyChange}
+                                                                                                        required />
+                                                                                                </div>
+                                                                                                <small className="form-text text-muted col-sm-11">
+                                                                                                    Inappropriate or irrelevant replies will be filtered accordingly.
+                                                                                                </small>  
+                                                                                                <br />
+                                                                                                <Button type="submit" color="secondary" variant="contained" onClick={handleSubmitCommentAns}
+                                                                                                disabled={replyContent == "" ? true : false} style={{marginBottom:15}}>
+                                                                                                    Add Reply
+                                                                                                </Button>
+                                                                                            </form>
+                                                                                        </div>
                                                                             
-                                                                    </div>
-                                                                    <div className="modal-body text-left pt-0">
-                                                                    <div className="row content mb-0 greyBg pt-4 pb-3">
-                                                                    <form className="post pb-4">
-                                                                        <div className="form-row align-items-left mb-3 ml-3">
-                                                                        <TextField
-                                                                            style = {{width: "60ch"}}
-                                                                            id="outlined-multiline-static"
-                                                                            label="Reply"
-                                                                            multiline
-                                                                            rows={5}
-                                                                            defaultValue="Default Value"
-                                                                            variant="outlined"
-                                                                            placeholder="Add reply... "
-                                                                            value={replyContent}
-                                                                            onChange={onReplyChange}
-                                                                            required />
-                                                                        </div>
-                                                                        <small className="form-text text-muted col-sm-11">
-                                                                            Inappropriate or irrelevant replies will be filtered accordingly.
-                                                                        </small>       
-                                                                        
-                                                                        <br />
-                                                                        <Button type="submit" color="secondary" variant="contained" onClick={handleSubmitCommentAns}
-                                                                        disabled={replyContent == "" ? true : false} style={{marginBottom:15}}
-                                                                        >
-                                                                            Add Reply
-                                                                        </Button>
-                                                                    </form>
-                                        
-                                                                    </div>
                                                                             {replies && replies.map((reply) => {
                                                                                 const d = reply.creationDate;
                                                                                 const e = d.split("T")[0];
@@ -1085,6 +1061,8 @@ export default function Thread({ match, location, id }) {
                                                                                                         <p className="sub-text pt-0 mt-0">
                                                                                                             Commented on {e} 
                                                                                                             </p>
+                                                                                                            <p>{(id)}
+                                                                                                            </p>
                                                                                                     </div>
                                                                                                     <p className="mr-3 ml-4 whiteSpace">{reply.textContent}</p>
                                                                                                     <Button className="btn btn-icon float-right"  title="Edit Answer" data-target="#deleteAnswerModal" 
@@ -1093,20 +1071,22 @@ export default function Thread({ match, location, id }) {
                                                                                                     </Button>
                                                                                                     <Dialog
                                                                                                         open={editRepOpen}
+                                                                                                        fullScreen={fullScreen}
                                                                                                         onClose={handleEditRepClose}
-                                                                                                        className={classes.modal}
                                                                                                         aria-labelledby="simple-dialog-title"
                                                                                                         aria-describedby="simple-dialog-description"
                                                                                                         >
-                                                                                                            <DialogContent className={classes.paper}>
-                                                                                                                <DialogContentText>
-                                                                                                                    <h4 id="simple-dialog-title">Edit Reply</h4>
-                                                                                                                </DialogContentText>
+                                                                                                        <AppBar className={classes.appBar}>
+                                                                                                            <Toolbar>
+                                                                                                                <Button edge="start" color="inherit" onClick={handleEditRepClose} aria-label="close" startIcon={<CloseIcon />}/>
+                                                                                                                <h4 id="simple-dialog-title">Edit Reply</h4>
+                                                                                                            </Toolbar>
+                                                                                                        </AppBar>
+                                                                                                            <DialogContent>
                                                                                                             <form className="post pb-4" className={classes.form}>
                                                                                                                 <div className="form-row align-items-left mb-3 ml-3">
                                                                                                                     <div>
                                                                                                                     <TextField
-                                                                                                                        style = {{width: "60ch"}}
                                                                                                                         id="outlined-multiline-static"
                                                                                                                         defaultValue="Default Value"
                                                                                                                         variant="outlined"
@@ -1138,15 +1118,19 @@ export default function Thread({ match, location, id }) {
                                                                                                     </Button>
                                                                                                     <Dialog
                                                                                                         open={deleteReplyOpen}
+                                                                                                        fullScreen={fullScreen}
                                                                                                         onClose={handleDeleteReplyClose} 
-                                                                                                        className={classes.modal}
                                                                                                         aria-labelledby="simple-dialog-title"
                                                                                                         aria-describedby="simple-dialog-description"
-                                                                                                        className={classes.modal}
                                                                                                     >
-                                                                                                    <DialogContent className={classes.paper}>
-                                                                                                        <DialogContentText>
+                                                                                                    <AppBar className={classes.appBar}>
+                                                                                                        <Toolbar>
+                                                                                                            <Button edge="start" color="inherit" onClick={handleDeleteReplyClose}  aria-label="close" startIcon={<CloseIcon />}/>
                                                                                                             <h4 id="simple-dialog-title">Delete Reply</h4>
+                                                                                                        </Toolbar>
+                                                                                                    </AppBar>
+                                                                                                    <DialogContent>
+                                                                                                        <DialogContentText>
                                                                                                             <div className="modal-body text-left pt-3 pb-3">
                                                                                                                 Are you sure you want to delete your reply? 
                                                                                                             </div>
@@ -1202,6 +1186,7 @@ export default function Thread({ match, location, id }) {
                                                          </div>
                                                      </div>
                                                 </div>
+                                                </DialogContent>
                                               </Fade>
                                               </Dialog>
                                     
@@ -1216,9 +1201,10 @@ export default function Thread({ match, location, id }) {
                                                      startIcon={<Comment/>}>
                                                          {comment.replyCount}
                                                  </Button>
-                                                     <Dialog
+                                                    <Dialog
                                                     className={classes.modal}
                                                     open={modal}
+                                                    fullScreen={fullScreen}
                                                     onClose={handleModalClose}
                                                     scroll={scroll}
                                                     aria-labelledby="scroll-dialog-title"
@@ -1226,32 +1212,36 @@ export default function Thread({ match, location, id }) {
                                                     closeAfterTransition
                                                     BackdropComponent={Backdrop}
                                                     BackdropProps={{
-                                                      timeout: 500,}}>
-                                               
-                                                  <Fade in={modal}>
-                                                     <div className={classes.paper}>
-                                                         <div id="scroll-dialog-title" className="modal fade" role="dialog">
-                                                             <div className="modal-dialog modal-lg">
-                                                                 <div className="modal-content">
-                                                                     <div className="modal-header blueBg">
-                                                                         <h2 id="transition-modal-title">Replies</h2>
-                                                                     </div>
-                                                                     <div className="modal-body text-left pt-0">
-                                                                     <div className="row content mb-0 greyBg pt-4 pb-3">
-                                                                        <div className="col-xl-11 col-md-10 col-sm-10 col-xs-10">
-                                                                            <p className="font-italic pb-1 mb-0 pl-2">Commenting as {username}</p>
-                                                                            
-                                                                        </div>
-                                                                    </div>
-                                                                         <hr className="mt-0 mb-4" />
-                                                    
-                                                                         {replies && replies.map((reply) =>
-                                                                             <DialogContent dividers={scroll === 'paper'}>
-                                                                                <DialogContentText
-                                                                                 id="scroll-dialog-description"
-                                                                                 ref={descriptionElementRef}
-                                                                                 tabIndex={-1}
-                                                                               >
+                                                    timeout: 500,}}>
+                                                        <AppBar className={classes.appBar}>
+                                                            <Toolbar>
+                                                                <Button edge="start" color="inherit" onClick={handleModalClose}  aria-label="close" startIcon={<CloseIcon />}/>
+                                                                <h4 id="simple-dialog-title">Delete Reply</h4>
+                                                            </Toolbar>
+                                                        </AppBar>
+                                                        <Fade in={modal}>
+                                                            <div>
+                                                                <div id="scroll-dialog-title" className="modal fade" role="dialog">
+                                                                    <div className="modal-dialog modal-lg">
+                                                                        <div className="modal-content">
+                                                                            <div className="modal-header blueBg">
+                                                                                <h2 id="transition-modal-title">Replies</h2>
+                                                                            </div>
+                                                                            <div className="modal-body text-left pt-0">
+                                                                            <div className="row content mb-0 greyBg pt-4 pb-3">
+                                                                                <div className="col-xl-11 col-md-10 col-sm-10 col-xs-10">
+                                                                                    <p className="font-italic pb-1 mb-0 pl-2">Commenting as {username}</p>
+                                                                                    
+                                                                                </div>
+                                                                            </div>
+                                                                            <hr className="mt-0 mb-4" />
+                                                                            {replies && replies.map((reply) =>
+                                                                                <DialogContent dividers={scroll === 'paper'}>
+                                                                                    <DialogContentText
+                                                                                    id="scroll-dialog-description"
+                                                                                    ref={descriptionElementRef}
+                                                                                    tabIndex={-1}
+                                                                                    >
                                                                                     <div>
                                                                                         <div className="row content">
                                                                                             <div className="col-sm-12 ml-2">
@@ -1260,28 +1250,25 @@ export default function Thread({ match, location, id }) {
                                                                                             <p className="mr-3 ml-4 whiteSpace">
                                                                                                 {reply.textContent}
                                                                                             </p>
-                                                                                        </div>   
-                                                                                        
+                                                                                        </div>     
                                                                                     </div>
-                                                                                </DialogContentText>
-                                                                            </DialogContent>
-                                                                     )}
- 
-                                                                     {replies.length == "0" &&
-                                                                         <div className="muted-text mt-3 pl-3 pb-3">
-                                                                             No Replies yet!
-                                                                         </div>
-                                                                     }
-                                                                 </div>
-                                                             </div>
-                                                         </div>
-                                                     </div>
-                                                  </div>
-                                              </Fade>
-                                              </Dialog>
-                                             </div>
-
-                                        }
+                                                                                    </DialogContentText>
+                                                                                </DialogContent>
+                                                                            )}
+                                                                            {replies.length == "0" &&
+                                                                                <div className="muted-text mt-3 pl-3 pb-3">
+                                                                                    No Replies yet!
+                                                                                </div>
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </Fade>
+                                                    </Dialog>
+                                                    </div>
+                                                }
                                         {/*Edit and Delete Comment*/}
                                         {isLoggedIn && id == `${comment.userID}` &&
                                         <ul>
@@ -1292,15 +1279,19 @@ export default function Thread({ match, location, id }) {
                                                 </Button>
                                                     <Dialog
                                                         open={editCommOpen}
+                                                        fullScreen={fullScreen}
                                                         onClose={handleEditComClose}
                                                         className={classes.modal}
                                                         aria-labelledby="simple-dialog-title"
                                                         aria-describedby="simple-dialog-description"
                                                         >
-                                                            <DialogContent className={classes.paper}>
-                                                                <DialogContentText>
+                                                            <AppBar className={classes.appBar}>
+                                                                <Toolbar>
+                                                                    <Button edge="start" color="inherit" onClick={handleEditComClose}  aria-label="close" startIcon={<CloseIcon />}/>
                                                                     <h4 id="simple-dialog-title">Edit Comment</h4>
-                                                                </DialogContentText>
+                                                                </Toolbar>
+                                                            </AppBar>   
+                                                            <DialogContent>
                                                             <form className="post pb-4" className={classes.form}>
                                                                 <div className="form-row align-items-left mb-3 ml-3">
                                                                     <div>
@@ -1341,12 +1332,18 @@ export default function Thread({ match, location, id }) {
                                                     open={open}
                                                     onClose={handleClose} 
                                                     className={classes.modal}
+                                                    fullScreen={fullScreen}
                                                     aria-labelledby="simple-dialog-title"
                                                     aria-describedby="simple-dialog-description"
                                                     >
-                                                        <DialogContent className={classes.paper}>
-                                                            <DialogContentText>
+                                                        <AppBar className={classes.appBar}>
+                                                            <Toolbar>
+                                                                <Button edge="start" color="inherit" onClick={handleClose}   aria-label="close" startIcon={<CloseIcon />}/>
                                                                 <h4 id="simple-dialog-title">Delete Comment</h4>
+                                                            </Toolbar>
+                                                        </AppBar>                                                       
+                                                        <DialogContent>
+                                                            <DialogContentText>
                                                                 <div className="modal-body text-left pt-3 pb-3">
                                                                     Are you sure you want to delete your comment? 
                                                                 </div>
@@ -1364,7 +1361,6 @@ export default function Thread({ match, location, id }) {
                                             
                                                             </DialogContentText>
                                                         </DialogContent>
-
                                                     </Dialog>
                                                 </>
                                             

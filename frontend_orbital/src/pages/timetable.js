@@ -6,7 +6,7 @@ import interactionPlugin from "@fullcalendar/interaction"; // needed
 import listPlugin from '@fullcalendar/list';
 import timeGridPlugin from "@fullcalendar/timegrid";
 import axios from 'axios';
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { Button, Container, CssBaseline, Typography, Grid } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import Dialog from '@material-ui/core/Dialog';
@@ -16,7 +16,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { TextField } from '@material-ui/core';
 import { MenuItem } from '@material-ui/core';
-import { TextFields } from '@material-ui/icons';
+import { Fullscreen, TextFields } from '@material-ui/icons';
 import { FadeLoader } from 'react-spinners';
 import CloseIcon from '@material-ui/icons/Close';
 import { AppBar } from '@material-ui/core';
@@ -29,7 +29,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Drawer from '@material-ui/core/Drawer';
 import { set } from 'react-hook-form';
-
+import useMediaQuery from '@material-ui/core/useMediaQuery';
 
 const override = css`
   display: flex;
@@ -88,9 +88,18 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: theme.spacing(2),
     flex: 1,
   },
+
+  form :  {
+    '& .MuiTextField-root': {
+        margin: theme.spacing(1),
+        maxWidth: '40ch',
+    },
+},
 }));
 
 export default function Timetable(props) {
+    const theme = useTheme();
+    const fullScreen = useMediaQuery(theme.breakpoints.down('xs'));
     const [id, setID] = useState(props.id);
     const classes = useStyles();
     const [events, setEvents] = useState([]);
@@ -547,148 +556,155 @@ useEffect(() => {
         <h1>{events.slice(1).eventID}</h1>
         <Dialog open={open}
             onClose={handleClose}
+            fullScreen={fullScreen}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
-            className={classes.root}
             style={{padding:'15px'}}
             >
-        <DialogTitle id="alert-dialog-title">Add Event</DialogTitle>
-        <DialogContent>
-          
-        <TextField
-              style = {{width: "20ch"}}
-              id="outlined-multiline-static"
-              select
-              variant="outlined"
-              placeholder="Event Type"
-              value={type}
-              onChange={onTypeChange}
-              helperText="Event"
-              required >
-               <MenuItem value="" disabled>
-                  Type
-              </MenuItem>
-              <MenuItem value={"Lesson"}>Lesson</MenuItem>
-              <MenuItem value={"Personal Event"}>
-                  Personal Event
-              </MenuItem>
-           </TextField>
-                  {type == "Lesson" &&
-                  <form className={classes.form} onSubmit={handleSubmitScheduleLesson}>
-                    <div>
-                      <div>
-                      <Autocomplete
-                        id="controllable-states-demo"
-                        options={modules}
-                        onChange = {(event,newValue) => {
-                            setModuleID(newValue.moduleCode);
-                            getModuleLesson(newValue.moduleCode);
-                        }}
-                        placeholder="Module"
-                        getOptionLabel={option => option.moduleCode}
-                        style={{ width: 300 }}
-                        renderInput={(params) => <TextField {...params} label="Module" variant="outlined" />}
-                    />
-                    </div>
-                    <div>
-                    <Autocomplete
-                      id="controllable-states-demo"
-                      options={lessons}
-                      onChange = {(event,newValue) => {
-                        console.log(newValue)
-                        setLessonID(newValue.lessonID);
-                      }}
-                      onInputChange={(event, newInputValue) => {
-                        setLessonDetail(newInputValue);
-                      }}
-                      getOptionLabel={option => (option.lessonType + " " + option.classNo + " " + option.day + "," + (option.startTime).slice(0,5) + 
-                      "-" + (option.endTime).slice(0,5))}
-                      style={{ width: 300 }}
-                      renderInput={(params) => <TextField {...params} label="Class" variant="outlined" />}
-                  />
-                    </div>
-                  </div>
-                  <DialogActions>
-                  <Button type="submit" disabled={((type == "Lesson" ? (moduleID == "" && lessonID == "") :
-                  (title == "" 
-                  || (start == "" || (desc == "" || end == ""))))) ? true : false}>
-                    Add
-                  </Button>
-                  <Button onClick={handleClose}>
-                    Close
-                  </Button>
-              </DialogActions>
-                  </form>
-                  }
-                    {type == "Personal Event" &&
-                    <form className={classes.form} onSubmit={handleSubmitEvent}>
-                    <div>
-                      <div>
-                    <TextField
-                    style = {{width: "30ch"}}
-                    id="outlined-multiline-static"
-                    variant="outlined"
-                    placeholder="Title"
-                    value={title}
-                    onChange={onTitleChange}
-                    helperText="Title"
-                    required/>
-                    </div>
-                    <div>
-                    <TextField
-                    style = {{width: "30ch"}}
-                    id="outlined-multiline-static"
-                    variant="outlined"
-                    placeholder="Description"
-                    value={desc}
-                    onChange={onDescChange}
-                    helperText="Description"
-                    required/>
-                    </div>
-                    <div>
-                    <TextField
-                      id="datetime-local"
-                      helperText="Start Time"
-                      variant="outlined"
-                      type="datetime-local"
-                      value={start}
-                      onChange={onStartChange}
-                      defaultValue="2017-05-24T10:30:00"
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
-                      required
-                    />
-                    </div>
-                    <div>
-                    <TextField
-                      id="datetime-local"
-                      helperText="End Time"
-                      variant="outlined"
-                      type="datetime-local"
-                      value={end}
-                      onChange={onEndChange}
-                      defaultValue="2017-05-24T10:30:00"
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
-                      required
-                    />
-                    </div>
-                  </div>
-                  <DialogActions>
-                  <Button type="submit" disabled={((type == "Lesson" ? (moduleID == "" && lessonID == "") :
-                  (title == "" 
-                  || (start == "" || (desc == "" || end == ""))))) ? true : false}>
-                    Add
-                  </Button>
-                  <Button onClick={handleClose}>
-                    Close
-                  </Button>
-              </DialogActions>
-                  </form>
-                  }
-          </DialogContent>
+            <AppBar className={classes.appBar}>
+                <Toolbar>
+                  <Button edge="start" color="inherit" onClick={handleClose} aria-label="close" startIcon={
+                    <CloseIcon />}/>
+                  <Typography variant="h6" className={classes.title}>
+                    Add Event
+                  </Typography>
+                </Toolbar>
+              </AppBar>
+            <DialogContent>
+            <TextField
+                  style = {{minWidth: "20ch", maxWidth:"50ch", marginTop:'20px'}}
+                  id="outlined-multiline-static"
+                  select
+                  variant="outlined"
+                  placeholder="Event Type"
+                  value={type}
+                  onChange={onTypeChange}
+                  helperText="Event"
+                  required >
+                  <MenuItem value="" disabled>
+                      Type
+                  </MenuItem>
+                  <MenuItem value={"Lesson"}>Lesson</MenuItem>
+                  <MenuItem value={"Personal Event"}>
+                      Personal Event
+                  </MenuItem>
+              </TextField>
+                      {type == "Lesson" &&
+                      <form className={classes.form} onSubmit={handleSubmitScheduleLesson}>
+                        <div>
+                          <div>
+                          <Autocomplete
+                            id="controllable-states-demo"
+                            options={modules}
+                            onChange = {(event,newValue) => {
+                                setModuleID(newValue.moduleCode);
+                                getModuleLesson(newValue.moduleCode);
+                            }}
+                            placeholder="Module"
+                            getOptionLabel={option => option.moduleCode}
+                            style={{cmaxWidth: 600 }}
+                            renderInput={(params) => <TextField {...params} label="Module" variant="outlined" />}
+                        />
+                        </div>
+                        <div>
+                        <Autocomplete
+                          id="controllable-states-demo"
+                          options={lessons}
+                          onChange = {(event,newValue) => {
+                            console.log(newValue)
+                            setLessonID(newValue.lessonID);
+                          }}
+                          onInputChange={(event, newInputValue) => {
+                            setLessonDetail(newInputValue);
+                          }}
+                          getOptionLabel={option => (option.lessonType + " " + option.classNo + " " + option.day + "," + (option.startTime).slice(0,5) + 
+                          "-" + (option.endTime).slice(0,5))}
+                          style={{ maxWidth: 600 }}
+                          renderInput={(params) => <TextField {...params} label="Class" variant="outlined" />}
+                      />
+                        </div>
+                      </div>
+                      <DialogActions>
+                      <Button type="submit" disabled={((type == "Lesson" ? (moduleID == "" && lessonID == "") :
+                      (title == "" 
+                      || (start == "" || (desc == "" || end == ""))))) ? true : false}>
+                        Add
+                      </Button>
+                      <Button onClick={handleClose}>
+                        Close
+                      </Button>
+                  </DialogActions>
+                      </form>
+                      }
+                        {type == "Personal Event" &&
+                        <form className={classes.form} onSubmit={handleSubmitEvent}>
+                        <div>
+                          <div>
+                        <TextField
+                        style = {{width: "30ch"}}
+                        id="outlined-multiline-static"
+                        variant="outlined"
+                        placeholder="Title"
+                        value={title}
+                        onChange={onTitleChange}
+                        helperText="Title"
+                        required/>
+                        </div>
+                        <div>
+                        <TextField
+                        style = {{width: "30ch"}}
+                        id="outlined-multiline-static"
+                        variant="outlined"
+                        placeholder="Description"
+                        value={desc}
+                        onChange={onDescChange}
+                        helperText="Description"
+                        required/>
+                        </div>
+                        <div>
+                        <TextField
+                          id="datetime-local"
+                          helperText="Start Time"
+                          variant="outlined"
+                          type="datetime-local"
+                          value={start}
+                          onChange={onStartChange}
+                          defaultValue="2017-05-24T10:30:00"
+                          InputLabelProps={{
+                            shrink: true,
+                          }}
+                          required
+                        />
+                        </div>
+                        <div>
+                        <TextField
+                          id="datetime-local"
+                          helperText="End Time"
+                          variant="outlined"
+                          type="datetime-local"
+                          value={end}
+                          onChange={onEndChange}
+                          defaultValue="2017-05-24T10:30:00"
+                          InputLabelProps={{
+                            shrink: true,
+                          }}
+                          required
+                        />
+                        </div>
+                      </div>
+                      <DialogActions>
+                      <Button type="submit" disabled={((type == "Lesson" ? (moduleID == "" && lessonID == "") :
+                      (title == "" 
+                      || (start == "" || (desc == "" || end == ""))))) ? true : false}>
+                        Add
+                      </Button>
+                      <Button onClick={handleClose}>
+                        Close
+                      </Button>
+                  </DialogActions>
+                      </form>
+                      }
+            </DialogContent>
         </Dialog>
         <main>    
           {loading ? (
@@ -742,14 +758,22 @@ useEffect(() => {
             </Button>
             <Dialog
               open={deleteOpen}
+              fullScreen={fullScreen}
               onClose={handleDeleteClose}
-              className={classes.root}
               aria-labelledby="simple-dialog-title"
               aria-describedby="simple-dialog-description"
               >
-                  <DialogContent className={classes.paper}>
+                <AppBar className={classes.appBar}>
+                  <Toolbar>
+                    <Button edge="start" color="inherit" onClick={handleDeleteClose} aria-label="close" startIcon={
+                      <CloseIcon />}/>
+                    <Typography variant="h6" className={classes.title}>
+                      Delete Event
+                    </Typography>
+                  </Toolbar>
+                </AppBar>
+                  <DialogContent style={{marginTop:"15px"}}>
                       <DialogContentText>
-                          <h4 id="simple-dialog-title">Delete Event</h4>
                           <div className="modal-body text-left pt-3 pb-3">
                               Are you sure you want to delete this event? 
                           </div>
