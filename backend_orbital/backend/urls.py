@@ -19,9 +19,13 @@ from rest_framework_jwt.views import obtain_jwt_token
 from rest_framework_jwt.views import refresh_jwt_token
 from django.conf.urls import url
 import server.urls
+from django.views.generic import TemplateView
+from django.conf import settings
+from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('token-auth/', obtain_jwt_token),
     path('server/', include('server.urls')),
     url('api-token-refresh/', refresh_jwt_token),
-]
+    url(r'^(%s)?$',TemplateView.as_view(template_name='index.html')),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
