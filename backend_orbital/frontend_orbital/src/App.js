@@ -32,7 +32,7 @@ function App(props) {
 
     useEffect(() => {
         if (isLoggedIn) {
-            fetch("http://localhost:8000/server/current_user/", {
+            fetch("http://studymate.pythonanywhere.com/server/current_user/", {
                 headers: {
                     Authorization: `JWT ${localStorage.getItem("token")}`,
                 },
@@ -47,7 +47,7 @@ function App(props) {
     }, [isLoggedIn]);
     const handleRegister = (e, data) => {
         e.preventDefault();
-        fetch("http://localhost:8000/server/users/", {
+        fetch("http://studymate.pythonanywhere.com/server/users/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -74,7 +74,7 @@ function App(props) {
     const handleLogin = (e, data) => {
         console.log(data);
         e.preventDefault();
-        fetch("http://localhost:8000/token-auth/", {
+        fetch("http://lstudymate.pythonanywhere.com/token-auth/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

@@ -130,7 +130,7 @@ export default function Timetable(props) {
 
   const getModules = () => {
       axios
-      .get("http://localhost:8000/server/modulelist/")
+      .get("http://studymate.pythonanywhere.com/server/modulelist/")
       .then((res) => {
           setModules(res.data);
           setLoading(false);
@@ -235,7 +235,7 @@ export default function Timetable(props) {
   const getModuleLesson = (moduleid) => {
     axios
       .get(
-      `http://localhost:8000/server/getmodulelessons/${moduleid}`,
+      `http://studymate.pythonanywhere.com/server/getmodulelessons/${moduleid}`,
       {
           headers: {
               Authorization: "JWT " + localStorage.getItem("token"),
@@ -267,7 +267,7 @@ export default function Timetable(props) {
     e.preventDefault();
     axios
       .post(
-      `http://localhost:8000/server/createevent/`,
+      `http://studymate.pythonanywhere.com/server/server/createevent/`,
       {
           userID : props.id,
           title : title,
@@ -310,7 +310,7 @@ export default function Timetable(props) {
     e.preventDefault();
     axios
       .post(
-      `http://localhost:8000/server/editevent/`,
+      `http://studymate.pythonanywhere.com/server/editevent/`,
       {
           userID : props.id,
           title : titleEdit,
@@ -355,7 +355,7 @@ export default function Timetable(props) {
   const handleDeleteEvent = (e, eventid) => {
     e.preventDefault();
     axios
-    .delete(`http://localhost:8000/server/deleteevent/${eventid}/${props.id}/`,
+    .delete(`http://studymate.pythonanywhere.com/server/${eventid}/${props.id}/`,
     {
         headers: {
             Authorization: "JWT " + localStorage.getItem("token"),
@@ -383,7 +383,7 @@ export default function Timetable(props) {
   };
 
 const getScheduleLessons = () => {
-    axios.get(`http://localhost:8000/server/userclasslist/${props.id}/`,
+    axios.get(`http://studymate.pythonanywhere.com/server/userclasslist/${props.id}/`,
     {
       headers: {
           Authorization: `JWT ${localStorage.getItem("token")}`,
@@ -410,13 +410,13 @@ const getScheduleLessons = () => {
 
 const getEvents = () => {
   axios.all([
-    axios.get(`http://localhost:8000/server/usereventlist/${props.id}/`,
+    axios.get(`http://studymate.pythonanywhere.com/server/usereventlist/${props.id}/`,
     {
       headers: {
           Authorization: `JWT ${localStorage.getItem("token")}`,
       },
     }),
-    axios.get(`http://localhost:8000/server/userclasslist/${props.id}/`,
+    axios.get(`http://studymate.pythonanywhere.com/server/userclasslist/${props.id}/`,
     {
       headers: {
           Authorization: `JWT ${localStorage.getItem("token")}`,
@@ -443,7 +443,7 @@ const getEvents = () => {
     e.preventDefault();
     axios
       .post(
-      `http://localhost:8000/server/createschedulelesson/`,
+      `http://studymate.pythonanywhere.com/server/createschedulelesson/`,
       {
           userID : props.id,
           lessonID : lessonID,
@@ -479,13 +479,13 @@ const getEvents = () => {
 useEffect(() => {
   getModules();
   axios.all([
-    axios.get(`http://localhost:8000/server/usereventlist/${props.id}/`,
+    axios.get(`http://studymate.pythonanywhere.com/server/usereventlist/${props.id}/`,
     {
       headers: {
           Authorization: `JWT ${localStorage.getItem("token")}`,
       },
     }),
-    axios.get(`http://localhost:8000/server/userclasslist/${props.id}/`,
+    axios.get(`http://studymate.pythonanywhere.com/server/userclasslist/${props.id}/`,
     {
       headers: {
           Authorization: `JWT ${localStorage.getItem("token")}`,
@@ -516,7 +516,7 @@ useEffect(() => {
   const handleDeleteSchedLesson = (e, lessonid) => {
     e.preventDefault();
     axios
-    .delete(`http://localhost:8000/server/deleteschedulelesson/${lessonid}/${props.id}/`,
+    .delete(`http://studymate.pythonanywhere.com/server/deleteschedulelesson/${lessonid}/${props.id}/`,
     {
         headers: {
             Authorization: "JWT " + localStorage.getItem("token"),

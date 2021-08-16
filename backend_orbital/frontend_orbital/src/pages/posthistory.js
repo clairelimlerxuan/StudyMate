@@ -66,7 +66,7 @@ export default function Profile(props) {
         if (!props.isStaff) {
             axios
                 .get(
-                    `http://localhost:8000/server/userpostlist/${props.id}/`,
+                    `http://studymate.pythonanywhere.com/server/userpostlist/${props.id}/`,
                     {
                         headers: {
                             Authorization:
@@ -98,7 +98,7 @@ export default function Profile(props) {
         if (newType == "Post") {
             axios
                 .get(
-                    `http://localhost:8000/server/userpostlist/${props.id}/`,
+                    `http://studymate.pythonanywhere.com/server/userpostlist/${props.id}/`,
                     {
                         headers: {
                             Authorization:
@@ -118,7 +118,7 @@ export default function Profile(props) {
         } else if (newType == "Comment") {
             axios
                 .get(
-                    `http://localhost:8000/server/usercommentlist/${props.id}/`,
+                    `http://studymate.pythonanywhere.com/server/usercommentlist/${props.id}/`,
                     {
                         headers: {
                             Authorization:
@@ -138,7 +138,7 @@ export default function Profile(props) {
         } else if (newType == 'Reply') {
             axios
             .get(
-                `http://localhost:8000/server/userreplylist/${props.id}/`,
+                `http://studymate.pythonanywhere.com/server/userreplylist/${props.id}/`,
                 {
                     headers: {
                         Authorization:

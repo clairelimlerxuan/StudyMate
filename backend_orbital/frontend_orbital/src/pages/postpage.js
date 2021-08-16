@@ -108,7 +108,7 @@ const useStyles = makeStyles((theme) => ({
         flexGrow: 1,
     },
     headerTitle : {
-        color:"#fff",
+        color:"#D7745A",
     },
 
     appBar : {
@@ -218,7 +218,7 @@ export default function Thread({ match, location, id }) {
 
     useEffect(() => {
         if (isLoggedIn) {
-            fetch("http://localhost:8000/server/current_user/", {
+            fetch("http://studymate.pythonanywhere.com/server/current_user/", {
                 headers: {
                     Authorization: `JWT ${localStorage.getItem("token")}`,
                 },
@@ -234,7 +234,7 @@ export default function Thread({ match, location, id }) {
     useEffect(() => {
         axios
             .get(
-                `http://localhost:8000/server/postcomment/${match.params.postID}/`
+                `http://studymate.pythonanywhere.com/server/postcomment/${match.params.postID}/`
             )
             .then((res) => {
                 console.log(res.data);
@@ -244,7 +244,7 @@ export default function Thread({ match, location, id }) {
                 res.data.map((comment) => {
                     const userid = comment.userID;
                     axios
-                    .get(`http://localhost:8000/server/getuserbyID/${userid}/`)
+                    .get(`http://studymate.pythonanywhere.com/server/getuserbyID/${userid}/`)
                     .then((res) => {
                         commentusers[userid] = res.data.username;
                         
@@ -262,7 +262,7 @@ export default function Thread({ match, location, id }) {
     useEffect(() => {
         axios
             .get(
-                `http://localhost:8000/server/viewpost/${match.params.postID}/`
+                `http://studymate.pythonanywhere.com/server/viewpost/${match.params.postID}/`
             )
             .then((res) => {
                 console.log(res.data);
@@ -282,7 +282,7 @@ export default function Thread({ match, location, id }) {
     const getPosts = () => {
         axios
             .get(
-                `http://localhost:8000/server/viewpost/${match.params.postID}/`
+                `http://studymate.pythonanywhere.com/server/viewpost/${match.params.postID}/`
             )
             .then((res) => {
                 console.log(res.data);
@@ -300,7 +300,7 @@ export default function Thread({ match, location, id }) {
     const getComments = () => {
         axios
             .get(
-                `http://localhost:8000/server/postcomment/${match.params.postID}/`
+                `http://studymate.pythonanywhere.com/server/postcomment/${match.params.postID}/`
             )
             .then((res) => {
                 console.log(res.data);
@@ -310,7 +310,7 @@ export default function Thread({ match, location, id }) {
                 res.data.map((comment) => {
                     const userid = comment.userID;
                     axios
-                    .get(`http://localhost:8000/server/getuserbyID/${userid}/`)
+                    .get(`http://studymate.pythonanywhere.com/server/getuserbyID/${userid}/`)
                     .then((res) => {
                         commentusers[userid] = res.data.username;
                     })
@@ -327,7 +327,7 @@ export default function Thread({ match, location, id }) {
     const getReplies = (commentid) => {
         axios
         .get(
-            `http://localhost:8000/server/commentanswer/${commentid}/`)
+            `http://studymate.pythonanywhere.com/server/commentanswer/${commentid}/`)
             .then((res) => {
                 setReplies(res.data);
                 setReplyID(id);
@@ -337,7 +337,7 @@ export default function Thread({ match, location, id }) {
                 res.data.map((reply) => {
                     const userid = reply.userID;
                     axios
-                    .get(`http://localhost:8000/server/getuserbyID/${userid}/`)
+                    .get(`http://studymate.pythonanywhere.com/server/getuserbyID/${userid}/`)
                     .then((res) => {
                         userreply[userid] = res.data.username;
                         setRepliesUsers(userreply)
@@ -366,7 +366,7 @@ export default function Thread({ match, location, id }) {
     const handleSubmitComment = () =>
         axios
         .post(
-        `http://localhost:8000/server/createcomment/`,
+        `http://studymate.pythonanywhere.com/server/createcomment/`,
         {
             postID: match.params.postID,
             userID : id,
@@ -402,7 +402,7 @@ export default function Thread({ match, location, id }) {
     const handleSubmitCommentAns = () => {
         axios
         .post(`
-        http://localhost:8000/server/createreply/`,
+        http://studymate.pythonanywhere.com/server/createreply/`,
         {
             postID: match.params.postID,
             userID : id,
@@ -439,7 +439,7 @@ export default function Thread({ match, location, id }) {
     
     const handleUpvote = (userID, postID) => {
     axios
-    .post(`http://localhost:8000/server/upvotepost/`, 
+    .post(`http://studymate.pythonanywhere.com/server/upvotepost/`, 
     {
         userID : id,
         postID : match.params.postID,
@@ -474,7 +474,7 @@ export default function Thread({ match, location, id }) {
 
     const handleDownvote = () => {
         axios
-        .post(`http://localhost:8000/server/downvotepost/`, 
+        .post(`http://studymate.pythonanywhere.com/server/downvotepost/`, 
         {
             postID : match.params.postID,
             userID : id
@@ -508,7 +508,7 @@ export default function Thread({ match, location, id }) {
     const handleEditComment = e => {
         e.preventDefault();
         axios
-            .post('http://localhost:8000/server/editcomment/',{
+            .post('http://studymate.pythonanywhere.com/server/editcomment/',{
                 textContent: commentEdit,
                 commentID : commentID,
                 userID : id,
@@ -537,7 +537,7 @@ export default function Thread({ match, location, id }) {
         const handleEditReply = e => {
             e.preventDefault();   
             axios
-                .post('http://localhost:8000/server/editreply/',{
+                .post('http://studymate.pythonanywhere.com/server/editreply/',{
                     textContent: replyEdit,
                     commentID : commentID,
                     replyID : replyID,
@@ -575,7 +575,7 @@ export default function Thread({ match, location, id }) {
             e.preventDefault();
 
             axios
-                .post('http://localhost:8000/server/editpost/',
+                .post('http://studymate.pythonanywhere.com/server/editpost/',
                 {
                     userID : id,
                     textContent: postEdit,
@@ -628,7 +628,7 @@ export default function Thread({ match, location, id }) {
         e.preventDefault();
 
         axios
-            .delete(`http://localhost:8000/server/deletepost/${match.params.postID}/${id}/`,
+            .delete(`http://studymate.pythonanywhere.com/server/deletepost/${match.params.postID}/${id}/`,
             {
                 headers: {
                     Authorization: "JWT " + localStorage.getItem("token"),
@@ -649,7 +649,7 @@ export default function Thread({ match, location, id }) {
     const handleDeleteComment = (e) => { 
 
         axios
-            .delete(`http://localhost:8000/server/deletecomment/${commentID}/${id}/`,
+            .delete(`http://studymate.pythonanywhere.com/server/deletecomment/${commentID}/${id}/`,
             {
                 headers: {
                     Authorization: "JWT " + localStorage.getItem("token"),
@@ -671,7 +671,7 @@ export default function Thread({ match, location, id }) {
     const handleDeleteReply = (e) => { 
 
         axios
-            .delete(`http://localhost:8000/server/deletereply/${replyID}/${id}/`,
+            .delete(`http://studymate.pythonanywhere.com/server/deletereply/${replyID}/${id}/`,
             {
                 headers: {
                     Authorization: "JWT " + localStorage.getItem("token"),
@@ -696,7 +696,7 @@ export default function Thread({ match, location, id }) {
         //get the user who post the question/post
         const postID = match.params.postID; //get post id
         axios
-            .get(`http://localhost:8000/server/postuser/${match.params.postID}/`
+            .get(`http://studymate.pythonanywhere.com/server/postuser/${match.params.postID}/`
             ) //search user who post the question
             .then(res => {
                 setUserPost(res.data); //set user_post 

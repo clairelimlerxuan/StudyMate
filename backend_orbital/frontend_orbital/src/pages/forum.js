@@ -58,7 +58,7 @@ const useStyles = makeStyles((theme) => ({
     box : {
         backgroundColor: "#331A1A"
     },
-    
+
     form :  {
     '& .MuiTextField-root': {
         margin: theme.spacing(1),
@@ -74,7 +74,7 @@ function Forum(props) {
     const classes = useStyles();
     const [active, setActive] = useState("");
     const [userpost, setUserPost] = useState({});
-    const alert = useAlert();   
+    const alert = useAlert();
     const [post, setPost] = useState({});
     const [content, setContent] = useState("");
     const [title, setTitle]  = useState("");
@@ -106,7 +106,7 @@ function Forum(props) {
 
     const loadAll= () => {
         axios
-        .get("http://localhost:8000/server/postlist/")
+        .get("http://studymate.pythonanywhere.com/server/postlist/")
         .then((res) => {
             const postlist = res.data;
             setPosts(postlist);
@@ -115,13 +115,13 @@ function Forum(props) {
             res.data.map((post) => {
                 const userid = post.userID;
                 axios
-                .get(`http://localhost:8000/server/getuserbyID/${userid}/`)
+                .get(`http://studymate.pythonanywhere.com/server/getuserbyID/${userid}/`)
                 .then((res) => {
                     userpost[userid] = res.data.username;
                     setUser(userpost);
                 })
                 .catch((error) => console.log(error));
-            }) 
+            })
             setLoading(false);
         })
         .catch((error) => console.log(error));
@@ -129,7 +129,7 @@ function Forum(props) {
 
     const getPosts = () => {
         axios
-        .get("http://localhost:8000/server/postlist/")
+        .get("http://studymate.pythonanywhere.com/server/postlist/")
         .then((res) => {
             const postlist = res.data;
             setPosts(postlist);
@@ -138,14 +138,14 @@ function Forum(props) {
             res.data.map((post) => {
                 const userid = post.userID;
                 axios
-                .get(`http://localhost:8000/server/getuserbyID/${userid}/`)
+                .get(`http://studymate.pythonanywhere.com/server/getuserbyID/${userid}/`)
                 .then((res) => {
                     userpost[userid] = res.data.username;
                     setUser(userpost);
                 })
                 .catch((error) => console.log(error));
             })
-            console.log(user); 
+            console.log(user);
             setLoading(false);
         })
         .catch((error) => console.log(error));
@@ -160,7 +160,7 @@ function Forum(props) {
 
     const getTags = () => {
         axios
-        .get("http://localhost:8000/server/taglist/")
+        .get("http://studymate.pythonanywhere.com/server/taglist/")
         .then((res) => {
             setTags(res.data);
             setLoading(false);
@@ -171,7 +171,7 @@ function Forum(props) {
 
     const getAcademicTag = () => {
         axios
-        .get("http://localhost:8000/server/tagbycategory/1/",{
+        .get("http://studymate.pythonanywhere.com/server/tagbycategory/1/",{
         headers: {
             Authorization: `JWT ${localStorage.getItem("token")}`,
         },})
@@ -184,7 +184,7 @@ function Forum(props) {
 
     const getNonAcademicTag = () => {
         axios
-        .get("http://localhost:8000/server/tagbycategory/2/",{
+        .get("http://studymate.pythonanywhere.com/server/tagbycategory/2/",{
             headers: {
                 Authorization: `JWT ${localStorage.getItem("token")}`,
         },})
@@ -197,7 +197,7 @@ function Forum(props) {
 
     const getCategories = () => {
         axios
-        .get("http://localhost:8000/server/categorylist/")
+        .get("http://studymate.pythonanywhere.com/server/categorylist/")
         .then((res) => {
             setCategories(res.data);
             setLoading(false);
@@ -207,7 +207,7 @@ function Forum(props) {
 
     const getModules = () => {
         axios
-        .get("http://localhost:8000/server/modulelist/")
+        .get("http://studymate.pythonanywhere.com/server/modulelist/")
         .then((res) => {
             setModules(res.data);
             setLoading(false);
@@ -222,11 +222,11 @@ function Forum(props) {
     const handleClose = () => {
         setOpen(false);
     }
-    
+
     const handleSearch = (keyword) => {
         axios
-            .get(`http://localhost:8000/server/search/?q=${keyword}`
-            
+            .get(`http://studymate.pythonanywhere.com/server/search/?q=${keyword}`
+
             )
             .then((res) => {
                 setPosts(res.data);
@@ -240,7 +240,7 @@ function Forum(props) {
     const handleFilter = (category) => {
         axios
             .get(
-                `http://localhost:8000/server/filterbycategory/?search=${category}`)
+                `http://studymate.pythonanywhere.com/server/filterbycategory/?search=${category}`)
             .then((res) => {
                 setPosts(res.data);
                 console.log(res.data);
@@ -264,7 +264,7 @@ function Forum(props) {
                 e.preventDefault();
                 axios
                 .post(`
-                http://localhost:8000/server/createpost/`,
+                http://studymate.pythonanywhere.com/server/createpost/`,
                 {
                     title : title,
                     userID : props.id,
@@ -348,7 +348,7 @@ function Forum(props) {
                 <Card className = {classes.root} style={{backgroundColor:"#DADBD6"}}>
                     <CardHeader
                     title="Hi, what's your question?"
-                    /> 
+                    />
                         <CardContent>
                             <form className="post pb-4" onSubmit={handleSubmitPost} className={classes.form}>
                                     <div className="form-row align-items-left mb-3 ml-3">
@@ -384,7 +384,7 @@ function Forum(props) {
                                                     {option.categoryName}
                                                     </MenuItem>
                                                 ))}
-                                             </TextField>             
+                                             </TextField>
                                              <TextField
                                                 style = {{width: "20ch"}}
                                                 id="outlined-multiline-static"
@@ -398,13 +398,13 @@ function Forum(props) {
                                                 disabled={!props.username}
                                                 helperText="Tag"
                                                 required >
-                                                
+
                                                 {selectCategory == "ACAD" && acadTag.map((option) => (
                                                     <MenuItem value={option.tagID}>
                                                     {option.tagName}
                                                     </MenuItem>
                                                 ))}
-                                                                                                
+
                                                 {selectCategory == "NON-ACAD" && nonacadTag.map((option) => (
                                                     <MenuItem value={option.tagID}>
                                                     {option.tagName}
@@ -412,7 +412,7 @@ function Forum(props) {
                                                 ))}
 
                                              </TextField>
-                                             
+
                                             {tag == "Module" &&
                                             <>
                                             <Autocomplete
@@ -428,8 +428,8 @@ function Forum(props) {
                                             </>
                                             }
                                             </div>
-                                    
-                                            
+
+
                                         <div>
                                     <TextField
                                         style = {{width: "60ch"}}
@@ -447,10 +447,10 @@ function Forum(props) {
                                     </div>
                                     <small className="form-text text-muted col-sm-11">
                                         Inappropriate or irrelevant questions will be filtered accordingly.
-                                    </small>       
-                                    
+                                    </small>
+
                                     <br />
-                                    <Button type="submit" color="secondary" variant="contained" 
+                                    <Button type="submit" color="secondary" variant="contained"
                                     disabled={content== "" ? true : false}
                                     >
                                         Submit
@@ -503,7 +503,7 @@ function Forum(props) {
                         })}
                         </Grid>
                     </Container>
-                    )}            
+                    )}
                 </main>
                 </main>
             </React.Fragment>

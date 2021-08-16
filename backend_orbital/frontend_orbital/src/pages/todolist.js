@@ -278,7 +278,7 @@ export default function Todolist(props) {
   const getTasks = () => {
     axios
     .get(
-        `http://localhost:8000/server/usertasklist/${props.id}/`,
+        `http://studymate.pythonanywhere.com/server/usertasklist/${props.id}/`,
         {
           headers: {
               Authorization: `JWT ${localStorage.getItem("token")}`,
@@ -307,7 +307,7 @@ export default function Todolist(props) {
   const getRecentTasks = () => {
     axios
     .get(
-        `http://localhost:8000/server/userrecenttasklist/${props.id}/`,
+        `http://studymate.pythonanywhere.com/server/userrecenttasklist/${props.id}/`,
         {
           headers: {
               Authorization: `JWT ${localStorage.getItem("token")}`,
@@ -336,7 +336,7 @@ export default function Todolist(props) {
   const getCompletedTask = () => {
     axios
     .get(
-        `http://localhost:8000/server/usercompletetasklist/${props.id}/`,
+        `http://studymate.pythonanywhere.com/server/usercompletetasklist/${props.id}/`,
         {
             headers: {
                 Authorization:
@@ -366,7 +366,7 @@ export default function Todolist(props) {
   const getIncompleteTask = () => {
     axios
     .get(
-        `http://localhost:8000/server/userincompletetasklist/${props.id}/`,
+        `http://studymate.pythonanywhere.com/server/userincompletetasklist/${props.id}/`,
         {
             headers: {
                 Authorization:
@@ -396,7 +396,7 @@ export default function Todolist(props) {
   const getTodayTasks = () => {
     axios
     .get(
-        `http://localhost:8000/server/usertodaytasklist/${props.id}/`,
+        `http://studymate.pythonanywhere.com/server/usertodaytasklist/${props.id}/`,
         {
             headers: {
                 Authorization:
@@ -426,7 +426,7 @@ export default function Todolist(props) {
   useEffect(() => {
     axios
     .get(
-        `http://localhost:8000/server/usertasklist/${props.id}/`,
+        `http://studymate.pythonanywhere.com/server/usertasklist/${props.id}/`,
         {
           headers: {
               Authorization: `JWT ${localStorage.getItem("token")}`,
@@ -476,7 +476,7 @@ const handleChangeData = (newType) => {
 
     const getDueTask = () => {
         axios
-        .get(`http://localhost:8000/server/viewduetask/${props.id}/`,
+        .get(`http://studymate.pythonanywhere.com/server/viewduetask/${props.id}/`,
     {
       headers: {
           Authorization: "JWT " + localStorage.getItem("token"),
@@ -493,7 +493,7 @@ const handleChangeData = (newType) => {
     const handleCompleteTask = (e, taskid, index) => {
         axios
       .post(
-      `http://localhost:8000/server/completetask/`,
+      `http://studymate.pythonanywhere.com/server/completetask/`,
       {
           taskID : taskid,
       },
@@ -530,7 +530,7 @@ const handleChangeData = (newType) => {
         e.preventDefault();
         axios
       .post(
-      `http://localhost:8000/server/createtask/`,
+      `http://studymate.pythonanywhere.com/server/createtask/`,
       {
           userID : props.id,
           title : title,
@@ -574,7 +574,7 @@ const handleChangeData = (newType) => {
         e.preventDefault();
         axios
       .post(
-      `http://localhost:8000/server/edittask/`,
+      `http://studymate.pythonanywhere.com/server/edittask/`,
       {
           userID : props.id,
           taskID : taskID,
@@ -625,7 +625,7 @@ const handleChangeData = (newType) => {
         e.preventDefault();
         axios
         .delete(
-        `http://localhost:8000/server/deletetask/${taskID}/${props.id}/`,
+        `http://studymate.pythonanywhere.com/server/deletetask/${taskID}/${props.id}/`,
         {
             headers: {
                 Authorization: "JWT " + localStorage.getItem("token"),

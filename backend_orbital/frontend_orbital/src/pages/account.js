@@ -137,7 +137,7 @@ function Account(props) {
 
     const getMember = () => {
         axios
-        .get(`http://localhost:8000/server/viewuser/${props.id}/`,
+        .get(`http://studymate.pythonanywhere.com/server/viewuser/${props.id}/`,
         {
             headers: {
                 Authorization:
@@ -155,7 +155,7 @@ function Account(props) {
 
     const getFacs = () => {
         axios
-        .get(`http://localhost:8000/server/facultylist/`)
+        .get(`http://studymate.pythonanywhere.com/server/facultylist/`)
         .then((res) => {
             setFaculties(res.data);
             setLoading(false);
@@ -165,7 +165,7 @@ function Account(props) {
 
     const getMajors = () => {
         axios
-        .get("http://localhost:8000/server/majorlist/")
+        .get("http://studymate.pythonanywhere.com/server/majorlist/")
         .then((res) => {
             setMajors(res.data);
             setLoading(false);
@@ -176,7 +176,7 @@ function Account(props) {
     const handleEditProfile = e => {
         e.preventDefault();
     axios
-        .post('http://localhost:8000/server/editprofile/',
+        .post('http://studymate.pythonanywhere.com/server/editprofile/',
         {
             userID : props.id,
             year : year,
