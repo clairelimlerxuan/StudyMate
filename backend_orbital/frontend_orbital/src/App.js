@@ -74,7 +74,7 @@ function App(props) {
     const handleLogin = (e, data) => {
         console.log(data);
         e.preventDefault();
-        fetch("http://studymate.pythonanywhere.com/token-auth/", {
+        fetch("http://lstudymate.pythonanywhere.com/token-auth/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
